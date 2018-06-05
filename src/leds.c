@@ -33,6 +33,7 @@ int leds_register(void *fdt, int fdt_node, led_controller_t ctrl){
 	leds->ctrl = ctrl;
 	leds->fdt_node = (int)fdt_node;
 	list_add_tail(&leds->list, &_leds);
+    return 0;
 }
 
 led_controller_t leds_find(const char *dtb_path){

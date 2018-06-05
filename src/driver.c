@@ -21,21 +21,19 @@
 
 #include "driver.h"
 
-extern char _drivers_start, _drivers_end;
+static struct list_head _driver_list = LIST_HEAD_INIT(_driver_list);
 
 static int _init_subnodes(void *fdt, int root){
-	struct device_driver *driver = (struct device_driver*)&_drivers_start;
-	size_t count = (size_t)(&_drivers_end - &_drivers_start)/sizeof(struct device_driver);
-
 	int node;
 	fdt_for_each_subnode(node, fdt, root){
-		for(size_t c = 0; c < count; c++){
-			if(!driver[c].compatible || !driver[c].probe) continue;
-			if(fdt_node_check_compatible(fdt, node, driver[c].compatible) == 0){
-				driver[c].probe(fdt, node);
-				break;
-			}
-		}
+        struct device_driver *driver;
+        list_for_each_entry(driver, &_driver_list, list){
+            if(!driver->compatible || !driver->probe) continue;
+            if(fdt_node_check_compatible(fdt, node, driver->compatible) == 0){
+                driver->probe(fdt, node);
+                break;
+            }
+        }
 		// initialize children recursively
 		_init_subnodes(fdt, node);
 	}
@@ -43,15 +41,13 @@ static int _init_subnodes(void *fdt, int root){
 }
 
 static int _deinit_subnodes(void *fdt, int root){
-	struct device_driver *driver = (struct device_driver*)&_drivers_start;
-	size_t count = (size_t)(&_drivers_end - &_drivers_start)/sizeof(struct device_driver);
-
 	int node;
 	fdt_for_each_subnode(node, fdt, root){
-		for(size_t c = 0; c < count; c++){
-			if(!driver[c].compatible || !driver[c].probe) continue;
-			if(fdt_node_check_compatible(fdt, node, driver[c].compatible) == 0){
-				driver[c].remove(fdt, node);
+        struct device_driver *driver;
+        list_for_each_entry(driver, &_driver_list, list){
+			if(!driver->compatible || !driver->remove) continue;
+			if(fdt_node_check_compatible(fdt, node, driver->compatible) == 0){
+				driver->remove(fdt, node);
 				break;
 			}
 		}
@@ -71,3 +67,10 @@ int remove_device_drivers(void *fdt){
 
 	return _deinit_subnodes(fdt, 0);
 }
+
+#include <stdio.h>
+void register_device_driver(struct device_driver *self){
+    INIT_LIST_HEAD(&self->list);
+    list_add(&self->list, &_driver_list);
+}
+

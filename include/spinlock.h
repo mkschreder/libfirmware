@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 /**
  * Since most chips we work on are single core, spinlocks just disable scheduler and in some cases disable interrupts
  */

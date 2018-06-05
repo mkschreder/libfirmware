@@ -27,11 +27,16 @@ struct device_driver {
 	const char *compatible;
 	int (*probe)(void *fdt, int device_node);
 	int (*remove)(void *fdt, int device_node);
+    struct list_head list;
 } __attribute__((aligned(4)));
 
-#define DEVICE_DRIVER(_name, _compatible, _probe, _remove) static const struct device_driver __attribute__((section(".drivers"),used,aligned(4))) _driver = { .name = _name, .compatible = _compatible, .probe = _probe, .remove = _remove }
+#define DEVICE_DRIVER(_name, _compatible, _probe, _remove) static void __attribute__((constructor)) _driver_init(){ \
+    static struct device_driver __attribute__((used,aligned(4))) _driver = { .name = _name, .compatible = _compatible, .probe = _probe, .remove = _remove };\
+    register_device_driver(&_driver);\
+}
 
 int probe_device_drivers(void *fdt);
 int remove_device_drivers(void *fdt);
+void register_device_driver(struct device_driver *self);
 
-extern const char *_devicetree;
+extern unsigned char _devicetree[];

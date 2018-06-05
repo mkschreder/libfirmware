@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <thread/thread.h>
+#include <libfirmware/thread.h>
 #include <libfirmware/vardir.h>
 #include <libcanopen/canopen.h>
 

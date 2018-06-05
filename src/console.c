@@ -206,6 +206,7 @@ static int _cmd_set(struct console *con, int argc, char **argv){
 	return 0;
 }
 
+#if 0
 static int _cmd_save(struct console *self, int argc, char **argv){
 	(void)self;
 	(void)argc;
@@ -217,6 +218,7 @@ static int _cmd_save(struct console *self, int argc, char **argv){
 	*/
 	return 0;
 }
+#endif
 
 static int _cmd_help(struct console *self, int argc, char **argv){
 	(void)argc; (void)argv;
