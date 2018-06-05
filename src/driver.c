@@ -1,0 +1,73 @@
+/*
+ * Copyright (C) 2017 Martin K. Schröder <mkschreder.uk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+#include <libfdt/libfdt.h>
+#include <errno.h>
+
+#include "driver.h"
+
+extern char _drivers_start, _drivers_end;
+
+static int _init_subnodes(void *fdt, int root){
+	struct device_driver *driver = (struct device_driver*)&_drivers_start;
+	size_t count = (size_t)(&_drivers_end - &_drivers_start)/sizeof(struct device_driver);
+
+	int node;
+	fdt_for_each_subnode(node, fdt, root){
+		for(size_t c = 0; c < count; c++){
+			if(!driver[c].compatible || !driver[c].probe) continue;
+			if(fdt_node_check_compatible(fdt, node, driver[c].compatible) == 0){
+				driver[c].probe(fdt, node);
+				break;
+			}
+		}
+		// initialize children recursively
+		_init_subnodes(fdt, node);
+	}
+	return 0;
+}
+
+static int _deinit_subnodes(void *fdt, int root){
+	struct device_driver *driver = (struct device_driver*)&_drivers_start;
+	size_t count = (size_t)(&_drivers_end - &_drivers_start)/sizeof(struct device_driver);
+
+	int node;
+	fdt_for_each_subnode(node, fdt, root){
+		for(size_t c = 0; c < count; c++){
+			if(!driver[c].compatible || !driver[c].probe) continue;
+			if(fdt_node_check_compatible(fdt, node, driver[c].compatible) == 0){
+				driver[c].remove(fdt, node);
+				break;
+			}
+		}
+		_deinit_subnodes(fdt, node);
+	}
+	return 0;
+}
+
+int probe_device_drivers(void *fdt){
+	if(fdt_check_header(fdt) != 0) return -EINVAL;
+
+	return _init_subnodes(fdt, 0);
+}
+
+int remove_device_drivers(void *fdt){
+	if(fdt_check_header(fdt) != 0) return -EINVAL;
+
+	return _deinit_subnodes(fdt, 0);
+}
