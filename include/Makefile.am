@@ -23,7 +23,7 @@ pkginclude_HEADERS = atomic.h \
     spi.h\
     spinlock.h\
     thread.h\
-    time.h\
+    timestamp.h\
     types.h\
     ulink.h\
     vardir.h\

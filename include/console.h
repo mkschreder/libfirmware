@@ -41,6 +41,7 @@ struct console {
 #endif
 	char printf_buffer[CONSOLE_MAX_LINE];
 	char line[CONSOLE_MAX_LINE];
+	char *argv[CONSOLE_MAX_ARGS];
 };
 
 struct console_command {

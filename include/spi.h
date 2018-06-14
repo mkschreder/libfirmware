@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "time.h"
+#include "timestamp.h"
 #include "list.h"
 
 typedef const struct spi_device_ops ** spi_device_t;

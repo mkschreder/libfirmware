@@ -281,8 +281,13 @@ static int con_readline(struct console *self, char *line, size_t size){
 
 static void _console_task(void *ptr){
 	struct console *self = (struct console*)ptr;
+    for(int c = 0; c < 3; c++){
+        con_printf(self, "%d\r", c);
+        thread_sleep_ms(1000);
+    }
+
 	while(1){
-		con_printf(self, "\x04# ");
+		con_printf(self, "# ");
 		int rd;
 		memset(self->line, 0, sizeof(self->line));
 
@@ -290,12 +295,12 @@ static void _console_task(void *ptr){
 
 		if(rd < 0) {
 			con_printf(self, "Internal error\n");
+            thread_sleep_ms(100); // to avoid busy loop
 			continue;
 		}
 
-		char *argv[CONSOLE_MAX_ARGS];
-		memset(argv, 0, sizeof(argv));
-		int argc = strtokenize(self->line, (size_t)rd, argv, 8);
+		memset(self->argv, 0, sizeof(self->argv));
+		int argc = strtokenize(self->line, (size_t)rd, self->argv, 8);
 
 		if(argc <= 0)
 			continue;
@@ -311,8 +316,8 @@ static void _console_task(void *ptr){
 		uint8_t handled = 0;
 		for(size_t c = 0; c < self->ncommands; c++){
 			struct console_command *cmd = self->commands + c;
-			if(strcmp(cmd->name, argv[0]) == 0 && cmd->proc){
-				if(cmd->proc(self, argc, argv) < 0){
+			if(strcmp(cmd->name, self->argv[0]) == 0 && cmd->proc){
+				if(cmd->proc(self, argc, self->argv) < 0){
 					con_printf(self, "Invalid arguments to command\n");
 				}
 				handled = 1;
@@ -322,28 +327,30 @@ static void _console_task(void *ptr){
 		if(!handled){
 			if(0) {}
 #if CONFIG_CMD_PS == 1
-			else if(strcmp("ps", argv[0]) == 0){
-				_cmd_ps(self, argc, argv);
+			else if(strcmp("ps", self->argv[0]) == 0){
+				_cmd_ps(self, argc, self->argv);
 			}
 #endif
-			else if(strcmp("reboot", argv[0]) == 0){
-				_cmd_reboot(self, argc, argv);
+			else if(strcmp("reboot", self->argv[0]) == 0){
+				_cmd_reboot(self, argc, self->argv);
 			}
-			else if(strcmp("set", argv[0]) == 0){
-				_cmd_set(self, argc, argv);
+			else if(strcmp("set", self->argv[0]) == 0){
+				_cmd_set(self, argc, self->argv);
 			}
 #if 0
-			else if(strcmp("get", argv[0]) == 0){
-				_cmd_get(self, argc, argv);
+			else if(strcmp("get", self->argv[0]) == 0){
+				_cmd_get(self, argc, self->argv);
 			}
-			else if(strcmp("save", argv[0]) == 0){
-				_cmd_save(self, argc, argv);
+			else if(strcmp("save", self->argv[0]) == 0){
+				_cmd_save(self, argc, self->argv);
 			}
 #endif
 			else {
 				_cmd_help(self, 0, NULL);
 			}
 		}
+        // send end of transmission
+		con_printf(self, "\x04");
 	}
 }
 
@@ -352,7 +359,7 @@ void console_start(struct console *self){
 	thread_create(
 		  _console_task,
 		  "shell",
-		  130 * 12,
+		  130 * 5,
 		  self,
 		  1,
 		  NULL);

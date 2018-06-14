@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <firmware/time.h>
+#include "timestamp.h"
 
 int timeval_subtract(const struct timeval *x, const struct timeval *__y, struct timeval *result){
 	struct timeval _y = {

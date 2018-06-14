@@ -1,0 +1,54 @@
+About libfirmware
+-----------------
+
+Libfirmware is a simple frameowrk that I use for my firmware work which allows
+me to decouple firmware drivers using device tree and provide basic data
+structures like lists and avl trees which can be used by device drivers.
+
+This library also provides header files with common interfaces that I typically
+use to establish communication between device drivers. These are typically
+implemented by device drivers but are defined here. 
+
+Libfirmware is fully cross platform and can be easily cross compiled like many
+other libraries that I have written using the --host option passed to configure
+script. It should work on all systems just the same. 
+
+Device tree in libfirmware
+--------------------------
+
+Device tree is used as main configuration of the boot process of all device
+drivers linked into the application. First, during initialization, the lowest
+level code will call all device driver constructors (which will end up in
+.init_array section of the executable) and each of these constructors will
+register the device driver with libfirmware driver list. Then the user code
+main() is called and user has to call probe_device_drivers(<devicetree>) to
+which the user passes a pointer to the binary dtb array which is compiled from
+a device tree. libfirmware then parses that device tree blob and finds a device
+driver for each section. It then calls probe method of the device driver for
+each section whose "compatible" string matches the name of the device driver.
+The device driver then registers the device that corresponds to the device tree
+section with the corresponding libfirmware subsystem. Most subsystems are just
+lists of registered devices which all have the same interface. For example, all
+serial ports will be registered with the serial subsystem regardless of how
+they are implemented under the hood. The user application will then query a
+device by name defined in the device tree using serial_find("/my/device/name")
+and will recieve an abstract interface to the device with which
+serial_write/serial_read calls can then be used to transfer data through the
+serial port. 
+
+This is a very powerful concept even if it means that the only way to exclude
+unused code is to exclude full driver object files from the application. When
+we use a data driven approach in general, we are forced to include all code
+into the application. We have no way of knowing which methods will be used or
+not based on the call tree because the call tree now depends on the data in the
+device tree blob. This is however a small price to pay for a vastly more
+modular and clean system which can be built using standalone libraries
+containing implementations for any subsystem and then configuring the actual
+application for a specific board using just the device tree blob. There is no
+longer need to use messy ifdef sections and other hacks to be able to build the
+code for different targets. All of that is handled by the device tree. Even
+things like configuration of baud rates, queue sizes and other device specific
+settings is neatly handled by the device tree and are all in one place instead
+of being defined in code across many different files.
+
+

@@ -1,0 +1,55 @@
+/dts-v1/;
+
+#define STM32F10X_MD
+
+#include "stm32f10x.dtsi"
+#include "stm32f10x.h"
+#include "stm32f10x_gpio.h"
+
+/ {
+	leds: leds {
+		compatible = "st,stm32_leds";
+		inverted = <1>;
+		pins = <&led_pins>;
+	};
+
+	serial {
+		debug_uart: debug {
+			compatible = "st,stm32_uart";
+			baud = <115200>;
+			reg = <USART1>;
+			interrupt = <USART1_IRQn>;
+		};
+		rfid_uart: rfid {
+			compatible = "st,stm32_uart";
+			baud = <115200>;
+			reg = <USART2>;
+			interrupt = <USART2_IRQn>;
+		};
+	};
+
+	gpio {
+		compatible = "st,stm32_gpio";
+		led_pins: led_pins {
+			pinctrl = <
+				GPIOB GPIO_Pin_13 (GPIO_Mode_Out_PP)
+				GPIOB GPIO_Pin_14 (GPIO_Mode_Out_PP)
+			>;
+		};
+
+		debug_serial_pins {
+			pinctrl = <
+				GPIOA GPIO_Pin_9  (GPIO_Mode_AF_PP | GPIO_Speed_50MHz) /* TX */
+				GPIOA GPIO_Pin_10 (GPIO_Mode_AF_PP | GPIO_Speed_50MHz) /* RX */
+			>;
+		};
+
+		rfid_serial_pins {
+			pinctrl = <
+				GPIOA GPIO_Pin_2 (GPIO_Mode_AF_PP | GPIO_Speed_50MHz) /* TX */
+				GPIOA GPIO_Pin_3 (GPIO_Mode_AF_PP | GPIO_Speed_50MHz) /* RX */
+			>;
+		};
+	};
+};
+

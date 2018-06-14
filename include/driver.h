@@ -30,8 +30,8 @@ struct device_driver {
     struct list_head list;
 } __attribute__((aligned(4)));
 
-#define DEVICE_DRIVER(_name, _compatible, _probe, _remove) static void __attribute__((constructor)) _driver_init(){ \
-    static struct device_driver __attribute__((used,aligned(4))) _driver = { .name = _name, .compatible = _compatible, .probe = _probe, .remove = _remove };\
+#define DEVICE_DRIVER(_name, _compatible, _probe, _remove) void __attribute__((__constructor__,used)) _name ## _ko(){ \
+    static struct device_driver __attribute__((used,aligned(4))) _driver = { .name = #_name, .compatible = _compatible, .probe = _probe, .remove = _remove };\
     register_device_driver(&_driver);\
 }
 

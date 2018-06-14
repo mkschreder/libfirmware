@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <libfirmware/thread.h>
-#include <libfirmware/vardir.h>
-#include <libcanopen/canopen.h>
+#include "thread.h"
+#include "vardir.h"
+//#include "canopen.h"
 
 typedef union {
 	int32_t int_value;

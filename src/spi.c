@@ -16,10 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <firmware/spi.h>
 #include <libfdt/libfdt.h>
-#include <firmware/list.h>
-#include <thread/thread.h>
+
+#include "spi.h"
+#include "list.h"
+#include "thread.h"
+#include "driver.h"
+
 #include <errno.h>
 
 static LIST_HEAD(_spi_ports);
