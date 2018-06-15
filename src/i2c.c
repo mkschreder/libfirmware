@@ -16,62 +16,55 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <errno.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <libfdt/libfdt.h>
 
-#include "serial.h"
+#include "i2c.h"
 #include "list.h"
 #include "thread.h"
 #include "driver.h"
 
-static serial_port_t _default_serial_port = 0;
+#include <errno.h>
 
-static LIST_HEAD(_serial_ports);
+static LIST_HEAD(_i2c_ports);
 
-void serial_device_init(struct serial_device *self, int fdt_node, const struct serial_ops *ops){
+void i2c_device_init(struct i2c_device *self, int fdt_node, const struct i2c_device_ops *ops){
 	memset(self, 0, sizeof(*self));
 	INIT_LIST_HEAD(&self->list);
 	self->fdt_node = fdt_node;
 	self->ops = ops;
 }
 
-int serial_device_register(struct serial_device *self){
+int i2c_device_register(struct i2c_device *self){
 	BUG_ON(!self);
 	BUG_ON(!self->ops);
 	BUG_ON(!self->ops->write);
 	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_serial_ports);
+	list_add_tail(&self->list, &_i2c_ports);
 	return 0;
 }
 
-serial_port_t serial_find(const char *dtb_path){
-	struct serial_device *serial;
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-	list_for_each_entry(serial, &_serial_ports, list){
-		if(serial->fdt_node == node) return &serial->ops;
+i2c_device_t i2c_find_by_node(void *fdt, int node){
+	struct i2c_device *dev;
+    if(node < 0) return NULL;
+    list_for_each_entry(dev, &_i2c_ports, list){
+		if(dev->fdt_node == node) return &dev->ops;
 	}
 	return NULL;
 }
 
-int serial_set_printk_port(serial_port_t port){
-    _default_serial_port = port;
-    return 0;
+i2c_device_t i2c_find(const char *dtb_path){
+	int node = fdt_path_offset(_devicetree, dtb_path);
+	if(node < 0) return NULL;
+    return i2c_find_by_node(_devicetree, node);
 }
 
-int printk(const char *fmt, ...){
-	if(!_default_serial_port) return -1;
-    static char buf[80];
+int i2c_write_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data){
+    return i2c_write_buf(dev, addr, reg, &data, 1);
+}
 
-	va_list argptr;
-	va_start(argptr, fmt);
-	int len = vsnprintf(buf, sizeof(buf), fmt, argptr);
-	va_end(argptr);
-	return serial_write(_default_serial_port, buf, (size_t)len, 10);
+int i2c_read_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data){
+    uint8_t ch;
+    if(!data) data = &ch;
+    return i2c_read_buf(dev, addr, reg, data, 1);
 }
 

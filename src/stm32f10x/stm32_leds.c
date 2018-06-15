@@ -83,6 +83,9 @@ static int _stm32_leds_probe(void *fdt, int fdt_node){
 	self->led_ops = &_led_ops;
 
 	leds_register(fdt, fdt_node, &self->led_ops);
+
+    dbg_printk("leds: ok, %d leds\n", self->count);
+
 	return 0;
 }
 

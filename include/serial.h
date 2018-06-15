@@ -43,3 +43,4 @@ void serial_device_init(struct serial_device *self, int fdt_node, const struct s
 int serial_device_register(struct serial_device *self);
 serial_port_t serial_find(const char *dtb_path);
 
+int serial_set_printk_port(serial_port_t port);

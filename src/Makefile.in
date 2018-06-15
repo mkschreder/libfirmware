@@ -266,8 +266,8 @@ am__v_AR_1 =
 libfirmware_a_AR = $(AR) $(ARFLAGS)
 libfirmware_a_LIBADD =
 am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c can.c console.c \
-	dx_tracker.c driver.c encoder.c leds.c math.c serial.c spi.c \
-	time.c ulink.c vardir.c linux/chip.c linux/linux_uart.c \
+	dx_tracker.c driver.c encoder.c i2c.c leds.c math.c serial.c \
+	spi.c time.c ulink.c vardir.c linux/chip.c linux/linux_uart.c \
 	linux/linux_udpcan.c linux/linux_vcan.c linux/linux_leds.c \
 	linux/thread.c linux/thread_mutex.c linux/thread_queue.c \
 	linux/thread_sem.c linux/thread_work.c linux/time.c \
@@ -474,11 +474,11 @@ am_libfirmware_a_OBJECTS = libfirmware_a-avl-cmp.$(OBJEXT) \
 	libfirmware_a-console.$(OBJEXT) \
 	libfirmware_a-dx_tracker.$(OBJEXT) \
 	libfirmware_a-driver.$(OBJEXT) libfirmware_a-encoder.$(OBJEXT) \
-	libfirmware_a-leds.$(OBJEXT) libfirmware_a-math.$(OBJEXT) \
-	libfirmware_a-serial.$(OBJEXT) libfirmware_a-spi.$(OBJEXT) \
-	libfirmware_a-time.$(OBJEXT) libfirmware_a-ulink.$(OBJEXT) \
-	libfirmware_a-vardir.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_3)
+	libfirmware_a-i2c.$(OBJEXT) libfirmware_a-leds.$(OBJEXT) \
+	libfirmware_a-math.$(OBJEXT) libfirmware_a-serial.$(OBJEXT) \
+	libfirmware_a-spi.$(OBJEXT) libfirmware_a-time.$(OBJEXT) \
+	libfirmware_a-ulink.$(OBJEXT) libfirmware_a-vardir.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -667,8 +667,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = avl-cmp.c avl.c can.c console.c dx_tracker.c \
-	driver.c encoder.c leds.c math.c serial.c spi.c time.c ulink.c \
-	vardir.c $(am__append_1) $(am__append_3) $(am__append_5)
+	driver.c encoder.c i2c.c leds.c math.c serial.c spi.c time.c \
+	ulink.c vardir.c $(am__append_1) $(am__append_3) \
+	$(am__append_5)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
 	$(am__append_2) $(am__append_4) $(am__append_6)
 AUTOMAKE_OPTIONS = subdir-objects
@@ -1108,6 +1109,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-dx_tracker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-encoder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-i2c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-math.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-serial.Po@am__quote@
@@ -1345,6 +1347,20 @@ libfirmware_a-encoder.obj: encoder.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='encoder.c' object='libfirmware_a-encoder.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-encoder.obj `if test -f 'encoder.c'; then $(CYGPATH_W) 'encoder.c'; else $(CYGPATH_W) '$(srcdir)/encoder.c'; fi`
+
+libfirmware_a-i2c.o: i2c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-i2c.o -MD -MP -MF $(DEPDIR)/libfirmware_a-i2c.Tpo -c -o libfirmware_a-i2c.o `test -f 'i2c.c' || echo '$(srcdir)/'`i2c.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-i2c.Tpo $(DEPDIR)/libfirmware_a-i2c.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='i2c.c' object='libfirmware_a-i2c.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-i2c.o `test -f 'i2c.c' || echo '$(srcdir)/'`i2c.c
+
+libfirmware_a-i2c.obj: i2c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-i2c.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-i2c.Tpo -c -o libfirmware_a-i2c.obj `if test -f 'i2c.c'; then $(CYGPATH_W) 'i2c.c'; else $(CYGPATH_W) '$(srcdir)/i2c.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-i2c.Tpo $(DEPDIR)/libfirmware_a-i2c.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='i2c.c' object='libfirmware_a-i2c.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-i2c.obj `if test -f 'i2c.c'; then $(CYGPATH_W) 'i2c.c'; else $(CYGPATH_W) '$(srcdir)/i2c.c'; fi`
 
 libfirmware_a-leds.o: leds.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-leds.o -MD -MP -MF $(DEPDIR)/libfirmware_a-leds.Tpo -c -o libfirmware_a-leds.o `test -f 'leds.c' || echo '$(srcdir)/'`leds.c

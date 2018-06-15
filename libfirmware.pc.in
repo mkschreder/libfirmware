@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libfirmware
+Description: Implements low level firmware subsystem for embedded hardware and linux
+URL: 
+Version: @VERSION@
+Requires: libfdt
+Libs: -Tstm32f429l_flash.ld
+Cflags: 
+

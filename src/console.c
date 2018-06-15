@@ -29,6 +29,7 @@
 #include "vardir.h"
 #include "types.h"
 #include "chip.h"
+#include "driver.h"
 
 #include <errno.h>
 
@@ -281,10 +282,6 @@ static int con_readline(struct console *self, char *line, size_t size){
 
 static void _console_task(void *ptr){
 	struct console *self = (struct console*)ptr;
-    for(int c = 0; c < 3; c++){
-        con_printf(self, "%d\r", c);
-        thread_sleep_ms(1000);
-    }
 
 	while(1){
 		con_printf(self, "# ");
@@ -356,12 +353,13 @@ static void _console_task(void *ptr){
 
 void console_start(struct console *self){
 	(void)self;
-	thread_create(
+	if(thread_create(
 		  _console_task,
 		  "shell",
-		  130 * 5,
+		  460,
 		  self,
 		  1,
-		  NULL);
+		  NULL) < 0)
+        dbg_printk("con: fail!\n");
 }
 

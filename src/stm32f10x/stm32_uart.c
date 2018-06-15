@@ -118,13 +118,6 @@ static const struct serial_ops _serial_ops = {
 };
 
 static int _stm32_uart_probe(void *fdt, int fdt_node){
-	// TODO: move this so it's only done once
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
-
 	int baud = fdt_get_int_or_default(fdt, (int)fdt_node, "baud", 9600);
 	USART_TypeDef *UARTx = (USART_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 	int irq = fdt_get_int_or_default(fdt, (int)fdt_node, "interrupt", -1);
@@ -132,6 +125,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	int irq_sub_prio = fdt_get_int_or_default(fdt, (int)fdt_node, "irq_sub_prio", 0);
 	int tx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "tx_queue", 64);
 	int rx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "rx_queue", 64);
+	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
 
 	if(UARTx == 0) {
 		return -EINVAL;
@@ -139,14 +133,19 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 
 	int idx = -1;
 	if(UARTx == USART1) {
+	    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 		idx = 1;
 	} else if(UARTx == USART2) {
+	    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 		idx = 2;
 	} else if(UARTx == USART3) {
+	    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 		idx = 3;
 	} else if(UARTx == UART4) {
+	    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 		idx = 4;
 	} else if(UARTx == UART5) {
+	    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 		idx = 5;
 	};
 
@@ -196,6 +195,8 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	if(serial_device_register(&self->dev) < 0){
 		return -1;
 	}
+
+    if(def_port) serial_set_printk_port(&self->dev.ops);
 
 	return 0;
 }

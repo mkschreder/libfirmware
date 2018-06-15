@@ -12,6 +12,27 @@
 #include "thread.h"
 
 #if 0
+int _stm32_spi_probe(void *fdt, int node){
+    SPI_InitTypeDef spi;
+    SPI_StructInit(&spi);
+    spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    spi.SPI_Mode = SPI_Mode_Master;
+    spi.SPI_DataSize = SPI_DataSize_8b;
+    spi.SPI_CPOL = SPI_CPOL_High;
+    spi.SPI_CPHA = SPI_CPHA_1Edge;
+    spi.SPI_NSS = SPI_NSS_Soft;
+    spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    spi.SPI_FirstBit = SPI_FirstBit_MSB;
+    spi.SPI_CRCPolynomial = 7;
+    SPI_Init(SPIx, &SPI_InitStructure);
+}
+
+int _stm32_spi_remove(void *fdt, int node){
+
+}
+
+DEVICE_DRIVER(stm32_spi, "st,stm32_spi", _stm32_spi_probe, _stm32_spi_remove)
+
 static struct stm32_spi *_spi2 = 0;
 
 void SPI2_IRQHandler(void){

@@ -40,3 +40,9 @@ int remove_device_drivers(void *fdt);
 void register_device_driver(struct device_driver *self);
 
 extern unsigned char _devicetree[];
+
+// this is defined to use the default uart once it has been initialized
+// this function is defined in serial.c but placed here because it is very often used in device drivers
+int printk(const char *fmt, ...);
+#define dbg_printk printk
+//#define dbg_printk(...) do {} while(0)

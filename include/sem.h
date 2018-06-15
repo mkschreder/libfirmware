@@ -25,6 +25,8 @@ struct semaphore {
 	void *sem;
 };
 
+typedef struct semaphore thread_sem_t;
+
 int thread_sem_init(struct semaphore *self);
 int thread_sem_init_counting(struct semaphore *self, uint16_t max_count, uint16_t initial_count);
 int thread_sem_destroy(struct semaphore *self);

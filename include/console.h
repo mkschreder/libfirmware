@@ -25,7 +25,8 @@
 #include "serial.h"
 
 #define CONSOLE_MAX_PS_TASKS 10
-#define CONSOLE_MAX_LINE 256
+// TODO: make this configurable from the devicetree
+#define CONSOLE_MAX_LINE 80
 #define CONSOLE_MAX_ARGS 16
 
 struct console {

@@ -17,7 +17,7 @@ int thread_sem_take(struct semaphore *self){
 }
 
 int thread_sem_take_wait(struct semaphore *self, uint32_t timeout){
-	if(xSemaphoreTake(self->sem, timeout) == pdTRUE) return 0;
+	if(xSemaphoreTake(self->sem, timeout / portTICK_PERIOD_MS) == pdTRUE) return 0;
 	return -1;
 }
 
