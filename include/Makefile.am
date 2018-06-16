@@ -1,6 +1,7 @@
 pkginclude_HEADERS = atomic.h \
     avl-cmp.h\
     avl.h\
+	baro.h\
     can.h\
     chip.h\
     console.h\

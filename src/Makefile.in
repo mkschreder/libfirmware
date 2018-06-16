@@ -265,13 +265,14 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libfirmware_a_AR = $(AR) $(ARFLAGS)
 libfirmware_a_LIBADD =
-am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c can.c console.c \
-	dx_tracker.c driver.c encoder.c i2c.c leds.c math.c serial.c \
-	spi.c time.c ulink.c vardir.c linux/chip.c linux/linux_uart.c \
-	linux/linux_udpcan.c linux/linux_vcan.c linux/linux_leds.c \
-	linux/thread.c linux/thread_mutex.c linux/thread_queue.c \
-	linux/thread_sem.c linux/thread_work.c linux/time.c \
-	stm32f10x/stdperiph/misc.c stm32f10x/stdperiph/stm32f10x_adc.c \
+am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c baro.c can.c \
+	console.c dx_tracker.c driver.c encoder.c i2c.c leds.c math.c \
+	serial.c spi.c time.c ulink.c vardir.c linux/chip.c \
+	linux/linux_uart.c linux/linux_udpcan.c linux/linux_vcan.c \
+	linux/linux_leds.c linux/thread.c linux/thread_mutex.c \
+	linux/thread_queue.c linux/thread_sem.c linux/thread_work.c \
+	linux/time.c stm32f10x/stdperiph/misc.c \
+	stm32f10x/stdperiph/stm32f10x_adc.c \
 	stm32f10x/stdperiph/stm32f10x_bkp.c \
 	stm32f10x/stdperiph/stm32f10x_can.c \
 	stm32f10x/stdperiph/stm32f10x_cec.c \
@@ -470,8 +471,8 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT) \
 @WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
 am_libfirmware_a_OBJECTS = libfirmware_a-avl-cmp.$(OBJEXT) \
-	libfirmware_a-avl.$(OBJEXT) libfirmware_a-can.$(OBJEXT) \
-	libfirmware_a-console.$(OBJEXT) \
+	libfirmware_a-avl.$(OBJEXT) libfirmware_a-baro.$(OBJEXT) \
+	libfirmware_a-can.$(OBJEXT) libfirmware_a-console.$(OBJEXT) \
 	libfirmware_a-dx_tracker.$(OBJEXT) \
 	libfirmware_a-driver.$(OBJEXT) libfirmware_a-encoder.$(OBJEXT) \
 	libfirmware_a-i2c.$(OBJEXT) libfirmware_a-leds.$(OBJEXT) \
@@ -666,9 +667,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LIBRARIES = libfirmware.a
-libfirmware_a_SOURCES = avl-cmp.c avl.c can.c console.c dx_tracker.c \
-	driver.c encoder.c i2c.c leds.c math.c serial.c spi.c time.c \
-	ulink.c vardir.c $(am__append_1) $(am__append_3) \
+libfirmware_a_SOURCES = avl-cmp.c avl.c baro.c can.c console.c \
+	dx_tracker.c driver.c encoder.c i2c.c leds.c math.c serial.c \
+	spi.c time.c ulink.c vardir.c $(am__append_1) $(am__append_3) \
 	$(am__append_5)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
 	$(am__append_2) $(am__append_4) $(am__append_6)
@@ -1104,6 +1105,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-avl-cmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-avl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-baro.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-can.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-console.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-driver.Po@am__quote@
@@ -1277,6 +1279,20 @@ libfirmware_a-avl.obj: avl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='avl.c' object='libfirmware_a-avl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-avl.obj `if test -f 'avl.c'; then $(CYGPATH_W) 'avl.c'; else $(CYGPATH_W) '$(srcdir)/avl.c'; fi`
+
+libfirmware_a-baro.o: baro.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-baro.o -MD -MP -MF $(DEPDIR)/libfirmware_a-baro.Tpo -c -o libfirmware_a-baro.o `test -f 'baro.c' || echo '$(srcdir)/'`baro.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-baro.Tpo $(DEPDIR)/libfirmware_a-baro.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='baro.c' object='libfirmware_a-baro.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-baro.o `test -f 'baro.c' || echo '$(srcdir)/'`baro.c
+
+libfirmware_a-baro.obj: baro.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-baro.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-baro.Tpo -c -o libfirmware_a-baro.obj `if test -f 'baro.c'; then $(CYGPATH_W) 'baro.c'; else $(CYGPATH_W) '$(srcdir)/baro.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-baro.Tpo $(DEPDIR)/libfirmware_a-baro.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='baro.c' object='libfirmware_a-baro.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-baro.obj `if test -f 'baro.c'; then $(CYGPATH_W) 'baro.c'; else $(CYGPATH_W) '$(srcdir)/baro.c'; fi`
 
 libfirmware_a-can.o: can.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-can.o -MD -MP -MF $(DEPDIR)/libfirmware_a-can.Tpo -c -o libfirmware_a-can.o `test -f 'can.c' || echo '$(srcdir)/'`can.c

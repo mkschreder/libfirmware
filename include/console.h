@@ -37,7 +37,7 @@ struct console {
 	struct vardir *vars;
 
 	//! this is used for displaying task stats
-#if defined(FREERTOS) && CONFIG_CMD_PS == 1
+#if 0
 	TaskStatus_t prev_status[CONSOLE_MAX_PS_TASKS];
 #endif
 	char printf_buffer[CONSOLE_MAX_LINE];

@@ -82,8 +82,10 @@ void con_printf(struct console *self, const char *fmt, ...){
 	*/
 }
 
-#if CONFIG_CMD_PS == 1
 #if !defined(__linux__)
+#include <FreeRTOS.h>
+#include <task.h>
+
 // TODO: get rid of this ugliness
 static int _compare_tasks(const void *a, const void *b){
 	TaskStatus_t *ta = (TaskStatus_t*)a;
@@ -97,7 +99,8 @@ static int _cmd_ps(struct console *self, int argc, char **argv){
 	(void)argc;
 	(void)argv;
 	// realtime tasks
-#if !defined(__linux__)
+//#if !defined(__linux__)
+#if 0
 	TaskStatus_t status[CONSOLE_MAX_PS_TASKS];
 	memset(status, 0, sizeof(status));
 	uint32_t total_time;
@@ -150,7 +153,6 @@ static int _cmd_ps(struct console *self, int argc, char **argv){
 #endif
 	return 0;
 }
-#endif
 
 static int _cmd_reboot(struct console *self, int argc, char **argv){
 	(void)self;
@@ -323,11 +325,9 @@ static void _console_task(void *ptr){
 		}
 		if(!handled){
 			if(0) {}
-#if CONFIG_CMD_PS == 1
 			else if(strcmp("ps", self->argv[0]) == 0){
 				_cmd_ps(self, argc, self->argv);
 			}
-#endif
 			else if(strcmp("reboot", self->argv[0]) == 0){
 				_cmd_reboot(self, argc, self->argv);
 			}

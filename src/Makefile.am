@@ -1,6 +1,7 @@
 lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = avl-cmp.c\
     avl.c\
+	baro.c\
     can.c\
     console.c\
     dx_tracker.c\

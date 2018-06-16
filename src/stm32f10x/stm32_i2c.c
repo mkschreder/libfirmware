@@ -34,6 +34,9 @@
 
 #define I2C_DEFAULT_TIMEOUT 50
 
+#define i2c_debug(...) do {} while(0)
+//#define i2c_debug dbg_printk
+
 // I2C2
 // SCL  PB10
 // SDA  PB11
@@ -119,30 +122,8 @@ static void _stm32_i2c_unstick(struct stm32_i2c *self){
 	GPIO_Init(self->gpio_sda, &gpio);
 }
 
-static int _i2c_check_error(struct stm32_i2c *self){
-    // Read the I2Cx status register
-    uint32_t SR1Register = self->hw->SR1;
-    if (SR1Register & 0x0700) {
-        (void)self->hw->SR2;                                                // read second status register to clear ADDR if it is set (note that BTF will not be set after a NACK)
-        I2C_ITConfig(self->hw, I2C_IT_BUF, DISABLE);                        // disable the RXNE/TXE interrupt - prevent the ISR tailchaining onto the ER (hopefully)
-        if (!(SR1Register & 0x0200) && !(self->hw->CR1 & 0x0200)) {         // if we dont have an ARLO error, ensure sending of a stop
-            if (self->hw->CR1 & 0x0100) {                                   // We are currently trying to send a start, this is very bad as start, stop will hang the peripheral
-                // TODO - busy waiting in highest priority IRQ. Maybe only set flag and handle it from main loop 
-                while (self->hw->CR1 & 0x0100) { ; }                        // wait for any start to finish sending  
-                I2C_GenerateSTOP(self->hw, ENABLE);                         // send stop to finalise bus transaction 
-                while (self->hw->CR1 & 0x0200) { ; }                        // wait for stop to finish sending       
-            } else {
-                I2C_GenerateSTOP(self->hw, ENABLE);                         // stop to free up the bus
-                I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_ERR, DISABLE);   // Disable EVT and ERR interrupts while bus inactive                                                                        
-            }
-        }
-    }
-    self->hw->SR1 = (uint16_t)(self->hw->SR1 & ~0x0F00);
-	return 0;
-}
-
 static int _i2c_wait_flag_cleared(struct stm32_i2c *self, uint32_t flag){
-    int timeout = 10;
+    int timeout = 100;
 	while(I2C_GetFlagStatus(self->hw, flag) == SET && --timeout > 0) thread_sleep_ms(1);
     if(timeout == 0){
         return -EBUSY;
@@ -150,35 +131,29 @@ static int _i2c_wait_flag_cleared(struct stm32_i2c *self, uint32_t flag){
     return 0;
 }
 
-static int _i2c_wait_event(struct stm32_i2c *self, uint32_t ev){
+static int _i2c_wait_flag_set(struct stm32_i2c *self, uint32_t flag){
     int timeout = 100;
-	while(!I2C_CheckEvent(self->hw, ev) && --timeout > 0) thread_sleep_ms(1);
-	_i2c_check_error(self);
+	while(I2C_GetFlagStatus(self->hw, flag) == RESET && --timeout > 0) asm volatile ("nop");
     if(timeout == 0){
-	    I2C_GenerateSTOP(self->hw, ENABLE);
+        return -EBUSY;
+    }
+    return 0;
+}
+
+static int _i2c_wait_event(struct stm32_i2c *self, uint32_t ev){
+    int timeout = 1000;
+	while(!I2C_CheckEvent(self->hw, ev) && --timeout > 0) asm volatile ("nop");
+    if(timeout == 0){
         return -ETIMEDOUT;
     }
     return 0;
 }
 
-static int _stm32_i2c_write_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *buf, size_t len){
-    struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
-    const uint8_t *data = (const uint8_t*)buf;
-
-    return -1;
-
-    if (!self->hw || !len)
-        return -1;
-
-	/* While the bus is busy */
-	if(_i2c_wait_flag_cleared(self, I2C_FLAG_BUSY) < 0) {
-        return -EBUSY;
-    }
-
-	/* Send START condition */
+#if 0
+static int _stm32_i2c_write_polling(struct stm32_i2c *self, const uint8_t *data, size_t len, bool gen_stop){
 	I2C_GenerateSTART(self->hw, ENABLE);
 
-	/* Test on EV5 and clear it */
+	// wait until sb is set EV5
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_MODE_SELECT) < 0) {
         return -ETIMEDOUT;
     }
@@ -186,64 +161,125 @@ static int _stm32_i2c_write_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, con
     // send device address
 	I2C_Send7bitAddress(self->hw, addr, I2C_Direction_Transmitter);
 
-	/* Test on EV6 and clear it */
+	// test EV6
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) < 0) {
         return -ETIMEDOUT;
     }
 
-	/* Clear EV6 by setting again the PE bit */
-	I2C_Cmd(self->hw, ENABLE);
+	for(size_t c = 0; c < len; c++){
+		// send register address
+		I2C_SendData(self->hw, data[c]);
 
-    // send register address
-	I2C_SendData(self->hw, reg);
+		// wait until the byte was sent
+		if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
+			return -ETIMEDOUT;
+		}
+	}
 
-    // wait until the byte was sent
-    if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
-        return -ETIMEDOUT;
-    }
+	if(gen_stop){
+		I2C_GenerateSTOP(self->hw, ENABLE);
+		// wait until stop is cleared by hardware
+		while (self->hw->CR1 & 0x0200);
+	}
 
-#if 0
-	/* Send repeated START condition */
+	return len;
+}
+#endif
+
+static int _stm32_i2c_write_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *buf, size_t len){
+    struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
+    const uint8_t *data = (const uint8_t*)buf;
+    addr = (uint8_t)(addr << 1);
+/*
+	_stm32_i2c_unstick(self);
+
+	// Init I2C peripheral
+    I2C_DeInit(self->hw);
+	I2C_InitTypeDef i2c;
+    I2C_StructInit(&i2c);
+
+    i2c.I2C_Mode = I2C_Mode_I2C;
+    i2c.I2C_DutyCycle = I2C_DutyCycle_2;
+    i2c.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+    i2c.I2C_ClockSpeed = 100000;
+	i2c.I2C_OwnAddress1 = 0;
+
+    I2C_Cmd(self->hw, ENABLE);
+*/
+    I2C_ClearITPendingBit(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR);
+
+    memset(&self->isr, 0, sizeof(self->isr));
+
+    i2c_debug("i2c: start\n");
 	I2C_GenerateSTART(self->hw, ENABLE);
 
-	/* Test on EV5 and clear it */
+	// wait until sb is set EV5
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_MODE_SELECT) < 0) {
-        return -ETIMEDOUT;
+		goto timedout;
     }
 
+    i2c_debug("i2c: addr\n");
+	I2C_AcknowledgeConfig(self->hw, ENABLE);
     // send device address
-	I2C_Send7bitAddress(self->hw, addr, I2C_Direction_Receiver);
+	I2C_Send7bitAddress(self->hw, addr, I2C_Direction_Transmitter);
 
-	/* Test on EV6 and clear it */
-    if(_i2c_wait_event(self, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED) < 0) {
-        return -ETIMEDOUT;
-    }
-#endif 
-	/* Clear EV6 by setting again the PE bit */
-	I2C_Cmd(self->hw, ENABLE);
-
-    if(len == 0){
-        I2C_AcknowledgeConfig(self->hw, DISABLE);
-        I2C_GenerateSTOP(self->hw, ENABLE);
+	// test EV6
+    if(_i2c_wait_event(self, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) < 0) {
+		goto timedout;
     }
 
-	for(int c = 0; c < (int)len; c++){
-	    if(c == ((int)len - 1)){
-            I2C_AcknowledgeConfig(self->hw, DISABLE);
-            I2C_GenerateSTOP(self->hw, ENABLE);
-        } else {
-            I2C_AcknowledgeConfig(self->hw, ENABLE);
-        }
-        // wait for a byte to be received
-        if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_RECEIVED) < 0) {
-            return -ETIMEDOUT;
-        }
-        I2C_SendData(self->hw, data[c]);
-        // wait until the byte was sent
-        if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
-            return -ETIMEDOUT;
-        }
+    i2c_debug("i2c: reg\n");
+	I2C_SendData(self->hw, reg);
+
+	// wait until the byte was sent
+	if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
+		goto timedout;
 	}
+
+	for(size_t c = 0; c < len; c++){
+		// send register address
+		I2C_SendData(self->hw, data[c]);
+
+		// wait until the byte was sent
+		if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
+			goto timedout;
+		}
+		i2c_debug("i2c: wr %d\n", c);
+	}
+
+	I2C_AcknowledgeConfig(self->hw, DISABLE);
+	I2C_GenerateSTOP(self->hw, ENABLE);
+	// wait until stop is cleared by hardware
+	while (self->hw->CR1 & 0x0200);
+
+	i2c_debug("i2c: done\n");
+
+	// wait until i2c bus is not busy anymore
+	if(_i2c_wait_flag_cleared(self, I2C_FLAG_BUSY) < 0) {
+		goto busy;
+    }
+
+    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
+
+	if(self->isr.error) {
+		i2c_debug("i2c: err %d\n", self->isr.error);
+		return self->isr.error;
+	}
+
+	return (int)len;
+timedout:
+	i2c_debug("i2c: tout\n");
+    i2c_debug("i2c: sr1: %04x, sr2: %04x, cr1: %04x\n", self->hw->SR1, self->hw->SR2, self->hw->CR1);
+
+	I2C_GenerateSTOP(self->hw, ENABLE);
+	// wait until stop is cleared by hardware
+	while (self->hw->CR1 & 0x0200);
+
+    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
+	return -ETIMEDOUT;
+busy:
+    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
+    return -EBUSY;
 
     /*
     //thread_mutex_lock(&self->lock);
@@ -283,125 +319,160 @@ static int _stm32_i2c_write_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, con
 
 static int _stm32_i2c_read_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, void* buf, size_t len){
     struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
-    uint8_t *data = (uint8_t*)buf;
 
-    if (!self->hw || !len)
+    if (!self->hw || !len || !buf)
         return -1;
 
+    uint8_t *data = (uint8_t*)buf;
     addr = (uint8_t)(addr << 1);
 
-    dbg_printk("i2c: bsy\n");
+    memset(&self->isr, 0, sizeof(self->isr));
 
-	if(_i2c_wait_flag_cleared(self, I2C_FLAG_BUSY) < 0) {
-        return -EBUSY;
+	// enable the error interrupt
+    //I2C_ITConfig(self->hw, I2C_IT_ERR, ENABLE);
+
+    i2c_debug("i2c: rstart %d\n", len);
+
+	I2C_GenerateSTART(self->hw, ENABLE);
+
+	// wait for master mode selected ev5
+    if(_i2c_wait_event(self, I2C_EVENT_MASTER_MODE_SELECT) < 0) {
+		goto timedout;
     }
 
-    dbg_printk("i2c: start\n");
+    i2c_debug("i2c: adr\n");
 
     I2C_AcknowledgeConfig(self->hw, ENABLE);
 
-	/* Send START condition */
-	I2C_GenerateSTART(self->hw, ENABLE);
-
-	/* Test on EV5 and clear it */
-    if(_i2c_wait_event(self, I2C_EVENT_MASTER_MODE_SELECT) < 0) {
-        return -ETIMEDOUT;
-    }
-
-    dbg_printk("i2c: adr\n");
     // send device address
 	I2C_Send7bitAddress(self->hw, addr, I2C_Direction_Transmitter);
 
-	/* Test on EV6 and clear it */
+	// wait for address set ev6
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) < 0) {
-        return -ETIMEDOUT;
+		goto timedout;
     }
 
-    dbg_printk("i2c: reg\n");
-	/* Clear EV6 by setting again the PE bit */
-	I2C_Cmd(self->hw, ENABLE);
+    i2c_debug("i2c: reg\n");
 
     // send register address
 	I2C_SendData(self->hw, reg);
 
     // wait until the byte was sent
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_TRANSMITTED) < 0) {
-        return -ETIMEDOUT;
+		goto timedout;
     }
 
-    dbg_printk("i2c: repst\n");
-	/* Send repeated START condition */
+    i2c_debug("i2c: repst\n");
 	I2C_GenerateSTART(self->hw, ENABLE);
-
-	/* Test on EV5 and clear it */
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_MODE_SELECT) < 0) {
-        return -ETIMEDOUT;
+		goto timedout;
     }
 
-    // send device address
+    i2c_debug("i2c: adr\n");
+    I2C_AcknowledgeConfig(self->hw, ENABLE);
 	I2C_Send7bitAddress(self->hw, addr, I2C_Direction_Receiver);
-
-	/* Test on EV6 and clear it */
     if(_i2c_wait_event(self, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED) < 0) {
-        return -ETIMEDOUT;
+		goto timedout;
     }
 
-	/* Clear EV6 by setting again the PE bit */
-	I2C_Cmd(self->hw, ENABLE);
-
-    dbg_printk("i2c: rd\n");
 	for(int c = 0; c < (int)len; c++){
-    /*
-	    if(c == ((int)len - 1)){
-            I2C_AcknowledgeConfig(self->hw, DISABLE);
-            I2C_GenerateSTOP(self->hw, ENABLE);
-        } else {
-            I2C_AcknowledgeConfig(self->hw, ENABLE);
-        }
-        */
-        // wait for a byte to be received
-        if(_i2c_wait_event(self, I2C_EVENT_MASTER_BYTE_RECEIVED) < 0) {
-            return -ETIMEDOUT;
-        }
-        data[c] = I2C_ReceiveData(self->hw);
+		// if this was last byte
+		if(c == (int)(len - 1)){
+			__disable_irq();
+			I2C_AcknowledgeConfig(self->hw, DISABLE);
+			I2C_GenerateSTOP(self->hw, ENABLE);
+			__enable_irq();
+			i2c_debug("i2c: stop\n");
+		} else if(c == (int)(len - 3)){
+			if(_i2c_wait_flag_set(self, I2C_FLAG_RXNE) < 0) {
+				goto timedout;
+			}
+			i2c_debug("i2c: rxne\n");
+			if(_i2c_wait_flag_set(self, I2C_FLAG_BTF) < 0) {
+				goto timedout;
+			}
+			i2c_debug("i2c: btf\n");
+
+			__disable_irq();
+			I2C_AcknowledgeConfig(self->hw, DISABLE);
+
+			data[c++] = I2C_ReceiveData(self->hw);
+
+			I2C_GenerateSTOP(self->hw, ENABLE);
+			__enable_irq();
+			i2c_debug("i2c: stop\n");
+			data[c++] = I2C_ReceiveData(self->hw);
+			data[c++] = I2C_ReceiveData(self->hw);
+			i2c_debug("i2c: done\n");
+			break;
+		}
+
+		i2c_debug("i2c: rd ");
+		if(_i2c_wait_flag_set(self, I2C_FLAG_RXNE) < 0) {
+			goto timedout;
+		}
+
+		data[c] = I2C_ReceiveData(self->hw);
+		i2c_debug("%d\n", c);
 	}
 
-    I2C_GenerateSTOP(self->hw, ENABLE);
-/*
-	int timeout = 10;
-	while(I2C_GetFlagStatus(self->hw, I2C_FLAG_BUSY) == SET && --timeout > 0) thread_sleep_ms(1);
-    if(timeout == 0){
+	while(I2C_GetFlagStatus(self->hw, I2C_FLAG_RXNE)) I2C_ReceiveData(self->hw);
+
+	thread_sleep_ms(100);
+    i2c_debug("i2c: sr1: %04x, sr2: %04x, cr1: %04x\n", self->hw->SR1, self->hw->SR2, self->hw->CR1);
+	return (int)len;
+timedout:
+	i2c_debug("i2c: tout\n");
+    i2c_debug("i2c: sr1: %04x, sr2: %04x, cr1: %04x\n", self->hw->SR1, self->hw->SR2, self->hw->CR1);
+
+	I2C_GenerateSTOP(self->hw, ENABLE);
+	// wait until stop is cleared by hardware
+	while (self->hw->CR1 & 0x0200);
+
+    I2C_ITConfig(self->hw, I2C_IT_ERR, ENABLE);
+	return -ETIMEDOUT;
+
+#if 0
+	if(_i2c_wait_flag_cleared(self, I2C_FLAG_BUSY) < 0) {
         return -EBUSY;
     }
 
-    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
-
     memset(&self->isr, 0, sizeof(self->isr));
 
-    self->isr.addr = (uint8_t)(addr_ << 1);
-    self->isr.reg = reg_;
+    self->isr.addr = (uint8_t)(addr << 1);
+    self->isr.reg = reg;
     self->isr.rd_buf = (uint8_t*)buf;
     self->isr.len = (int)len;
 
+    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, ENABLE);
+
+    I2C_AcknowledgeConfig(self->hw, ENABLE);
+
     I2C_GenerateSTART(self->hw, ENABLE);
+	// wait until start has been sent
+	int timeout = 1000;
+	while (self->hw->CR1 & 0x0100 && --timeout) thread_sleep_ms(1);
+	// wait until stop has been generated (ie we are done)
+	timeout = 1000;
+	while (self->hw->SR2 & 0x0002 && --timeout) thread_sleep_ms(1);
 
-    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_ERR, ENABLE);
-
+    I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
+/*
     if(thread_sem_take_wait(&self->done, I2C_DEFAULT_TIMEOUT) < 0){
-        dbg_printk("i2c: tout\n");
+        i2c_debug("i2c: tout\n");
         return -ETIMEDOUT;
     }
-
-    dbg_printk("i2c: sr1: %04x, sr2: %04x, cr1: %04x\n", self->hw->SR1, self->hw->SR2, self->hw->CR1);
+*/
+    i2c_debug("i2c: sr1: %04x, sr2: %04x, cr1: %04x\n", self->hw->SR1, self->hw->SR2, self->hw->CR1);
 
     if(self->isr.error){
-        dbg_printk("i2c: fail %d\n", self->isr.error);
+        i2c_debug("i2c: fail %d\n", self->isr.error);
         return self->isr.error;
     }
 
-    dbg_printk("i2c: ok\n");
-*/
+    i2c_debug("i2c: ok\n");
     return (int)len;
+#endif
 }
 
 static void i2c_er_handler(struct stm32_i2c *self){
@@ -419,14 +490,14 @@ static void i2c_er_handler(struct stm32_i2c *self){
         // no ack received from slave (ie slave not connected)
         I2C_ClearITPendingBit(self->hw, I2C_IT_AF);
         // generate stop to release the bus
-        I2C_GenerateSTOP(self->hw, ENABLE);
+        //I2C_GenerateSTOP(self->hw, ENABLE);
         self->isr.error = -I2C_ERR_ARB_FAILED;
     }
     // disable interrupts and release the device
     I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
 	// reset all error bits
 	self->hw->SR1 = (uint16_t)(self->hw->SR1 & ~0x0F00);
-    thread_sem_give_from_isr(&self->done);
+    //thread_sem_give_from_isr(&self->done);
 }
 
 void i2c_ev_handler(struct stm32_i2c *self){
@@ -442,19 +513,11 @@ void i2c_ev_handler(struct stm32_i2c *self){
 		  */
 		/* --EV5 */
         case I2C_EVENT_MASTER_MODE_SELECT: {
-    		I2C_AcknowledgeConfig(self->hw, ENABLE);
-			if(self->isr.reg_sent && self->isr.rd_buf){
-                I2C_Send7bitAddress(self->hw, self->isr.addr, I2C_Direction_Receiver);
-			} else {
+			if(self->isr.wr_buf || (self->isr.rd_buf && !self->isr.reg_sent)) {
                 I2C_Send7bitAddress(self->hw, self->isr.addr, I2C_Direction_Transmitter);
+			} else {
+                I2C_Send7bitAddress(self->hw, self->isr.addr, I2C_Direction_Receiver);
 			}
-/*
-            if(self->isr.len == 0){
-                I2C_AcknowledgeConfig(self->hw, DISABLE);
-                I2C_GenerateSTOP(self->hw, ENABLE);
-                self->isr.stop_sent = true;
-            }
-*/
         } break;
 		/** 
 		  * @brief  Address Acknowledge
@@ -481,17 +544,26 @@ void i2c_ev_handler(struct stm32_i2c *self){
 		  *     
 		  */
 		/* --EV6 */
+		/* BUSY, MSL, ADDR, TXE and TRA flags */
         case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
+		/* BUSY, MSL and ADDR flags */
         case I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED: {
 			// clear ev6 by setting PE bit
-			//I2C_Cmd(self->hw, ENABLE);
-			// if we only want one byte then we should request stop now
-            if(self->isr.rd_buf && self->isr.reg_sent && self->isr.len == 1){
+			I2C_Cmd(self->hw, ENABLE);
+
+			// we must only enable byte transfer finished interrupt here.
+			// No data transmission should happen in this event!
+			/*
+			if(self->isr.len == 0){
+				// if no buffer data is to be sent or received then we send stop now
                 I2C_AcknowledgeConfig(self->hw, DISABLE);
-                I2C_GenerateSTOP(self->hw, ENABLE);
-				//I2C_ITConfig(I2Cx, I2C_IT_BUF, ENABLE);
-                self->isr.stop_sent = true;
-            }
+				I2C_GenerateSTOP(self->hw, ENABLE);
+				self->isr.stop_sent = true;
+			}
+			*/
+
+			// enable the byte transfer finished interrupt
+			I2C_ITConfig(self->hw, I2C_IT_BUF, ENABLE);
 		} break;
 		case I2C_EVENT_MASTER_MODE_ADDRESS10: {
 			// this is currently ignored!
@@ -526,54 +598,64 @@ void i2c_ev_handler(struct stm32_i2c *self){
 		  */
 		/* Master RECEIVER mode -----------------------------*/ 
 		/* --EV7 */
+		/* BUSY, MSL and RXNE flags */
         case I2C_EVENT_MASTER_BYTE_RECEIVED: {
             // always get the by from dr
             uint8_t ch = I2C_ReceiveData(self->hw);
             // store byte if there is space
             if(self->isr.rd_buf && self->isr.cursor < self->isr.len){
+				// a byte arrived and is to be placed into the buffer
                 self->isr.rd_buf[self->isr.cursor++] = ch;
-                I2C_AcknowledgeConfig(self->hw, ENABLE);
-                if(self->isr.cursor == self->isr.len){
-                    // if next to last byte then generate stop
-                    I2C_AcknowledgeConfig(self->hw, DISABLE);
-                    I2C_GenerateSTOP(self->hw, ENABLE);
-                    self->isr.stop_sent = true;
-                }
+			}
+
+			// check if this is next to last byte and send stop
+			if(self->isr.len == 0 || (self->isr.len > 0 && self->isr.cursor == (self->isr.len - 1))){
+				I2C_AcknowledgeConfig(self->hw, DISABLE);
+				I2C_GenerateSTOP(self->hw, ENABLE);
+				self->isr.stop_sent = true;
             } else if(self->isr.stop_sent){
-                // if last byte then signal that we are done
+				// if this was the last byte and stop was sent then we are done
                 I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
                 thread_sem_give_from_isr(&self->done);
             }
-        } break;
+		} break;
 		/* Master TRANSMITTER mode --------------------------*/
 		/* --EV8 */
+		/* TRA, BUSY, MSL, TXE flags */
         case I2C_EVENT_MASTER_BYTE_TRANSMITTING: {
-            if(self->isr.cursor == -1){
+			// this happens when byte transfer is in progress, data register has been latched in but the transfer has not yet completed.
+			/*
+			if(!self->isr.reg_sent){
+				// send reg in both write and read modes
 				I2C_SendData(self->hw, self->isr.reg);
-				self->isr.cursor++;
-			} else if(self->isr.wr_buf && (self->isr.cursor < self->isr.len)){
-                // if we have data left to send then send it
+				self->isr.reg_sent = true;
+			} else if(self->isr.reg_sent && self->isr.wr_buf && (self->isr.cursor < self->isr.len)){
+				// if we have sent the address and we are writing then we send next byte here
                 I2C_SendData(self->hw, self->isr.wr_buf[self->isr.cursor++]);
             }
+			*/
         } break;
 		/* --EV8_2 */
+		/* TRA, BUSY, MSL, TXE and BTF flags */
         case I2C_EVENT_MASTER_BYTE_TRANSMITTED: {
-            if(self->isr.rd_buf) {
-                if(self->isr.len){
-                    // we only end up here if we have sent the reg address and we should now switch into read mode
-                    I2C_GenerateSTART(self->hw, ENABLE);
-                } else {
-                    // if we have sent reg address and no more data is to be sent
-                    I2C_GenerateSTOP(self->hw, ENABLE);
-                    self->isr.stop_sent = true;
-                }
-            } else if(self->isr.stop_sent){
-                // if we are in write mode and stop has been sent then we are done
+			// this happens when byte transfer has been completed
+			if(self->isr.stop_sent){
+				// stop has been sent and transmission has finished so we quit
                 I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
                 thread_sem_give_from_isr(&self->done);
-            }
-             // we must wait for the start to clear, otherwise we get constant BTF
-             while (self->hw->CR1 & 0x0100) {; }
+            } else if(self->isr.cursor == self->isr.len){
+				// we are done sending data but have not sent stop yet
+				I2C_AcknowledgeConfig(self->hw, DISABLE);
+				I2C_GenerateSTOP(self->hw, ENABLE);
+				self->isr.stop_sent = true;
+			} else if(self->isr.rd_buf && self->isr.cursor == 0 && self->isr.reg_sent) {
+				// we intend to read data but we have only sent reg. Send repeat start and restart the transfer.
+                I2C_GenerateSTART(self->hw, ENABLE);
+				// next time the read mode will be initialized and we will end up in read handler
+			} else {
+				// otherwise we just keep sendin out bytes of data
+                I2C_SendData(self->hw, self->isr.wr_buf[self->isr.cursor++]);
+			}
         } break;
         default: {
             // an unknown event has occured so we have to send stop and notify that we are done.
@@ -719,7 +801,7 @@ int _stm32_i2c_probe(void *fdt, int fdt_node){
     i2c_device_register(&self->dev);
 
     dbg_printk("i2c%d: ok, %dhz\n", idx, speed);
-    dbg_printk("i2c%d sr1: %04x, sr2: %04x, cr1: %04x\n", idx, self->hw->SR1, self->hw->SR2, self->hw->CR1);
+    i2c_debug("i2c%d sr1: %04x, sr2: %04x, cr1: %04x\n", idx, self->hw->SR1, self->hw->SR2, self->hw->CR1);
 
     return 0;
 }
