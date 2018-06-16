@@ -10,6 +10,7 @@ pkginclude_HEADERS = atomic.h \
     encoder.h\
     gpio.h\
 	i2c.h\
+	imu.h\
     io.h\
     irq.h\
     leds.h\

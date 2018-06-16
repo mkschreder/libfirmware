@@ -29,8 +29,6 @@ struct i2c_device_ops {
     int (*read)(i2c_device_t dev, uint8_t addr_, uint8_t reg_, void *data, size_t len);
 };
 
-#define spi_transfer(spi, tx, rx, sz, to) (*(spi))->transfer(spi, tx, rx, sz, to)
-
 struct i2c_device {
 	struct list_head list;
 	const struct i2c_device_ops *ops;

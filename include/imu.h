@@ -22,21 +22,28 @@
 #include "timestamp.h"
 #include "list.h"
 
-typedef const struct spi_device_ops ** spi_device_t;
+typedef const struct imu_device_ops ** imu_device_t;
 
-struct spi_device_ops {
-	int (*transfer)(spi_device_t spi, uint8_t cs, const void *tx, void *rx, size_t size, timestamp_t timeout);
+struct imu_reading {
+    uint8_t has_reading;
+    float ax, ay, az;
+    float gx, gy, gz;
 };
 
-#define spi_transfer(spi, cs, tx, rx, sz, to) (*(spi))->transfer(spi, cs, tx, rx, sz, to)
+struct imu_device_ops {
+    int (*read)(imu_device_t dev, struct imu_reading *data);
+};
 
-struct spi_device {
+struct imu_device {
 	struct list_head list;
-	const struct spi_device_ops *ops;
+	const struct imu_device_ops *ops;
 	int fdt_node;
 };
 
-void spi_device_init(struct spi_device *self, int fdt_node, const struct spi_device_ops *ops);
-int spi_device_register(struct spi_device *self);
-spi_device_t spi_find(const char *dtb_path);
-spi_device_t spi_find_by_node(void *fdt, int node);
+void imu_device_init(struct imu_device *self, int fdt_node, const struct imu_device_ops *ops);
+int imu_device_register(struct imu_device *self);
+imu_device_t imu_find(const char *dtb_path);
+imu_device_t imu_find_by_node(void *fdt, int node);
+
+#define imu_read(imu, data) (*(imu))->read(imu, data)
+

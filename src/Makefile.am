@@ -7,7 +7,9 @@ libfirmware_a_SOURCES = avl-cmp.c\
     dx_tracker.c\
     driver.c\
     encoder.c\
+	gpio.c\
 	i2c.c\
+	imu.c\
     leds.c\
     math.c\
     serial.c\

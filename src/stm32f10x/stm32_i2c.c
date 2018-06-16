@@ -123,8 +123,8 @@ static void _stm32_i2c_unstick(struct stm32_i2c *self){
 }
 
 static int _i2c_wait_flag_cleared(struct stm32_i2c *self, uint32_t flag){
-    int timeout = 100;
-	while(I2C_GetFlagStatus(self->hw, flag) == SET && --timeout > 0) thread_sleep_ms(1);
+    volatile int timeout = 10000;
+	while(I2C_GetFlagStatus(self->hw, flag) == SET && --timeout > 0) asm volatile ("nop");
     if(timeout == 0){
         return -EBUSY;
     }
@@ -132,7 +132,7 @@ static int _i2c_wait_flag_cleared(struct stm32_i2c *self, uint32_t flag){
 }
 
 static int _i2c_wait_flag_set(struct stm32_i2c *self, uint32_t flag){
-    int timeout = 100;
+    volatile int timeout = 10000;
 	while(I2C_GetFlagStatus(self->hw, flag) == RESET && --timeout > 0) asm volatile ("nop");
     if(timeout == 0){
         return -EBUSY;
@@ -141,7 +141,7 @@ static int _i2c_wait_flag_set(struct stm32_i2c *self, uint32_t flag){
 }
 
 static int _i2c_wait_event(struct stm32_i2c *self, uint32_t ev){
-    int timeout = 1000;
+    volatile int timeout = 10000;
 	while(!I2C_CheckEvent(self->hw, ev) && --timeout > 0) asm volatile ("nop");
     if(timeout == 0){
         return -ETIMEDOUT;

@@ -18,42 +18,43 @@
 
 #include <libfdt/libfdt.h>
 
-#include "spi.h"
+#include "gpio.h"
 #include "list.h"
 #include "thread.h"
 #include "driver.h"
 
 #include <errno.h>
 
-static LIST_HEAD(_spi_ports);
+static LIST_HEAD(_gpio_ports);
 
-void spi_device_init(struct spi_device *self, int fdt_node, const struct spi_device_ops *ops){
+void gpio_device_init(struct gpio_device *self, int fdt_node, const struct gpio_device_ops *ops){
 	memset(self, 0, sizeof(*self));
 	INIT_LIST_HEAD(&self->list);
 	self->fdt_node = fdt_node;
 	self->ops = ops;
 }
 
-int spi_device_register(struct spi_device *self){
+int gpio_device_register(struct gpio_device *self){
 	BUG_ON(!self);
 	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->transfer);
-	list_add_tail(&self->list, &_spi_ports);
+	BUG_ON(!self->ops->write_pin);
+	BUG_ON(!self->ops->read_pin);
+	list_add_tail(&self->list, &_gpio_ports);
 	return 0;
 }
 
-spi_device_t spi_find_by_node(void *fdt, int node){
-	struct spi_device *dev;
+gpio_device_t gpio_find_by_node(void *fdt, int node){
+	struct gpio_device *dev;
     if(node < 0) return NULL;
-    list_for_each_entry(dev, &_spi_ports, list){
+    list_for_each_entry(dev, &_gpio_ports, list){
 		if(dev->fdt_node == node) return &dev->ops;
 	}
 	return NULL;
 }
 
-spi_device_t spi_find(const char *dtb_path){
+gpio_device_t gpio_find(const char *dtb_path){
 	int node = fdt_path_offset(_devicetree, dtb_path);
 	if(node < 0) return NULL;
-    return spi_find_by_node(_devicetree, node);
+    return gpio_find_by_node(_devicetree, node);
 }
 
