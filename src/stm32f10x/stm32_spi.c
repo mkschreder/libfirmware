@@ -20,7 +20,6 @@
 struct stm32_spi {
 	struct spi_device dev;
 	SPI_TypeDef *hw;
-    gpio_device_t gpio;
 /*
 	char tx_dma[16];
 	char rx_dma[16];
@@ -86,23 +85,26 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 	while (DMA_GetCmdStatus(dma) != ENABLE);
 }
 #endif
-int _stm32_spi_transfer(spi_device_t dev, uint8_t cs, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+
+#define SPI_TRANSFER_TIMEOUT 20000
+
+int _stm32_spi_transfer(spi_device_t dev, int cs, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
 	if(!self->hw) return -1;
 
-    SPI_Cmd(self->hw, ENABLE);
+    //SPI_Cmd(self->hw, ENABLE);
 
-    gpio_reset(self->gpio, cs);
+    //gpio_reset(self->gpio, cs);
     for(size_t c = 0; c < size; c++){
 		SPI_I2S_SendData(self->hw, ((const uint8_t*)tx_data)[c]);
-        int tout = 1000;
-        while(!SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_TXE) == RESET && --tout);
+        int tout = SPI_TRANSFER_TIMEOUT;
+        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_TXE) == RESET && --tout) asm volatile ("nop");
         if(tout == 0) {
             dbg_printk("spi: etxe\n");
             goto timedout;
         }
-        tout = 1000;
-        while(!SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_RXNE) == RESET && --tout);
+        tout = SPI_TRANSFER_TIMEOUT;
+        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_RXNE) == RESET && --tout) asm volatile ("nop");
         if(tout == 0){
             dbg_printk("spi: erxne\n");
             goto timedout;
@@ -110,19 +112,19 @@ int _stm32_spi_transfer(spi_device_t dev, uint8_t cs, const void *tx_data, void 
 
 		((uint8_t*)rx_data)[c] = (uint8_t)SPI_I2S_ReceiveData(self->hw);
 
-        tout = 1000;
-        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY) == SET && --tout);
+        tout = SPI_TRANSFER_TIMEOUT;
+        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY) == SET && --tout) asm volatile ("nop");
         if(tout == 0){
             dbg_printk("spi: ebsy\n");
             goto timedout;
         }
     }
-    gpio_set(self->gpio, cs);
-    SPI_Cmd(self->hw, DISABLE);
+    //gpio_set(self->gpio, cs);
+    //SPI_Cmd(self->hw, DISABLE);
     return 0;
 timedout:
-    gpio_set(self->gpio, cs);
-    SPI_Cmd(self->hw, DISABLE);
+    //gpio_set(self->gpio, cs);
+    //SPI_Cmd(self->hw, DISABLE);
     return -ETIMEDOUT;
 #if 0
 	if(self->hw == SPI1){
@@ -165,19 +167,8 @@ const struct spi_device_ops _ops = {
 
 static int _stm32_spi_probe(void *fdt, int fdt_node){
 	SPI_TypeDef *SPIx = (SPI_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
-	int node = fdt_find_node_by_ref(fdt, fdt_node, "cs_pins");
-	if(node < 0) {
-		dbg_printk("spi: nocs!\n");
-		return -EINVAL;
-	}
 
-    gpio_device_t gpio = gpio_find_by_node(fdt, node);
-    if(!gpio) {
-		dbg_printk("spi: nogpio!\n");
-		return -EINVAL;
-	}
-
-    int idx = 0;
+	int idx = 0;
     if(SPIx == SPI1){
         RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
         idx = 0;
@@ -191,7 +182,6 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 	struct stm32_spi *self = kzmalloc(sizeof(struct stm32_spi));
 	spi_device_init(&self->dev, fdt_node, &_ops);
 	self->hw = SPIx;
-    self->gpio = gpio;
     _devices[idx] = self;
 
 	SPI_Cmd(SPIx, DISABLE);
@@ -210,6 +200,8 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 
     SPI_Init(SPIx, &spi);
     SPI_CalculateCRC(SPIx, DISABLE);
+
+	SPI_Cmd(SPIx, ENABLE);
 
 	spi_device_register(&self->dev);
     dbg_printk("spi%d: ok\n", idx + 1);

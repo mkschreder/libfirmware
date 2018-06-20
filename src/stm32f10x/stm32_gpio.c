@@ -8,6 +8,8 @@
 #include "driver.h"
 #include "gpio.h"
 
+#define gpio_debug no_printk
+
 struct stm32_gpio_pin {
     GPIO_TypeDef *gpio;
     uint16_t pin;
@@ -22,7 +24,7 @@ struct stm32_gpio {
 static int _stm32_gpio_write_pin(gpio_device_t dev, uint32_t pin, bool value){
     struct stm32_gpio *self = container_of(dev, struct stm32_gpio, dev.ops);
     if(pin >= self->npins) return -EINVAL;
-    dbg_printk("gpio pin %08x: %04x = %d\n", self->pins[pin].gpio, self->pins[pin].pin, value);
+    gpio_debug("gpio pin %08x: %04x = %d\n", self->pins[pin].gpio, self->pins[pin].pin, value);
     if(value){
         GPIO_SetBits(self->pins[pin].gpio, self->pins[pin].pin);
     } else {
@@ -87,6 +89,7 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
 }
 
 static int _stm32_gpio_probe(void *fdt, int fdt_node){
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);

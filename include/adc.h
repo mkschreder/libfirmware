@@ -16,39 +16,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 #pragma once
 
 #include "timestamp.h"
 #include "list.h"
 
-typedef const struct spi_device_ops ** spi_device_t;
+typedef const struct adc_device_ops ** adc_device_t;
 
-struct spi_transfer {
-	struct list_head list;
-	const void *tx_buf;
-	void *rx_buf;
-	size_t len;
-	uint32_t timeout_ms;
+struct adc_device_ops {
+    int (*read)(adc_device_t dev, int channel);
 };
 
-struct spi_device_ops {
-	int (*transfer)(spi_device_t spi, int cs, const void *tx_buf, void *rx_buf, size_t len, uint32_t to);
-};
-
-#define spi_transfer(spi, cs, tx, rx, sz, to) (*(spi))->transfer(spi, cs, tx, rx, sz, to)
-//#define spi_sync(spi, ts) (*(spi))->transfer(spi, ts)
-
-struct spi_device {
+struct adc_device {
 	struct list_head list;
-	const struct spi_device_ops *ops;
+	const struct adc_device_ops *ops;
 	int fdt_node;
 };
 
-void spi_device_init(struct spi_device *self, int fdt_node, const struct spi_device_ops *ops);
-int spi_device_register(struct spi_device *self);
-spi_device_t spi_find(const char *dtb_path);
-spi_device_t spi_find_by_node(void *fdt, int node);
+void adc_device_init(struct adc_device *self, int fdt_node, const struct adc_device_ops *ops);
+int adc_device_register(struct adc_device *self);
+adc_device_t adc_find(const char *dtb_path);
+adc_device_t adc_find_by_node(void *fdt, int node);
 
-void spi_transfer_init(struct spi_transfer *self);
+#define adc_read(dev, channel) (*(dev))->read(dev, channel)
 

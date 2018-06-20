@@ -1,4 +1,4 @@
-#include <libfirmware/atomic.h>
+#include "atomic.h"
 
 __atomic_t atomic_set(atomic_t *self, atomic_t other){
 	// this will loop until the set has been successful without any write

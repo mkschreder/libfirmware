@@ -6,7 +6,6 @@
  * in the same way.
  */
 
-#if 0
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -14,6 +13,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#if 0
 #include <sys/time.h>
 
 #include <libfirmware/queue.h>

@@ -1,5 +1,5 @@
 #include "kernel.h"
-#include <libfirmware/queue.h>
+#include "queue.h"
 
 int thread_queue_init(struct thread_queue *queue, size_t elems, size_t elem_size){
 	queue->handle = xQueueCreate(elems, elem_size);

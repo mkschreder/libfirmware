@@ -1,10 +1,12 @@
 pkginclude_HEADERS = atomic.h \
+	adc.h\
     avl-cmp.h\
     avl.h\
 	baro.h\
     can.h\
     chip.h\
     console.h\
+	display.h\
     driver.h\
     eeprom.h\
     encoder.h\
@@ -18,6 +20,7 @@ pkginclude_HEADERS = atomic.h \
     math.h\
     motor.h\
     mutex.h\
+	pointer.h\
     pwm.h\
     queue.h\
     rtc.h\

@@ -83,6 +83,7 @@ void con_printf(struct console *self, const char *fmt, ...){
 }
 
 #if !defined(__linux__)
+#if 0
 #include <FreeRTOS.h>
 #include <task.h>
 
@@ -93,7 +94,7 @@ static int _compare_tasks(const void *a, const void *b){
 	return tb->xTaskNumber < ta->xTaskNumber;
 }
 #endif
-
+#endif
 static int _cmd_ps(struct console *self, int argc, char **argv){
 	(void)self;
 	(void)argc;
@@ -351,7 +352,7 @@ static void _console_task(void *ptr){
 	}
 }
 
-void console_start(struct console *self){
+int console_start(struct console *self){
 	(void)self;
 	if(thread_create(
 		  _console_task,
@@ -359,7 +360,12 @@ void console_start(struct console *self){
 		  460,
 		  self,
 		  1,
-		  NULL) < 0)
+		  NULL) < 0){
         dbg_printk("con: fail!\n");
+        return -1;
+    } else {
+        dbg_printk("con: started!\n");
+    }
+    return 0;
 }
 

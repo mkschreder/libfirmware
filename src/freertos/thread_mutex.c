@@ -1,5 +1,5 @@
 #include "kernel.h"
-#include <libfirmware/mutex.h>
+#include "mutex.h"
 #include <string.h>
 #include <errno.h>
 

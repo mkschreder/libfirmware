@@ -72,8 +72,9 @@ void SystemInit(void)
 
     __libc_init_array();
 
-    // disable jtag pins (TODO: make this configurable in driver device tree)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    // disable jtag pins (TODO: make this configurable in driver device tree)
+    /*
     AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_DISABLE;
     AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
 
@@ -85,6 +86,7 @@ void SystemInit(void)
     GPIO_Init(GPIOB, &GPIO_InitStructure);   
 
     GPIOB->ODR ^= GPIO_Pin_3 | GPIO_Pin_4;   
+*/
 }
 
 void SystemCoreClockUpdate(void)

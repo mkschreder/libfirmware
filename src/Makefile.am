@@ -1,10 +1,14 @@
 lib_LIBRARIES = libfirmware.a
-libfirmware_a_SOURCES = avl-cmp.c\
+libfirmware_a_SOURCES = \
+	adc.c\
+	avl-cmp.c\
     avl.c\
 	baro.c\
     can.c\
     console.c\
+	display.c\
     dx_tracker.c\
+    pointer.c\
     driver.c\
     encoder.c\
 	gpio.c\
@@ -21,6 +25,7 @@ libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99
 
 if WITH_TARGET_LINUX
 libfirmware_a_SOURCES+=linux/chip.c\
+	linux/linux_display.c\
 	linux/linux_uart.c\
 	linux/linux_udpcan.c\
 	linux/linux_vcan.c\
@@ -59,6 +64,7 @@ libfirmware_a_SOURCES += \
     stm32f10x/stdperiph/stm32f10x_tim.c\
     stm32f10x/stdperiph/stm32f10x_usart.c\
     stm32f10x/stdperiph/stm32f10x_wwdg.c\
+    stm32f10x/stm32_adc.c\
     stm32f10x/stm32_can.c\
     stm32f10x/stm32_chip.c\
     stm32f10x/stm32_gpio.c\
@@ -80,7 +86,7 @@ libfirmware_a_SOURCES += \
 	freertos/kernel/queue.c\
 	freertos/kernel/tasks.c\
 	freertos/kernel/timers.c\
-	freertos/kernel/portable/MemMang/heap_3.c\
+	freertos/kernel/portable/MemMang/heap_2.c\
 	freertos/kernel/portable/GCC/ARM_CM3/port.c
 libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
 endif

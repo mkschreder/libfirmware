@@ -38,6 +38,8 @@ int thread_join(thread_t handle);
 void thread_set_tag(thread_t thread, void *tag);
 void thread_start_scheduler(void);
 int thread_sleep_ms(uint32_t ms);
+int thread_sleep_us(uint32_t us);
+
 /**
  * Used in interrupt handlers to signal operating system that a reschedule may be necessary
  */
@@ -52,3 +54,4 @@ void* kmalloc(size_t size);
 void* kzmalloc(size_t size);
 void kfree(void *ptr);
 
+void thread_meminfo();

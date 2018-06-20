@@ -53,6 +53,6 @@ struct console_command {
 };
 
 void console_init(struct console *self, serial_port_t port, struct console_command *commands, size_t ncommands, struct vardir *vars);
-void console_start(struct console *self);
+int console_start(struct console *self);
 
 void con_printf(struct console *self, const char *fmt, ...);

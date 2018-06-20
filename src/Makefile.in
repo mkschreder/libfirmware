@@ -89,6 +89,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @WITH_TARGET_LINUX_TRUE@am__append_1 = linux/chip.c\
+@WITH_TARGET_LINUX_TRUE@	linux/linux_display.c\
 @WITH_TARGET_LINUX_TRUE@	linux/linux_uart.c\
 @WITH_TARGET_LINUX_TRUE@	linux/linux_udpcan.c\
 @WITH_TARGET_LINUX_TRUE@	linux/linux_vcan.c\
@@ -125,6 +126,7 @@ host_triplet = @host@
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stdperiph/stm32f10x_tim.c\
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stdperiph/stm32f10x_usart.c\
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stdperiph/stm32f10x_wwdg.c\
+@WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stm32_adc.c\
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stm32_can.c\
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stm32_chip.c\
 @WITH_TARGET_STM32F10X_TRUE@    stm32f10x/stm32_gpio.c\
@@ -146,7 +148,7 @@ host_triplet = @host@
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/queue.c\
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/tasks.c\
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/timers.c\
-@WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/heap_3.c\
+@WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/heap_2.c\
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/GCC/ARM_CM3/port.c
 
 @WITH_TARGET_STM32F10X_TRUE@am__append_4 = -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
@@ -265,14 +267,14 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libfirmware_a_AR = $(AR) $(ARFLAGS)
 libfirmware_a_LIBADD =
-am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c baro.c can.c \
-	console.c dx_tracker.c driver.c encoder.c gpio.c i2c.c imu.c \
-	leds.c math.c serial.c spi.c time.c ulink.c vardir.c \
-	linux/chip.c linux/linux_uart.c linux/linux_udpcan.c \
-	linux/linux_vcan.c linux/linux_leds.c linux/thread.c \
-	linux/thread_mutex.c linux/thread_queue.c linux/thread_sem.c \
-	linux/thread_work.c linux/time.c stm32f10x/stdperiph/misc.c \
-	stm32f10x/stdperiph/stm32f10x_adc.c \
+am__libfirmware_a_SOURCES_DIST = adc.c avl-cmp.c avl.c baro.c can.c \
+	console.c display.c dx_tracker.c pointer.c driver.c encoder.c \
+	gpio.c i2c.c imu.c leds.c math.c serial.c spi.c time.c ulink.c \
+	vardir.c linux/chip.c linux/linux_display.c linux/linux_uart.c \
+	linux/linux_udpcan.c linux/linux_vcan.c linux/linux_leds.c \
+	linux/thread.c linux/thread_mutex.c linux/thread_queue.c \
+	linux/thread_sem.c linux/thread_work.c linux/time.c \
+	stm32f10x/stdperiph/misc.c stm32f10x/stdperiph/stm32f10x_adc.c \
 	stm32f10x/stdperiph/stm32f10x_bkp.c \
 	stm32f10x/stdperiph/stm32f10x_can.c \
 	stm32f10x/stdperiph/stm32f10x_cec.c \
@@ -293,18 +295,18 @@ am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c baro.c can.c \
 	stm32f10x/stdperiph/stm32f10x_spi.c \
 	stm32f10x/stdperiph/stm32f10x_tim.c \
 	stm32f10x/stdperiph/stm32f10x_usart.c \
-	stm32f10x/stdperiph/stm32f10x_wwdg.c stm32f10x/stm32_can.c \
-	stm32f10x/stm32_chip.c stm32f10x/stm32_gpio.c \
-	stm32f10x/stm32_i2c.c stm32f10x/stm32_leds.c \
-	stm32f10x/stm32_spi.c stm32f10x/stm32_uart.c \
-	stm32f10x/system_stm32f10x.c stm32f10x/timestamp.c \
-	freertos/atomic.c freertos/thread.c freertos/thread_mutex.c \
-	freertos/thread_queue.c freertos/thread_sem.c \
-	freertos/thread_work.c freertos/kernel/croutine.c \
-	freertos/kernel/event_groups.c freertos/kernel/list.c \
-	freertos/kernel/queue.c freertos/kernel/tasks.c \
-	freertos/kernel/timers.c \
-	freertos/kernel/portable/MemMang/heap_3.c \
+	stm32f10x/stdperiph/stm32f10x_wwdg.c stm32f10x/stm32_adc.c \
+	stm32f10x/stm32_can.c stm32f10x/stm32_chip.c \
+	stm32f10x/stm32_gpio.c stm32f10x/stm32_i2c.c \
+	stm32f10x/stm32_leds.c stm32f10x/stm32_spi.c \
+	stm32f10x/stm32_uart.c stm32f10x/system_stm32f10x.c \
+	stm32f10x/timestamp.c freertos/atomic.c freertos/thread.c \
+	freertos/thread_mutex.c freertos/thread_queue.c \
+	freertos/thread_sem.c freertos/thread_work.c \
+	freertos/kernel/croutine.c freertos/kernel/event_groups.c \
+	freertos/kernel/list.c freertos/kernel/queue.c \
+	freertos/kernel/tasks.c freertos/kernel/timers.c \
+	freertos/kernel/portable/MemMang/heap_2.c \
 	freertos/kernel/portable/GCC/ARM_CM3/port.c \
 	stm32f4xx/stdperiph/misc.c stm32f4xx/stdperiph/stm32f4xx_adc.c \
 	stm32f4xx/stdperiph/stm32f4xx_can.c \
@@ -346,10 +348,12 @@ am__libfirmware_a_SOURCES_DIST = avl-cmp.c avl.c baro.c can.c \
 	stm32f4xx/stm32_spi.c stm32f4xx/stm32_uart.c \
 	stm32f4xx/system.c stm32f4xx/system_stm32f4xx.c \
 	stm32f4xx/timestamp.c stm32f4xx/watchdog.c \
+	freertos/kernel/portable/MemMang/heap_3.c \
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_LINUX_TRUE@am__objects_1 =  \
 @WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-chip.$(OBJEXT) \
+@WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-linux_display.$(OBJEXT) \
 @WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-linux_uart.$(OBJEXT) \
 @WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-linux_udpcan.$(OBJEXT) \
 @WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-linux_vcan.$(OBJEXT) \
@@ -383,6 +387,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/stdperiph/libfirmware_a-stm32f10x_tim.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/stdperiph/libfirmware_a-stm32f10x_usart.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/stdperiph/libfirmware_a-stm32f10x_wwdg.$(OBJEXT) \
+@WITH_TARGET_STM32F10X_TRUE@	stm32f10x/libfirmware_a-stm32_adc.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/libfirmware_a-stm32_can.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/libfirmware_a-stm32_chip.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	stm32f10x/libfirmware_a-stm32_gpio.$(OBJEXT) \
@@ -404,7 +409,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/libfirmware_a-queue.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/libfirmware_a-tasks.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
-@WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT) \
+@WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_2.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/GCC/ARM_CM3/libfirmware_a-port.$(OBJEXT)
 @WITH_TARGET_STM32F429_TRUE@am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
 @WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_adc.$(OBJEXT) \
@@ -470,17 +475,20 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
 @WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT) \
 @WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
-am_libfirmware_a_OBJECTS = libfirmware_a-avl-cmp.$(OBJEXT) \
-	libfirmware_a-avl.$(OBJEXT) libfirmware_a-baro.$(OBJEXT) \
-	libfirmware_a-can.$(OBJEXT) libfirmware_a-console.$(OBJEXT) \
+am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
+	libfirmware_a-avl-cmp.$(OBJEXT) libfirmware_a-avl.$(OBJEXT) \
+	libfirmware_a-baro.$(OBJEXT) libfirmware_a-can.$(OBJEXT) \
+	libfirmware_a-console.$(OBJEXT) \
+	libfirmware_a-display.$(OBJEXT) \
 	libfirmware_a-dx_tracker.$(OBJEXT) \
-	libfirmware_a-driver.$(OBJEXT) libfirmware_a-encoder.$(OBJEXT) \
-	libfirmware_a-gpio.$(OBJEXT) libfirmware_a-i2c.$(OBJEXT) \
-	libfirmware_a-imu.$(OBJEXT) libfirmware_a-leds.$(OBJEXT) \
-	libfirmware_a-math.$(OBJEXT) libfirmware_a-serial.$(OBJEXT) \
-	libfirmware_a-spi.$(OBJEXT) libfirmware_a-time.$(OBJEXT) \
-	libfirmware_a-ulink.$(OBJEXT) libfirmware_a-vardir.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3)
+	libfirmware_a-pointer.$(OBJEXT) libfirmware_a-driver.$(OBJEXT) \
+	libfirmware_a-encoder.$(OBJEXT) libfirmware_a-gpio.$(OBJEXT) \
+	libfirmware_a-i2c.$(OBJEXT) libfirmware_a-imu.$(OBJEXT) \
+	libfirmware_a-leds.$(OBJEXT) libfirmware_a-math.$(OBJEXT) \
+	libfirmware_a-serial.$(OBJEXT) libfirmware_a-spi.$(OBJEXT) \
+	libfirmware_a-time.$(OBJEXT) libfirmware_a-ulink.$(OBJEXT) \
+	libfirmware_a-vardir.$(OBJEXT) $(am__objects_1) \
+	$(am__objects_2) $(am__objects_3)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -668,10 +676,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LIBRARIES = libfirmware.a
-libfirmware_a_SOURCES = avl-cmp.c avl.c baro.c can.c console.c \
-	dx_tracker.c driver.c encoder.c gpio.c i2c.c imu.c leds.c \
-	math.c serial.c spi.c time.c ulink.c vardir.c $(am__append_1) \
-	$(am__append_3) $(am__append_5)
+libfirmware_a_SOURCES = adc.c avl-cmp.c avl.c baro.c can.c console.c \
+	display.c dx_tracker.c pointer.c driver.c encoder.c gpio.c \
+	i2c.c imu.c leds.c math.c serial.c spi.c time.c ulink.c \
+	vardir.c $(am__append_1) $(am__append_3) $(am__append_5)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
 	$(am__append_2) $(am__append_4) $(am__append_6)
 AUTOMAKE_OPTIONS = subdir-objects
@@ -746,6 +754,8 @@ linux/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) linux/$(DEPDIR)
 	@: > linux/$(DEPDIR)/$(am__dirstamp)
 linux/libfirmware_a-chip.$(OBJEXT): linux/$(am__dirstamp) \
+	linux/$(DEPDIR)/$(am__dirstamp)
+linux/libfirmware_a-linux_display.$(OBJEXT): linux/$(am__dirstamp) \
 	linux/$(DEPDIR)/$(am__dirstamp)
 linux/libfirmware_a-linux_uart.$(OBJEXT): linux/$(am__dirstamp) \
 	linux/$(DEPDIR)/$(am__dirstamp)
@@ -848,6 +858,8 @@ stm32f10x/$(am__dirstamp):
 stm32f10x/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) stm32f10x/$(DEPDIR)
 	@: > stm32f10x/$(DEPDIR)/$(am__dirstamp)
+stm32f10x/libfirmware_a-stm32_adc.$(OBJEXT):  \
+	stm32f10x/$(am__dirstamp) stm32f10x/$(DEPDIR)/$(am__dirstamp)
 stm32f10x/libfirmware_a-stm32_can.$(OBJEXT):  \
 	stm32f10x/$(am__dirstamp) stm32f10x/$(DEPDIR)/$(am__dirstamp)
 stm32f10x/libfirmware_a-stm32_chip.$(OBJEXT):  \
@@ -914,7 +926,7 @@ freertos/kernel/portable/MemMang/$(am__dirstamp):
 freertos/kernel/portable/MemMang/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) freertos/kernel/portable/MemMang/$(DEPDIR)
 	@: > freertos/kernel/portable/MemMang/$(DEPDIR)/$(am__dirstamp)
-freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT):  \
+freertos/kernel/portable/MemMang/libfirmware_a-heap_2.$(OBJEXT):  \
 	freertos/kernel/portable/MemMang/$(am__dirstamp) \
 	freertos/kernel/portable/MemMang/$(DEPDIR)/$(am__dirstamp)
 freertos/kernel/portable/GCC/ARM_CM3/$(am__dirstamp):
@@ -1073,6 +1085,9 @@ stm32f4xx/libfirmware_a-timestamp.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-watchdog.$(OBJEXT): stm32f4xx/$(am__dirstamp) \
 	stm32f4xx/$(DEPDIR)/$(am__dirstamp)
+freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT):  \
+	freertos/kernel/portable/MemMang/$(am__dirstamp) \
+	freertos/kernel/portable/MemMang/$(DEPDIR)/$(am__dirstamp)
 freertos/kernel/portable/GCC/ARM_CM4F/$(am__dirstamp):
 	@$(MKDIR_P) freertos/kernel/portable/GCC/ARM_CM4F
 	@: > freertos/kernel/portable/GCC/ARM_CM4F/$(am__dirstamp)
@@ -1104,11 +1119,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-adc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-avl-cmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-avl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-baro.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-can.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-console.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-display.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-dx_tracker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-encoder.Po@am__quote@
@@ -1117,6 +1134,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-imu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-math.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-pointer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-serial.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-spi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-time.Po@am__quote@
@@ -1136,8 +1154,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@freertos/kernel/$(DEPDIR)/libfirmware_a-timers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR)/libfirmware_a-port.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR)/libfirmware_a-port.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-chip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-linux_display.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-linux_leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-linux_uart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-linux_udpcan.Po@am__quote@
@@ -1148,6 +1168,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-thread_sem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-thread_work.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@linux/$(DEPDIR)/libfirmware_a-time.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f10x/$(DEPDIR)/libfirmware_a-stm32_can.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f10x/$(DEPDIR)/libfirmware_a-stm32_chip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f10x/$(DEPDIR)/libfirmware_a-stm32_gpio.Po@am__quote@
@@ -1255,6 +1276,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
+libfirmware_a-adc.o: adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-adc.o -MD -MP -MF $(DEPDIR)/libfirmware_a-adc.Tpo -c -o libfirmware_a-adc.o `test -f 'adc.c' || echo '$(srcdir)/'`adc.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-adc.Tpo $(DEPDIR)/libfirmware_a-adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='adc.c' object='libfirmware_a-adc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-adc.o `test -f 'adc.c' || echo '$(srcdir)/'`adc.c
+
+libfirmware_a-adc.obj: adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-adc.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-adc.Tpo -c -o libfirmware_a-adc.obj `if test -f 'adc.c'; then $(CYGPATH_W) 'adc.c'; else $(CYGPATH_W) '$(srcdir)/adc.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-adc.Tpo $(DEPDIR)/libfirmware_a-adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='adc.c' object='libfirmware_a-adc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-adc.obj `if test -f 'adc.c'; then $(CYGPATH_W) 'adc.c'; else $(CYGPATH_W) '$(srcdir)/adc.c'; fi`
+
 libfirmware_a-avl-cmp.o: avl-cmp.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-avl-cmp.o -MD -MP -MF $(DEPDIR)/libfirmware_a-avl-cmp.Tpo -c -o libfirmware_a-avl-cmp.o `test -f 'avl-cmp.c' || echo '$(srcdir)/'`avl-cmp.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-avl-cmp.Tpo $(DEPDIR)/libfirmware_a-avl-cmp.Po
@@ -1325,6 +1360,20 @@ libfirmware_a-console.obj: console.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-console.obj `if test -f 'console.c'; then $(CYGPATH_W) 'console.c'; else $(CYGPATH_W) '$(srcdir)/console.c'; fi`
 
+libfirmware_a-display.o: display.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-display.o -MD -MP -MF $(DEPDIR)/libfirmware_a-display.Tpo -c -o libfirmware_a-display.o `test -f 'display.c' || echo '$(srcdir)/'`display.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-display.Tpo $(DEPDIR)/libfirmware_a-display.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='display.c' object='libfirmware_a-display.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-display.o `test -f 'display.c' || echo '$(srcdir)/'`display.c
+
+libfirmware_a-display.obj: display.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-display.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-display.Tpo -c -o libfirmware_a-display.obj `if test -f 'display.c'; then $(CYGPATH_W) 'display.c'; else $(CYGPATH_W) '$(srcdir)/display.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-display.Tpo $(DEPDIR)/libfirmware_a-display.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='display.c' object='libfirmware_a-display.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-display.obj `if test -f 'display.c'; then $(CYGPATH_W) 'display.c'; else $(CYGPATH_W) '$(srcdir)/display.c'; fi`
+
 libfirmware_a-dx_tracker.o: dx_tracker.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-dx_tracker.o -MD -MP -MF $(DEPDIR)/libfirmware_a-dx_tracker.Tpo -c -o libfirmware_a-dx_tracker.o `test -f 'dx_tracker.c' || echo '$(srcdir)/'`dx_tracker.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-dx_tracker.Tpo $(DEPDIR)/libfirmware_a-dx_tracker.Po
@@ -1338,6 +1387,20 @@ libfirmware_a-dx_tracker.obj: dx_tracker.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dx_tracker.c' object='libfirmware_a-dx_tracker.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-dx_tracker.obj `if test -f 'dx_tracker.c'; then $(CYGPATH_W) 'dx_tracker.c'; else $(CYGPATH_W) '$(srcdir)/dx_tracker.c'; fi`
+
+libfirmware_a-pointer.o: pointer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-pointer.o -MD -MP -MF $(DEPDIR)/libfirmware_a-pointer.Tpo -c -o libfirmware_a-pointer.o `test -f 'pointer.c' || echo '$(srcdir)/'`pointer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-pointer.Tpo $(DEPDIR)/libfirmware_a-pointer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pointer.c' object='libfirmware_a-pointer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-pointer.o `test -f 'pointer.c' || echo '$(srcdir)/'`pointer.c
+
+libfirmware_a-pointer.obj: pointer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-pointer.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-pointer.Tpo -c -o libfirmware_a-pointer.obj `if test -f 'pointer.c'; then $(CYGPATH_W) 'pointer.c'; else $(CYGPATH_W) '$(srcdir)/pointer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-pointer.Tpo $(DEPDIR)/libfirmware_a-pointer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pointer.c' object='libfirmware_a-pointer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-pointer.obj `if test -f 'pointer.c'; then $(CYGPATH_W) 'pointer.c'; else $(CYGPATH_W) '$(srcdir)/pointer.c'; fi`
 
 libfirmware_a-driver.o: driver.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-driver.o -MD -MP -MF $(DEPDIR)/libfirmware_a-driver.Tpo -c -o libfirmware_a-driver.o `test -f 'driver.c' || echo '$(srcdir)/'`driver.c
@@ -1520,6 +1583,20 @@ linux/libfirmware_a-chip.obj: linux/chip.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='linux/chip.c' object='linux/libfirmware_a-chip.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o linux/libfirmware_a-chip.obj `if test -f 'linux/chip.c'; then $(CYGPATH_W) 'linux/chip.c'; else $(CYGPATH_W) '$(srcdir)/linux/chip.c'; fi`
+
+linux/libfirmware_a-linux_display.o: linux/linux_display.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT linux/libfirmware_a-linux_display.o -MD -MP -MF linux/$(DEPDIR)/libfirmware_a-linux_display.Tpo -c -o linux/libfirmware_a-linux_display.o `test -f 'linux/linux_display.c' || echo '$(srcdir)/'`linux/linux_display.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) linux/$(DEPDIR)/libfirmware_a-linux_display.Tpo linux/$(DEPDIR)/libfirmware_a-linux_display.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='linux/linux_display.c' object='linux/libfirmware_a-linux_display.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o linux/libfirmware_a-linux_display.o `test -f 'linux/linux_display.c' || echo '$(srcdir)/'`linux/linux_display.c
+
+linux/libfirmware_a-linux_display.obj: linux/linux_display.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT linux/libfirmware_a-linux_display.obj -MD -MP -MF linux/$(DEPDIR)/libfirmware_a-linux_display.Tpo -c -o linux/libfirmware_a-linux_display.obj `if test -f 'linux/linux_display.c'; then $(CYGPATH_W) 'linux/linux_display.c'; else $(CYGPATH_W) '$(srcdir)/linux/linux_display.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) linux/$(DEPDIR)/libfirmware_a-linux_display.Tpo linux/$(DEPDIR)/libfirmware_a-linux_display.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='linux/linux_display.c' object='linux/libfirmware_a-linux_display.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o linux/libfirmware_a-linux_display.obj `if test -f 'linux/linux_display.c'; then $(CYGPATH_W) 'linux/linux_display.c'; else $(CYGPATH_W) '$(srcdir)/linux/linux_display.c'; fi`
 
 linux/libfirmware_a-linux_uart.o: linux/linux_uart.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT linux/libfirmware_a-linux_uart.o -MD -MP -MF linux/$(DEPDIR)/libfirmware_a-linux_uart.Tpo -c -o linux/libfirmware_a-linux_uart.o `test -f 'linux/linux_uart.c' || echo '$(srcdir)/'`linux/linux_uart.c
@@ -1983,6 +2060,20 @@ stm32f10x/stdperiph/libfirmware_a-stm32f10x_wwdg.obj: stm32f10x/stdperiph/stm32f
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f10x/stdperiph/libfirmware_a-stm32f10x_wwdg.obj `if test -f 'stm32f10x/stdperiph/stm32f10x_wwdg.c'; then $(CYGPATH_W) 'stm32f10x/stdperiph/stm32f10x_wwdg.c'; else $(CYGPATH_W) '$(srcdir)/stm32f10x/stdperiph/stm32f10x_wwdg.c'; fi`
 
+stm32f10x/libfirmware_a-stm32_adc.o: stm32f10x/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f10x/libfirmware_a-stm32_adc.o -MD -MP -MF stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo -c -o stm32f10x/libfirmware_a-stm32_adc.o `test -f 'stm32f10x/stm32_adc.c' || echo '$(srcdir)/'`stm32f10x/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f10x/stm32_adc.c' object='stm32f10x/libfirmware_a-stm32_adc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f10x/libfirmware_a-stm32_adc.o `test -f 'stm32f10x/stm32_adc.c' || echo '$(srcdir)/'`stm32f10x/stm32_adc.c
+
+stm32f10x/libfirmware_a-stm32_adc.obj: stm32f10x/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f10x/libfirmware_a-stm32_adc.obj -MD -MP -MF stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo -c -o stm32f10x/libfirmware_a-stm32_adc.obj `if test -f 'stm32f10x/stm32_adc.c'; then $(CYGPATH_W) 'stm32f10x/stm32_adc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f10x/stm32_adc.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo stm32f10x/$(DEPDIR)/libfirmware_a-stm32_adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f10x/stm32_adc.c' object='stm32f10x/libfirmware_a-stm32_adc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f10x/libfirmware_a-stm32_adc.obj `if test -f 'stm32f10x/stm32_adc.c'; then $(CYGPATH_W) 'stm32f10x/stm32_adc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f10x/stm32_adc.c'; fi`
+
 stm32f10x/libfirmware_a-stm32_can.o: stm32f10x/stm32_can.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f10x/libfirmware_a-stm32_can.o -MD -MP -MF stm32f10x/$(DEPDIR)/libfirmware_a-stm32_can.Tpo -c -o stm32f10x/libfirmware_a-stm32_can.o `test -f 'stm32f10x/stm32_can.c' || echo '$(srcdir)/'`stm32f10x/stm32_can.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f10x/$(DEPDIR)/libfirmware_a-stm32_can.Tpo stm32f10x/$(DEPDIR)/libfirmware_a-stm32_can.Po
@@ -2277,19 +2368,19 @@ freertos/kernel/libfirmware_a-timers.obj: freertos/kernel/timers.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/libfirmware_a-timers.obj `if test -f 'freertos/kernel/timers.c'; then $(CYGPATH_W) 'freertos/kernel/timers.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/timers.c'; fi`
 
-freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o: freertos/kernel/portable/MemMang/heap_3.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o `test -f 'freertos/kernel/portable/MemMang/heap_3.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_3.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_3.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o' libtool=no @AMDEPBACKSLASH@
+freertos/kernel/portable/MemMang/libfirmware_a-heap_2.o: freertos/kernel/portable/MemMang/heap_2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_2.o -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_2.o `test -f 'freertos/kernel/portable/MemMang/heap_2.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_2.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_2.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o `test -f 'freertos/kernel/portable/MemMang/heap_3.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_3.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_2.o `test -f 'freertos/kernel/portable/MemMang/heap_2.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_2.c
 
-freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj: freertos/kernel/portable/MemMang/heap_3.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj `if test -f 'freertos/kernel/portable/MemMang/heap_3.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_3.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_3.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_3.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj' libtool=no @AMDEPBACKSLASH@
+freertos/kernel/portable/MemMang/libfirmware_a-heap_2.obj: freertos/kernel/portable/MemMang/heap_2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_2.obj -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_2.obj `if test -f 'freertos/kernel/portable/MemMang/heap_2.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_2.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_2.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_2.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj `if test -f 'freertos/kernel/portable/MemMang/heap_3.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_3.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_3.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_2.obj `if test -f 'freertos/kernel/portable/MemMang/heap_2.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_2.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_2.c'; fi`
 
 freertos/kernel/portable/GCC/ARM_CM3/libfirmware_a-port.o: freertos/kernel/portable/GCC/ARM_CM3/port.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/GCC/ARM_CM3/libfirmware_a-port.o -MD -MP -MF freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR)/libfirmware_a-port.Tpo -c -o freertos/kernel/portable/GCC/ARM_CM3/libfirmware_a-port.o `test -f 'freertos/kernel/portable/GCC/ARM_CM3/port.c' || echo '$(srcdir)/'`freertos/kernel/portable/GCC/ARM_CM3/port.c
@@ -3004,6 +3095,20 @@ stm32f4xx/libfirmware_a-watchdog.obj: stm32f4xx/watchdog.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/watchdog.c' object='stm32f4xx/libfirmware_a-watchdog.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-watchdog.obj `if test -f 'stm32f4xx/watchdog.c'; then $(CYGPATH_W) 'stm32f4xx/watchdog.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/watchdog.c'; fi`
+
+freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o: freertos/kernel/portable/MemMang/heap_3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o `test -f 'freertos/kernel/portable/MemMang/heap_3.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_3.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_3.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.o `test -f 'freertos/kernel/portable/MemMang/heap_3.c' || echo '$(srcdir)/'`freertos/kernel/portable/MemMang/heap_3.c
+
+freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj: freertos/kernel/portable/MemMang/heap_3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj -MD -MP -MF freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj `if test -f 'freertos/kernel/portable/MemMang/heap_3.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_3.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_3.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Tpo freertos/kernel/portable/MemMang/$(DEPDIR)/libfirmware_a-heap_3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='freertos/kernel/portable/MemMang/heap_3.c' object='freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/MemMang/libfirmware_a-heap_3.obj `if test -f 'freertos/kernel/portable/MemMang/heap_3.c'; then $(CYGPATH_W) 'freertos/kernel/portable/MemMang/heap_3.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/MemMang/heap_3.c'; fi`
 
 freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.o: freertos/kernel/portable/GCC/ARM_CM4F/port.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.o -MD -MP -MF freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR)/libfirmware_a-port.Tpo -c -o freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.o `test -f 'freertos/kernel/portable/GCC/ARM_CM4F/port.c' || echo '$(srcdir)/'`freertos/kernel/portable/GCC/ARM_CM4F/port.c

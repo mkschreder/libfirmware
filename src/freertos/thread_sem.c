@@ -1,5 +1,5 @@
 #include "kernel.h"
-#include <libfirmware/sem.h>
+#include "sem.h"
 
 int thread_sem_init(struct semaphore *self){
 	if((self->sem = xSemaphoreCreateBinary()) == NULL) return -1;
