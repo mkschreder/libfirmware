@@ -268,4 +268,4 @@ static int _stm32_spi_remove(void *fdt, int fdt_node){
 	return 0;
 }
 
-DEVICE_DRIVER("stm32_spi", "st,stm32_spi", _stm32_spi_probe, _stm32_spi_remove);
+DEVICE_DRIVER(stm32_spi, "st,stm32_spi", _stm32_spi_probe, _stm32_spi_remove)

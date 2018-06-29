@@ -21,8 +21,11 @@ AC_ARG_WITH([target],
 AM_CONDITIONAL([WITH_TARGET_LINUX], [test x$with_target = xlinux])
 AM_COND_IF([WITH_TARGET_LINUX], (AC_DEFINE([WITH_TARGET_LINUX], [1], [Build for linux system])))
 
-AM_CONDITIONAL([WITH_TARGET_STM32F429], [test x$with_target = xstm32f4xx])
+AM_CONDITIONAL([WITH_TARGET_STM32F429], [test x$with_target = xstm32f429])
 AM_COND_IF([WITH_TARGET_STM32F429], (AC_DEFINE([WITH_TARGET_STM32F429], [1], [Build for stm32f429 processor])))
+
+AM_CONDITIONAL([WITH_TARGET_STM32F407], [test x$with_target = xstm32f407])
+AM_COND_IF([WITH_TARGET_STM32F407], (AC_DEFINE([WITH_TARGET_STM32F407], [1], [Build for stm32f407 processor])))
 
 AM_CONDITIONAL([WITH_TARGET_STM32F10X], [test x$with_target = xstm32f10x])
 AM_COND_IF([WITH_TARGET_STM32F10X], (AC_DEFINE([WITH_TARGET_STM32F10X], [1], [Build for stm32f10x processor])))

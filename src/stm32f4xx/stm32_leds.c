@@ -84,4 +84,4 @@ static int _stm32_leds_remove(void *fdt, int fdt_node){
     return -1;
 }
 
-DEVICE_DRIVER("stm32_leds", "st,stm32_leds", _stm32_leds_probe, _stm32_leds_remove);
+DEVICE_DRIVER(stm32_leds, "st,stm32_leds", _stm32_leds_probe, _stm32_leds_remove)

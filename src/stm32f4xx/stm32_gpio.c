@@ -43,7 +43,7 @@ void stm32_gpio_pin_set_output_default(struct stm32_gpio_pin *self){
 	gpio.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(self->port, &gpio);
 }
-
+/*
 static int _stm32_gpio_set(gpio_pin_t pin, bool value){
 	struct stm32_gpio_pin *self = container_of(pin, struct stm32_gpio_pin, ops);
 	if(value){
@@ -171,7 +171,7 @@ gpio_pin_t stm32_gpio_pin_init(struct stm32_gpio_pin *self, GPIO_TypeDef *port, 
 	self->pin = pin;
 	return stm32_gpio_pin_get_interface(self);
 }
-
+*/
 
 static inline __attribute__((always_inline)) void _handle_irq(uint32_t lines, struct list_head *list){
 	struct irq *self;
@@ -229,7 +229,9 @@ static int _stm32_gpio_probe(void *fdt, int fdt_node){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
+#ifdef STM32F427_429xx
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+#endif
 
 	int node;
 	fdt_for_each_subnode(node, fdt, fdt_node){
@@ -270,4 +272,4 @@ static int _stm32_gpio_remove(void *fdt, int fdt_node){
     return -1;
 }
 
-DEVICE_DRIVER("stm32_gpio", "st,stm32_gpio", _stm32_gpio_probe, _stm32_gpio_remove);
+DEVICE_DRIVER(stm32_gpio, "st,stm32_gpio", _stm32_gpio_probe, _stm32_gpio_remove)

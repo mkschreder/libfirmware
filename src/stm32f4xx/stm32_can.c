@@ -406,4 +406,4 @@ static int _stm32_can_remove(void *fdt, int fdt_node){
     return -1;
 }
 
-DEVICE_DRIVER("stm32_can", "st,stm32_can", _stm32_can_probe, _stm32_can_remove);
+DEVICE_DRIVER(stm32_can, "st,stm32_can", _stm32_can_probe, _stm32_can_remove)

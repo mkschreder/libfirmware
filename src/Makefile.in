@@ -152,73 +152,10 @@ host_triplet = @host@
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/GCC/ARM_CM3/port.c
 
 @WITH_TARGET_STM32F10X_TRUE@am__append_4 = -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
-@WITH_TARGET_STM32F429_TRUE@am__append_5 = \
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/misc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_adc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_can.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_crc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_cryp.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_cryp_aes.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_cryp_des.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_cryp_tdes.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_dac.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_dbgmcu.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_dcmi.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_dma.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_dma2d.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_exti.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_flash.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_fmc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_fsmc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_gpio.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_hash.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_hash_md5.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_hash_sha1.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_i2c.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_iwdg.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_ltdc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_pwr.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_rcc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_rng.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_rtc.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_sai.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_sdio.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_spi.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_syscfg.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_tim.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_usart.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stdperiph/stm32f4xx_wwdg.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/chip.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/dac.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/debug.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/interrupts.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/pwm.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_can.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_gpio.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_leds.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_pwm_motor.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_spi.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/stm32_uart.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/system.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/system_stm32f4xx.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/timestamp.c\
-@WITH_TARGET_STM32F429_TRUE@    stm32f4xx/watchdog.c \
-@WITH_TARGET_STM32F429_TRUE@	freertos/atomic.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/thread.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/thread_mutex.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/thread_queue.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/thread_sem.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/thread_work.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/croutine.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/event_groups.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/list.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/queue.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/tasks.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/timers.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/MemMang/heap_3.c\
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/GCC/ARM_CM4F/port.c
-
+@WITH_TARGET_STM32F429_TRUE@am__append_5 = $(STM32F4XX_FILES)
 @WITH_TARGET_STM32F429_TRUE@am__append_6 = -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F407_TRUE@am__append_7 = $(STM32F4XX_FILES)
+@WITH_TARGET_STM32F407_TRUE@am__append_8 = -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -343,12 +280,12 @@ am__libfirmware_a_SOURCES_DIST = adc.c avl-cmp.c avl.c baro.c can.c \
 	stm32f4xx/stdperiph/stm32f4xx_usart.c \
 	stm32f4xx/stdperiph/stm32f4xx_wwdg.c stm32f4xx/chip.c \
 	stm32f4xx/dac.c stm32f4xx/debug.c stm32f4xx/interrupts.c \
-	stm32f4xx/pwm.c stm32f4xx/stm32_can.c stm32f4xx/stm32_gpio.c \
-	stm32f4xx/stm32_leds.c stm32f4xx/stm32_pwm_motor.c \
-	stm32f4xx/stm32_spi.c stm32f4xx/stm32_uart.c \
-	stm32f4xx/system.c stm32f4xx/system_stm32f4xx.c \
-	stm32f4xx/timestamp.c stm32f4xx/watchdog.c \
-	freertos/kernel/portable/MemMang/heap_3.c \
+	stm32f4xx/pwm.c stm32f4xx/stm32_adc.c stm32f4xx/stm32_can.c \
+	stm32f4xx/stm32_gpio.c stm32f4xx/stm32_leds.c \
+	stm32f4xx/stm32_pwm_motor.c stm32f4xx/stm32_spi.c \
+	stm32f4xx/stm32_timer.c stm32f4xx/stm32_uart.c \
+	stm32f4xx/system_stm32f4xx.c stm32f4xx/timestamp.c \
+	stm32f4xx/watchdog.c freertos/kernel/portable/MemMang/heap_3.c \
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_LINUX_TRUE@am__objects_1 =  \
@@ -411,70 +348,73 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_2.$(OBJEXT) \
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/GCC/ARM_CM3/libfirmware_a-port.$(OBJEXT)
-@WITH_TARGET_STM32F429_TRUE@am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_adc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_can.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_crc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_aes.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_des.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_tdes.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dac.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dbgmcu.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dcmi.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dma.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dma2d.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_exti.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_flash.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_fmc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_fsmc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_gpio.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash_md5.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash_sha1.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_i2c.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_iwdg.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_ltdc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_pwr.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rcc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rng.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rtc.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_sai.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_sdio.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_spi.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_syscfg.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_tim.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_usart.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_wwdg.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-chip.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-dac.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-debug.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-interrupts.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-pwm.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_can.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_gpio.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_leds.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_spi.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-stm32_uart.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-system.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-system_stm32f4xx.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-timestamp.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	stm32f4xx/libfirmware_a-watchdog.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-atomic.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-thread.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-thread_mutex.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-thread_queue.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-thread_sem.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/libfirmware_a-thread_work.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-croutine.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-event_groups.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-list.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-queue.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-tasks.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT) \
-@WITH_TARGET_STM32F429_TRUE@	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
+am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_adc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_can.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_crc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_aes.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_des.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_cryp_tdes.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dac.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dbgmcu.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dcmi.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dma.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_dma2d.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_exti.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_flash.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_fmc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_fsmc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_gpio.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash_md5.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_hash_sha1.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_i2c.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_iwdg.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_ltdc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_pwr.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rcc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rng.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_rtc.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_sai.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_sdio.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_spi.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_syscfg.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_tim.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_usart.$(OBJEXT) \
+	stm32f4xx/stdperiph/libfirmware_a-stm32f4xx_wwdg.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-chip.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-dac.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-debug.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-interrupts.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-pwm.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_adc.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_can.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_gpio.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_leds.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_spi.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_timer.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_uart.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-system_stm32f4xx.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-timestamp.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-watchdog.$(OBJEXT) \
+	freertos/libfirmware_a-atomic.$(OBJEXT) \
+	freertos/libfirmware_a-thread.$(OBJEXT) \
+	freertos/libfirmware_a-thread_mutex.$(OBJEXT) \
+	freertos/libfirmware_a-thread_queue.$(OBJEXT) \
+	freertos/libfirmware_a-thread_sem.$(OBJEXT) \
+	freertos/libfirmware_a-thread_work.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-croutine.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-event_groups.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-list.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-queue.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-tasks.$(OBJEXT) \
+	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
+	freertos/kernel/portable/MemMang/libfirmware_a-heap_3.$(OBJEXT) \
+	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
+@WITH_TARGET_STM32F429_TRUE@am__objects_4 = $(am__objects_3)
+@WITH_TARGET_STM32F407_TRUE@am__objects_5 = $(am__objects_3)
 am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-avl-cmp.$(OBJEXT) libfirmware_a-avl.$(OBJEXT) \
 	libfirmware_a-baro.$(OBJEXT) libfirmware_a-can.$(OBJEXT) \
@@ -488,7 +428,7 @@ am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-serial.$(OBJEXT) libfirmware_a-spi.$(OBJEXT) \
 	libfirmware_a-time.$(OBJEXT) libfirmware_a-ulink.$(OBJEXT) \
 	libfirmware_a-vardir.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_3)
+	$(am__objects_2) $(am__objects_4) $(am__objects_5)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -679,9 +619,77 @@ lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = adc.c avl-cmp.c avl.c baro.c can.c console.c \
 	display.c dx_tracker.c pointer.c driver.c encoder.c gpio.c \
 	i2c.c imu.c leds.c math.c serial.c spi.c time.c ulink.c \
-	vardir.c $(am__append_1) $(am__append_3) $(am__append_5)
+	vardir.c $(am__append_1) $(am__append_3) $(am__append_5) \
+	$(am__append_7)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
-	$(am__append_2) $(am__append_4) $(am__append_6)
+	$(am__append_2) $(am__append_4) $(am__append_6) \
+	$(am__append_8)
+STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
+    stm32f4xx/stdperiph/stm32f4xx_adc.c\
+    stm32f4xx/stdperiph/stm32f4xx_can.c\
+    stm32f4xx/stdperiph/stm32f4xx_crc.c\
+    stm32f4xx/stdperiph/stm32f4xx_cryp.c\
+    stm32f4xx/stdperiph/stm32f4xx_cryp_aes.c\
+    stm32f4xx/stdperiph/stm32f4xx_cryp_des.c\
+    stm32f4xx/stdperiph/stm32f4xx_cryp_tdes.c\
+    stm32f4xx/stdperiph/stm32f4xx_dac.c\
+    stm32f4xx/stdperiph/stm32f4xx_dbgmcu.c\
+    stm32f4xx/stdperiph/stm32f4xx_dcmi.c\
+    stm32f4xx/stdperiph/stm32f4xx_dma.c\
+    stm32f4xx/stdperiph/stm32f4xx_dma2d.c\
+    stm32f4xx/stdperiph/stm32f4xx_exti.c\
+    stm32f4xx/stdperiph/stm32f4xx_flash.c\
+    stm32f4xx/stdperiph/stm32f4xx_fmc.c\
+    stm32f4xx/stdperiph/stm32f4xx_fsmc.c\
+    stm32f4xx/stdperiph/stm32f4xx_gpio.c\
+    stm32f4xx/stdperiph/stm32f4xx_hash.c\
+    stm32f4xx/stdperiph/stm32f4xx_hash_md5.c\
+    stm32f4xx/stdperiph/stm32f4xx_hash_sha1.c\
+    stm32f4xx/stdperiph/stm32f4xx_i2c.c\
+    stm32f4xx/stdperiph/stm32f4xx_iwdg.c\
+    stm32f4xx/stdperiph/stm32f4xx_ltdc.c\
+    stm32f4xx/stdperiph/stm32f4xx_pwr.c\
+    stm32f4xx/stdperiph/stm32f4xx_rcc.c\
+    stm32f4xx/stdperiph/stm32f4xx_rng.c\
+    stm32f4xx/stdperiph/stm32f4xx_rtc.c\
+    stm32f4xx/stdperiph/stm32f4xx_sai.c\
+    stm32f4xx/stdperiph/stm32f4xx_sdio.c\
+    stm32f4xx/stdperiph/stm32f4xx_spi.c\
+    stm32f4xx/stdperiph/stm32f4xx_syscfg.c\
+    stm32f4xx/stdperiph/stm32f4xx_tim.c\
+    stm32f4xx/stdperiph/stm32f4xx_usart.c\
+    stm32f4xx/stdperiph/stm32f4xx_wwdg.c\
+    stm32f4xx/chip.c\
+    stm32f4xx/dac.c\
+    stm32f4xx/debug.c\
+    stm32f4xx/interrupts.c\
+    stm32f4xx/pwm.c\
+	stm32f4xx/stm32_adc.c\
+    stm32f4xx/stm32_can.c\
+    stm32f4xx/stm32_gpio.c\
+    stm32f4xx/stm32_leds.c\
+    stm32f4xx/stm32_pwm_motor.c\
+    stm32f4xx/stm32_spi.c\
+    stm32f4xx/stm32_timer.c\
+    stm32f4xx/stm32_uart.c\
+    stm32f4xx/system_stm32f4xx.c\
+    stm32f4xx/timestamp.c\
+    stm32f4xx/watchdog.c \
+	freertos/atomic.c\
+	freertos/thread.c\
+	freertos/thread_mutex.c\
+	freertos/thread_queue.c\
+	freertos/thread_sem.c\
+	freertos/thread_work.c\
+	freertos/kernel/croutine.c\
+	freertos/kernel/event_groups.c\
+	freertos/kernel/list.c\
+	freertos/kernel/queue.c\
+	freertos/kernel/tasks.c\
+	freertos/kernel/timers.c\
+	freertos/kernel/portable/MemMang/heap_3.c\
+	freertos/kernel/portable/GCC/ARM_CM4F/port.c
+
 AUTOMAKE_OPTIONS = subdir-objects
 all: all-am
 
@@ -1065,6 +1073,8 @@ stm32f4xx/libfirmware_a-interrupts.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-pwm.$(OBJEXT): stm32f4xx/$(am__dirstamp) \
 	stm32f4xx/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/libfirmware_a-stm32_adc.$(OBJEXT):  \
+	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_can.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_gpio.$(OBJEXT):  \
@@ -1075,10 +1085,10 @@ stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_spi.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/libfirmware_a-stm32_timer.$(OBJEXT):  \
+	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_uart.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
-stm32f4xx/libfirmware_a-system.$(OBJEXT): stm32f4xx/$(am__dirstamp) \
-	stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-system_stm32f4xx.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-timestamp.$(OBJEXT):  \
@@ -1206,13 +1216,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-interrupts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-pwm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_can.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_gpio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_pwm_motor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_spi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-system_stm32f4xx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-timestamp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-watchdog.Po@am__quote@
@@ -2956,6 +2967,20 @@ stm32f4xx/libfirmware_a-pwm.obj: stm32f4xx/pwm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-pwm.obj `if test -f 'stm32f4xx/pwm.c'; then $(CYGPATH_W) 'stm32f4xx/pwm.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/pwm.c'; fi`
 
+stm32f4xx/libfirmware_a-stm32_adc.o: stm32f4xx/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_adc.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo -c -o stm32f4xx/libfirmware_a-stm32_adc.o `test -f 'stm32f4xx/stm32_adc.c' || echo '$(srcdir)/'`stm32f4xx/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_adc.c' object='stm32f4xx/libfirmware_a-stm32_adc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_adc.o `test -f 'stm32f4xx/stm32_adc.c' || echo '$(srcdir)/'`stm32f4xx/stm32_adc.c
+
+stm32f4xx/libfirmware_a-stm32_adc.obj: stm32f4xx/stm32_adc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_adc.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo -c -o stm32f4xx/libfirmware_a-stm32_adc.obj `if test -f 'stm32f4xx/stm32_adc.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_adc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_adc.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_adc.c' object='stm32f4xx/libfirmware_a-stm32_adc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_adc.obj `if test -f 'stm32f4xx/stm32_adc.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_adc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_adc.c'; fi`
+
 stm32f4xx/libfirmware_a-stm32_can.o: stm32f4xx/stm32_can.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_can.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_can.Tpo -c -o stm32f4xx/libfirmware_a-stm32_can.o `test -f 'stm32f4xx/stm32_can.c' || echo '$(srcdir)/'`stm32f4xx/stm32_can.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_can.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_can.Po
@@ -3026,6 +3051,20 @@ stm32f4xx/libfirmware_a-stm32_spi.obj: stm32f4xx/stm32_spi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_spi.obj `if test -f 'stm32f4xx/stm32_spi.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_spi.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_spi.c'; fi`
 
+stm32f4xx/libfirmware_a-stm32_timer.o: stm32f4xx/stm32_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_timer.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo -c -o stm32f4xx/libfirmware_a-stm32_timer.o `test -f 'stm32f4xx/stm32_timer.c' || echo '$(srcdir)/'`stm32f4xx/stm32_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_timer.c' object='stm32f4xx/libfirmware_a-stm32_timer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_timer.o `test -f 'stm32f4xx/stm32_timer.c' || echo '$(srcdir)/'`stm32f4xx/stm32_timer.c
+
+stm32f4xx/libfirmware_a-stm32_timer.obj: stm32f4xx/stm32_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_timer.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo -c -o stm32f4xx/libfirmware_a-stm32_timer.obj `if test -f 'stm32f4xx/stm32_timer.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_timer.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_timer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_timer.c' object='stm32f4xx/libfirmware_a-stm32_timer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_timer.obj `if test -f 'stm32f4xx/stm32_timer.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_timer.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_timer.c'; fi`
+
 stm32f4xx/libfirmware_a-stm32_uart.o: stm32f4xx/stm32_uart.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_uart.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Tpo -c -o stm32f4xx/libfirmware_a-stm32_uart.o `test -f 'stm32f4xx/stm32_uart.c' || echo '$(srcdir)/'`stm32f4xx/stm32_uart.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Po
@@ -3039,20 +3078,6 @@ stm32f4xx/libfirmware_a-stm32_uart.obj: stm32f4xx/stm32_uart.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_uart.c' object='stm32f4xx/libfirmware_a-stm32_uart.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_uart.obj `if test -f 'stm32f4xx/stm32_uart.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_uart.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_uart.c'; fi`
-
-stm32f4xx/libfirmware_a-system.o: stm32f4xx/system.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-system.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-system.Tpo -c -o stm32f4xx/libfirmware_a-system.o `test -f 'stm32f4xx/system.c' || echo '$(srcdir)/'`stm32f4xx/system.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-system.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-system.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/system.c' object='stm32f4xx/libfirmware_a-system.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-system.o `test -f 'stm32f4xx/system.c' || echo '$(srcdir)/'`stm32f4xx/system.c
-
-stm32f4xx/libfirmware_a-system.obj: stm32f4xx/system.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-system.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-system.Tpo -c -o stm32f4xx/libfirmware_a-system.obj `if test -f 'stm32f4xx/system.c'; then $(CYGPATH_W) 'stm32f4xx/system.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/system.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-system.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-system.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/system.c' object='stm32f4xx/libfirmware_a-system.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-system.obj `if test -f 'stm32f4xx/system.c'; then $(CYGPATH_W) 'stm32f4xx/system.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/system.c'; fi`
 
 stm32f4xx/libfirmware_a-system_stm32f4xx.o: stm32f4xx/system_stm32f4xx.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-system_stm32f4xx.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-system_stm32f4xx.Tpo -c -o stm32f4xx/libfirmware_a-system_stm32f4xx.o `test -f 'stm32f4xx/system_stm32f4xx.c' || echo '$(srcdir)/'`stm32f4xx/system_stm32f4xx.c

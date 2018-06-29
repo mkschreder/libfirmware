@@ -166,8 +166,8 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/libfirmware.pc.in \
 	$(top_srcdir)/aux-dist/ltmain.sh \
 	$(top_srcdir)/aux-dist/missing AUTHORS COPYING ChangeLog \
 	INSTALL NEWS README aux-dist/compile aux-dist/config.guess \
-	aux-dist/config.sub aux-dist/depcomp aux-dist/install-sh \
-	aux-dist/ltmain.sh aux-dist/missing
+	aux-dist/config.sub aux-dist/install-sh aux-dist/ltmain.sh \
+	aux-dist/missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)

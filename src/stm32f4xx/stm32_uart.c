@@ -171,8 +171,8 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 
 	serial_device_init(&self->dev, fdt_node, &_serial_ops);
 
-    thread_queue_init(&self->tx_queue, tx_queue, sizeof(char));
-    thread_queue_init(&self->rx_queue, rx_queue, sizeof(char));
+    thread_queue_init(&self->tx_queue, (size_t)tx_queue, sizeof(char));
+    thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char));
 
 	self->hw = UARTx;
 	_uart_ptr[idx - 1] = self;
@@ -217,4 +217,4 @@ static int _stm32_uart_remove(void *fdt, int fdt_node){
     return -1;
 }
 
-DEVICE_DRIVER("stm32_uart", "st,stm32_uart", _stm32_uart_probe, _stm32_uart_remove);
+DEVICE_DRIVER(stm32_uart, "st,stm32_uart", _stm32_uart_probe, _stm32_uart_remove)

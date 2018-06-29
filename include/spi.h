@@ -33,10 +33,10 @@ struct spi_transfer {
 };
 
 struct spi_device_ops {
-	int (*transfer)(spi_device_t spi, int cs, const void *tx_buf, void *rx_buf, size_t len, uint32_t to);
+	int (*transfer)(spi_device_t spi, const void *tx_buf, void *rx_buf, size_t len, uint32_t to);
 };
 
-#define spi_transfer(spi, cs, tx, rx, sz, to) (*(spi))->transfer(spi, cs, tx, rx, sz, to)
+#define spi_transfer(spi, tx, rx, sz, to) (*(spi))->transfer(spi, tx, rx, sz, to)
 //#define spi_sync(spi, ts) (*(spi))->transfer(spi, ts)
 
 struct spi_device {

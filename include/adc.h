@@ -24,7 +24,8 @@
 typedef const struct adc_device_ops ** adc_device_t;
 
 struct adc_device_ops {
-    int (*read)(adc_device_t dev, int channel);
+    int (*trigger)(adc_device_t dev);
+    int (*read)(adc_device_t dev, unsigned int channel, int16_t *value);
 };
 
 struct adc_device {
@@ -39,4 +40,5 @@ adc_device_t adc_find(const char *dtb_path);
 adc_device_t adc_find_by_node(void *fdt, int node);
 
 #define adc_read(dev, channel) (*(dev))->read(dev, channel)
+#define adc_trigger(dev) (*(dev))->trigger(dev)
 

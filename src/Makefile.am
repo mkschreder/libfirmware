@@ -91,9 +91,7 @@ libfirmware_a_SOURCES += \
 libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
 endif
 
-if WITH_TARGET_STM32F429
-libfirmware_a_SOURCES += \
-    stm32f4xx/stdperiph/misc.c\
+STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stdperiph/stm32f4xx_adc.c\
     stm32f4xx/stdperiph/stm32f4xx_can.c\
     stm32f4xx/stdperiph/stm32f4xx_crc.c\
@@ -133,13 +131,14 @@ libfirmware_a_SOURCES += \
     stm32f4xx/debug.c\
     stm32f4xx/interrupts.c\
     stm32f4xx/pwm.c\
+	stm32f4xx/stm32_adc.c\
     stm32f4xx/stm32_can.c\
     stm32f4xx/stm32_gpio.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
     stm32f4xx/stm32_spi.c\
+    stm32f4xx/stm32_timer.c\
     stm32f4xx/stm32_uart.c\
-    stm32f4xx/system.c\
     stm32f4xx/system_stm32f4xx.c\
     stm32f4xx/timestamp.c\
     stm32f4xx/watchdog.c \
@@ -157,7 +156,15 @@ libfirmware_a_SOURCES += \
 	freertos/kernel/timers.c\
 	freertos/kernel/portable/MemMang/heap_3.c\
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
+
+if WITH_TARGET_STM32F429
+libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+endif
+
+if WITH_TARGET_STM32F407
+libfirmware_a_SOURCES += $(STM32F4XX_FILES)
+libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 endif
 
 AUTOMAKE_OPTIONS = subdir-objects

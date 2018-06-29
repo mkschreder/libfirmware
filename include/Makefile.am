@@ -10,6 +10,7 @@ pkginclude_HEADERS = atomic.h \
     driver.h\
     eeprom.h\
     encoder.h\
+	dx_tracker.h\
     gpio.h\
 	i2c.h\
 	imu.h\
