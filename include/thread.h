@@ -55,3 +55,7 @@ void* kzmalloc(size_t size);
 void kfree(void *ptr);
 
 void thread_meminfo();
+
+unsigned long thread_get_free_heap();
+unsigned long thread_get_total_heap();
+ 

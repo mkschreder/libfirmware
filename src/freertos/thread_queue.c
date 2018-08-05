@@ -3,7 +3,8 @@
 
 int thread_queue_init(struct thread_queue *queue, size_t elems, size_t elem_size){
 	queue->handle = xQueueCreate(elems, elem_size);
-	return !!queue->handle;
+	if(!queue->handle) return -1;
+    return 0;
 }
 
 int thread_queue_send(struct thread_queue *self, const void *data, uint32_t tout_ms){

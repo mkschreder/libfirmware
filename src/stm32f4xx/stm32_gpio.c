@@ -11,9 +11,14 @@
 #include "gpio.h"
 
 struct stm32_gpio_pin {
-	GPIO_TypeDef *port;
-	uint16_t pin;
-	const struct gpio_pin_ops *ops;
+    GPIO_TypeDef *gpio;
+    uint16_t pin;
+};
+
+struct stm32_gpio {
+    struct gpio_device dev;
+    struct stm32_gpio_pin *pins;
+    uint8_t npins;
 };
 
 static LIST_HEAD(ext0_list);
@@ -24,25 +29,6 @@ static LIST_HEAD(ext4_list);
 static LIST_HEAD(ext9_5_list);
 static LIST_HEAD(ext15_10_list);
 
-void stm32_gpio_pin_set_input_default(struct stm32_gpio_pin *self){
-	GPIO_InitTypeDef gpio;
-	gpio.GPIO_Pin = self->pin;
-	gpio.GPIO_OType = GPIO_OType_PP;
-	gpio.GPIO_PuPd = GPIO_PuPd_UP;
-	gpio.GPIO_Mode = GPIO_Mode_IN;
-	gpio.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(self->port, &gpio);
-}
-
-void stm32_gpio_pin_set_output_default(struct stm32_gpio_pin *self){
-	GPIO_InitTypeDef gpio;
-	gpio.GPIO_Pin = self->pin;
-	gpio.GPIO_Mode = GPIO_Mode_OUT;
-	gpio.GPIO_OType = GPIO_OType_PP;
-	gpio.GPIO_Speed = GPIO_Speed_50MHz;
-	gpio.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(self->port, &gpio);
-}
 /*
 static int _stm32_gpio_set(gpio_pin_t pin, bool value){
 	struct stm32_gpio_pin *self = container_of(pin, struct stm32_gpio_pin, ops);
@@ -221,6 +207,72 @@ void EXTI15_10_IRQHandler(void){
 	_handle_irq(EXTI_Line10 | EXTI_Line11 | EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15, &ext15_10_list);
 }
 
+static int _stm32_gpio_write_pin(gpio_device_t dev, uint32_t pin, bool value){
+    struct stm32_gpio *self = container_of(dev, struct stm32_gpio, dev.ops);
+    if(pin >= self->npins) return -EINVAL;
+    if(value){
+        GPIO_SetBits(self->pins[pin].gpio, self->pins[pin].pin);
+    } else {
+        GPIO_ResetBits(self->pins[pin].gpio, self->pins[pin].pin);
+    }
+    return 0;
+}
+
+static int _stm32_gpio_read_pin(gpio_device_t dev, uint32_t pin, bool *value){
+    struct stm32_gpio *self = container_of(dev, struct stm32_gpio, dev.ops);
+    if(pin >= self->npins) return -EINVAL;
+    *value = !!GPIO_ReadInputDataBit(self->pins[pin].gpio, self->pins[pin].pin);
+    return 0;
+}
+
+static const struct gpio_device_ops _gpio_ops = {
+    .read_pin = _stm32_gpio_read_pin,
+    .write_pin = _stm32_gpio_write_pin
+};
+
+static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
+    int len = 0;
+    const fdt32_t *val = (const fdt32_t*)fdt_getprop(fdt, fdt_node, "pinctrl", &len);
+
+    if(len == 0 || !val) return -1;
+
+    int pin_count = (uint8_t)(len / 4 / 3);
+
+    struct stm32_gpio *self = kzmalloc(sizeof(struct stm32_gpio));
+    if(!self) return -ENOMEM;
+
+    self->pins = kzmalloc(sizeof(struct stm32_gpio_pin) * (unsigned)pin_count);
+    if(!self->pins) return -ENOMEM;
+
+    gpio_device_init(&self->dev, fdt_node, &_gpio_ops);
+    self->npins = (uint8_t)pin_count;
+
+    for(int c = 0; c < pin_count; c++){
+        const fdt32_t *base = val + (3 * c);
+        GPIO_TypeDef *GPIOx = (GPIO_TypeDef*)fdt32_to_cpu(*(base));
+        uint16_t pin = (uint16_t)fdt32_to_cpu(*(base + 1));
+        uint32_t opts = (uint32_t)fdt32_to_cpu(*(base + 2));
+
+        GPIO_InitTypeDef gpio;
+        GPIO_StructInit(&gpio);
+        gpio.GPIO_Pin = pin;
+        gpio.GPIO_Mode = (opts >> 4) & 0x3;
+        gpio.GPIO_OType = (opts >> 6) & 0x1;
+        gpio.GPIO_Speed = (opts >> 7) & 0x3;
+        gpio.GPIO_PuPd = (opts >> 9) & 0x3;
+        GPIO_Init(GPIOx, &gpio);
+
+        uint16_t idx = (uint16_t)ffs(pin);
+        if(gpio.GPIO_Mode == GPIO_Mode_AF && idx != 0){
+            GPIO_PinAFConfig(GPIOx, (uint16_t)(idx - 1), (opts & 0xf));
+        }
+    }
+
+    gpio_device_register(&self->dev);
+    dbg_printk("gpio %s: ok, %d pins\n", fdt_get_name(fdt, fdt_node, NULL), pin_count);
+    return 0;
+}
+
 static int _stm32_gpio_probe(void *fdt, int fdt_node){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -229,39 +281,22 @@ static int _stm32_gpio_probe(void *fdt, int fdt_node){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
-#ifdef STM32F427_429xx
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-#endif
 
+    // check if we directly have a pinmux here
+    int len = 0;
+	const fdt32_t *val = (const fdt32_t*)fdt_getprop(fdt, fdt_node, "pinctrl", &len);
+    if(val && len > 0){
+        if(_stm32_gpio_setup_subnode(fdt, fdt_node) < 0){
+            return -1;
+        }
+    }
+
+    // otherwise scan all children
 	int node;
 	fdt_for_each_subnode(node, fdt, fdt_node){
-		int len = 0;
-		const fdt32_t *val = (const fdt32_t*)fdt_getprop(fdt, node, "pinctrl", &len);
-
-		if(len == 0 || !val) continue;
-
-		int pin_count = (uint8_t)(len / 4 / 3);
-
-		for(int c = 0; c < pin_count; c++){
-			const fdt32_t *base = val + (3 * c);
-			GPIO_TypeDef *GPIOx = (GPIO_TypeDef*)fdt32_to_cpu(*(base));
-			uint16_t pin = (uint16_t)fdt32_to_cpu(*(base + 1));
-			uint32_t opts = (uint32_t)fdt32_to_cpu(*(base + 2));
-
-			GPIO_InitTypeDef gpio;
-			GPIO_StructInit(&gpio);
-			gpio.GPIO_Pin = pin;
-			gpio.GPIO_Mode = (opts >> 4) & 0x3;
-			gpio.GPIO_OType = (opts >> 6) & 0x1;
-			gpio.GPIO_Speed = (opts >> 7) & 0x3;
-			gpio.GPIO_PuPd = (opts >> 9) & 0x3;
-			GPIO_Init(GPIOx, &gpio);
-
-			uint16_t idx = (uint16_t)ffs(pin);
-			if(gpio.GPIO_Mode == GPIO_Mode_AF && idx != 0){
-				GPIO_PinAFConfig(GPIOx, (uint16_t)(idx - 1), (opts & 0xf));
-			}
-		}
+        if(_stm32_gpio_setup_subnode(fdt, node) < 0){
+            return -1;
+        }
 	}
 
 	return 0;

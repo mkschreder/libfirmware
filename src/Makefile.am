@@ -64,6 +64,17 @@ libfirmware_a_SOURCES += \
     stm32f10x/stdperiph/stm32f10x_tim.c\
     stm32f10x/stdperiph/stm32f10x_usart.c\
     stm32f10x/stdperiph/stm32f10x_wwdg.c\
+    stm32f10x/usb-fs-core/usb_core.c\
+    stm32f10x/usb-fs-core/usb_desc.c\
+    stm32f10x/usb-fs-core/usb_endp.c\
+    stm32f10x/usb-fs-core/usb_init.c\
+    stm32f10x/usb-fs-core/usb_int.c\
+    stm32f10x/usb-fs-core/usb_istr.c\
+    stm32f10x/usb-fs-core/usb_mem.c\
+    stm32f10x/usb-fs-core/usb_prop.c\
+    stm32f10x/usb-fs-core/usb_pwr.c\
+    stm32f10x/usb-fs-core/usb_regs.c\
+    stm32f10x/usb-fs-core/usb_sil.c\
     stm32f10x/stm32_adc.c\
     stm32f10x/stm32_can.c\
     stm32f10x/stm32_chip.c\
@@ -72,6 +83,7 @@ libfirmware_a_SOURCES += \
     stm32f10x/stm32_leds.c\
     stm32f10x/stm32_spi.c\
     stm32f10x/stm32_uart.c\
+    stm32f10x/stm32_usb.c\
     stm32f10x/system_stm32f10x.c\
     stm32f10x/timestamp.c\
 	freertos/atomic.c\
@@ -86,7 +98,7 @@ libfirmware_a_SOURCES += \
 	freertos/kernel/queue.c\
 	freertos/kernel/tasks.c\
 	freertos/kernel/timers.c\
-	freertos/kernel/portable/MemMang/heap_2.c\
+	freertos/kernel/portable/MemMang/heap_1.c\
 	freertos/kernel/portable/GCC/ARM_CM3/port.c
 libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
 endif
@@ -154,7 +166,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
 	freertos/kernel/queue.c\
 	freertos/kernel/tasks.c\
 	freertos/kernel/timers.c\
-	freertos/kernel/portable/MemMang/heap_3.c\
+	freertos/kernel/portable/MemMang/heap_2.c\
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
 
 if WITH_TARGET_STM32F429

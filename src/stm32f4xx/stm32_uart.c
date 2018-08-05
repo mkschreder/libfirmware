@@ -171,8 +171,10 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 
 	serial_device_init(&self->dev, fdt_node, &_serial_ops);
 
-    thread_queue_init(&self->tx_queue, (size_t)tx_queue, sizeof(char));
-    thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char));
+    bool uart_queue_alloc_fail = (thread_queue_init(&self->tx_queue, (size_t)tx_queue, sizeof(char)) < 0 ||
+        thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char)) < 0);
+
+    BUG_ON(uart_queue_alloc_fail);
 
 	self->hw = UARTx;
 	_uart_ptr[idx - 1] = self;
@@ -189,7 +191,6 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	conf.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	conf.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 	USART_Init(UARTx, &conf);
-	(void)irq;
 
 	if(irq > 0){
 		NVIC_InitTypeDef nvic;

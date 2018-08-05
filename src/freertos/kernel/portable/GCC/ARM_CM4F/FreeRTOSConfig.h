@@ -84,14 +84,6 @@
 /* Ensure stdint is only used by the compiler, and not the assembler. */
 //#ifdef __ICCARM__
 #include <stdint.h>
-#if 0
-#ifdef STM32F4XX
-	#include <system_stm32f4xx.h>
-#elif defined(STM32F10X)
-	#include <system_stm32f10x.h>
-#endif
-	//extern uint32_t SystemCoreClock;
-#endif
 
 #include "system_stm32f4xx.h"
 

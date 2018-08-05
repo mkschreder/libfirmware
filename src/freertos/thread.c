@@ -75,8 +75,20 @@ void kfree(void *ptr){
 	vPortFree(ptr);
 }
 
+unsigned long thread_get_free_heap(){
+    return xPortGetFreeHeapSize();
+}
+
+unsigned long thread_get_total_heap(){
+    return configTOTAL_HEAP_SIZE;
+}
+
 void vApplicationStackOverflowHook(void){
-	panic("Stack overflow!");
+	panic("SOVF");
+}
+
+void vApplicationMallocFailedHook(void){
+    panic("NOMEM");
 }
 
 // TODO: get rid of this ugliness
@@ -89,7 +101,7 @@ static int _compare_tasks(const void *a, const void *b){
 void thread_meminfo(){
     #define CONSOLE_MAX_PS_TASKS 8
 	// realtime tasks
-	TaskStatus_t status[CONSOLE_MAX_PS_TASKS];
+	static TaskStatus_t status[CONSOLE_MAX_PS_TASKS];
 	static TaskStatus_t prev_status[CONSOLE_MAX_PS_TASKS];
 	memset(status, 0, sizeof(status));
 	uint32_t total_time;

@@ -44,5 +44,6 @@ extern unsigned char _devicetree[];
 // this is defined to use the default uart once it has been initialized
 // this function is defined in serial.c but placed here because it is very often used in device drivers
 int printk(const char *fmt, ...);
+int printk_isr(const char *fmt, ...);
 #define dbg_printk printk
 #define no_printk(...) do {} while(0)
