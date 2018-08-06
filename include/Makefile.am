@@ -34,4 +34,6 @@ pkginclude_HEADERS = atomic.h \
     types.h\
     ulink.h\
     vardir.h\
+	usb.h\
+	usb_cdc.h\
     work.h

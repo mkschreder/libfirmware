@@ -1,24 +1,31 @@
+/**
+ * This is a usb interface driver for the HS and FS device side interface. In
+ * unconfigured state the interface is started with NAK on both TX and RX lines
+ * on all endpoints. The interface needs to be configured with callbacks and
+ * descriptors using a specific interface device driver which will handle
+ * communication with the host.
+ */
+
+#include <errno.h>
+
 #include <stm32f10x.h>
 #include <stm32f10x_exti.h>
 #include <stm32f10x_rcc.h>
-//#include "usb-fs-core/usb_lib.h"
-//#include "usb-fs-core/usb_istr.h"
-#include "driver.h"
 
-#define EPCOUNT 4
+#include <libfdt/libfdt.h>
+
+#include "driver.h"
+#include "serial.h"
+#include "queue.h"
+#include "usb.h"
+
 #define USB_BASE ((uint32_t)0x40005C00)
 #define USB_PBUFFER ((uint32_t)0x40006000)
 #define STRX 12
 #define STTX 4
 #define CTR_RX 0x8000
 #define CTR_TX 0x80
-#define CDC_CMD_PACKET_SIZE 8          /* Control Endpoint Packet size */
-#define CDC_DATA_FS_CMD_PACKET_SIZE 16 /* Endpoint IN & OUT Packet size */
-#define CDC_DATA_FS_MAX_PACKET_SIZE 64 /* Endpoint IN & OUT Packet size */
 #define LANG_US (uint16_t)0x0409
-
-#define DEVICE_VENDOR_ID 0x25AE
-#define DEVICE_PRODUCT_ID 0x24AB
 #define STRING_DT 3
 
 /* EPxREG: EndPoint Registers Bit Definitions */
@@ -71,123 +78,6 @@
 #define USB_REQUEST_SET_INTERFACE 11
 #define USB_REQUEST_SYNC_FRAME 12
 
-/* USB Descriptor Types */
-#define USB_DEVICE_DESC_TYPE 1
-#define USB_CFG_DESC_TYPE 2
-#define USB_STR_DESC_TYPE 3
-#define USB_IFACE_DESC_TYPE 4
-#define USB_EP_DESC_TYPE 5
-#define USB_DEVICE_QR_DESC_TYPE 6
-#define USB_OSPEED_CFG_DESC_TYPE 7
-#define USB_IFACE_PWR_DESC_TYPE 8
-/* USB Device Classes */
-#define USB_RESERVED 0x00
-#define USB_AUDIO 0x01
-#define USB_COMM 0x02
-#define USB_HID 0x03
-#define USB_MONITOR 0x04
-#define USB_PHYSIC 0x05
-#define USB_POWER 0x06
-#define USB_PRINTER 0x07
-#define USB_STORAGE 0x08
-#define USB_HUB 0x09
-#define USB_VENDOR_SPEC 0xFF
-/* Interface Class SubClass Codes */
-#define USB_ACM_COMM 0x02
-
-#define CDC_DATA_IFACE 0x0A
-#define CS_INTERFACE 0x24
-#define CS_ENDPOINT 0x25
-
-/* CDC */
-#define USB_CDC_CONFIG_DESC_SIZ 67
-#define CDC_CMD_EP 0x81 /* EP2 for CDC commands */
-#define CDC_IN_EP 0x82  /* EP1 for data IN */
-#define CDC_OUT_EP 0x02 /* EP1 for data OUT */
-
-#define USB_DEVICE_CDC_REQUEST_SEND_ENCAPSULATED_COMMAND \
-    (0x00) /*!< The CDC class request code for SEND_ENCAPSULATED_COMMAND. */
-#define USB_DEVICE_CDC_REQUEST_GET_ENCAPSULATED_RESPONSE \
-    (0x01)                                               /*!< The CDC class request code for GET_ENCAPSULATED_RESPONSE. */
-#define USB_DEVICE_CDC_REQUEST_SET_COMM_FEATURE (0x02)   /*!< The CDC class request code for SET_COMM_FEATURE. */
-#define USB_DEVICE_CDC_REQUEST_GET_COMM_FEATURE (0x03)   /*!< The CDC class request code for GET_COMM_FEATURE. */
-#define USB_DEVICE_CDC_REQUEST_CLEAR_COMM_FEATURE (0x04) /*!< The CDC class request code for CLEAR_COMM_FEATURE. */
-#define USB_DEVICE_CDC_REQUEST_SET_AUX_LINE_STATE (0x10) /*!< The CDC class request code for SET_AUX_LINE_STATE. */
-#define USB_DEVICE_CDC_REQUEST_SET_HOOK_STATE (0x11)     /*!< The CDC class request code for SET_HOOK_STATE. */
-#define USB_DEVICE_CDC_REQUEST_PULSE_SETUP (0x12)        /*!< The CDC class request code for PULSE_SETUP. */
-#define USB_DEVICE_CDC_REQUEST_SEND_PULSE (0x13)         /*!< The CDC class request code for SEND_PULSE. */
-#define USB_DEVICE_CDC_REQUEST_SET_PULSE_TIME (0x14)     /*!< The CDC class request code for SET_PULSE_TIME. */
-#define USB_DEVICE_CDC_REQUEST_RING_AUX_JACK (0x15)      /*!< The CDC class request code for RING_AUX_JACK. */
-#define USB_DEVICE_CDC_REQUEST_SET_LINE_CODING (0x20)    /*!< The CDC class request code for SET_LINE_CODING. */
-#define USB_DEVICE_CDC_REQUEST_GET_LINE_CODING (0x21)    /*!< The CDC class request code for GET_LINE_CODING. */
-#define USB_DEVICE_CDC_REQUEST_SET_CONTROL_LINE_STATE \
-    (0x22)                                                /*!< The CDC class request code for SET_CONTROL_LINE_STATE. */
-#define USB_DEVICE_CDC_REQUEST_SEND_BREAK (0x23)          /*!< The CDC class request code for SEND_BREAK. */
-#define USB_DEVICE_CDC_REQUEST_SET_RINGER_PARAMS (0x30)   /*!< The CDC class request code for SET_RINGER_PARAMS. */
-#define USB_DEVICE_CDC_REQUEST_GET_RINGER_PARAMS (0x31)   /*!< The CDC class request code for GET_RINGER_PARAMS. */
-#define USB_DEVICE_CDC_REQUEST_SET_OPERATION_PARAM (0x32) /*!< The CDC class request code for SET_OPERATION_PARAM. */
-#define USB_DEVICE_CDC_REQUEST_GET_OPERATION_PARAM (0x33) /*!< The CDC class request code for GET_OPERATION_PARAM. */
-#define USB_DEVICE_CDC_REQUEST_SET_LINE_PARAMS (0x34)     /*!< The CDC class request code for SET_LINE_PARAMS. */
-#define USB_DEVICE_CDC_REQUEST_GET_LINE_PARAMS (0x35)     /*!< The CDC class request code for GET_LINE_PARAMS. */
-#define USB_DEVICE_CDC_REQUEST_DIAL_DIGITS (0x36)         /*!< The CDC class request code for DIAL_DIGITS. */
-#define USB_DEVICE_CDC_REQUEST_SET_UNIT_PARAMETER (0x37)  /*!< The CDC class request code for SET_UNIT_PARAMETER. */
-#define USB_DEVICE_CDC_REQUEST_GET_UNIT_PARAMETER (0x38)  /*!< The CDC class request code for GET_UNIT_PARAMETER. */
-#define USB_DEVICE_CDC_REQUEST_CLEAR_UNIT_PARAMETER \
-    (0x39) /*!< The CDC class request code for CLEAR_UNIT_PARAMETER. */
-#define USB_DEVICE_CDC_REQUEST_SET_ETHERNET_MULTICAST_FILTERS \
-    (0x40) /*!< The CDC class request code for SET_ETHERNET_MULTICAST_FILTERS. */
-#define USB_DEVICE_CDC_REQUEST_SET_ETHERNET_POW_PATTER_FILTER \
-    (0x41) /*!< The CDC class request code for SET_ETHERNET_POW_PATTER_FILTER. */
-#define USB_DEVICE_CDC_REQUEST_GET_ETHERNET_POW_PATTER_FILTER \
-    (0x42) /*!< The CDC class request code for GET_ETHERNET_POW_PATTER_FILTER. */
-#define USB_DEVICE_CDC_REQUEST_SET_ETHERNET_PACKET_FILTER \
-    (0x43) /*!< The CDC class request code for SET_ETHERNET_PACKET_FILTER. */
-#define USB_DEVICE_CDC_REQUEST_GET_ETHERNET_STATISTIC \
-    (0x44)                                                /*!< The CDC class request code for GET_ETHERNET_STATISTIC. */
-#define USB_DEVICE_CDC_REQUEST_SET_ATM_DATA_FORMAT (0x50) /*!< The CDC class request code for SET_ATM_DATA_FORMAT. */
-#define USB_DEVICE_CDC_REQUEST_GET_ATM_DEVICE_STATISTICS \
-    (0x51)                                               /*!< The CDC class request code for GET_ATM_DEVICE_STATISTICS. */
-#define USB_DEVICE_CDC_REQUEST_SET_ATM_DEFAULT_VC (0x52) /*!< The CDC class request code for SET_ATM_DEFAULT_VC. */
-#define USB_DEVICE_CDC_REQUEST_GET_ATM_VC_STATISTICS \
-    (0x53) /*!< The CDC class request code for GET_ATM_VC_STATISTICS. */
-#define USB_DEVICE_CDC_REQUEST_MDLM_SPECIFIC_REQUESTS_MASK \
-    (0x7F) /*!< The CDC class request code for MDLM_SPECIFIC_REQUESTS_MASK. */
-
-//#define RXCNT(bsize, nblock) (uint16_t)(((bsize & 1) << 15) | ((nblock / 2 & 0x1F) << 10))
-#define LOBYTE(x) ((uint8_t)(x & 0x00FF))
-#define HIBYTE(x) ((uint8_t)((x & 0xFF00) >> 8))
-
-#define LOG_LENGTH 50
-#define LOG_DATA_LENGTH 10
-#define LOG_OP_RESET 1
-#define LOG_OP_GET_DESC_RX 2
-#define LOG_OP_GET_DESC_TX 3
-#define LOG_OP_GET_STATUS_TX 4
-#define LOG_OP_SET_ADDRESS_RX 5
-#define LOG_OP_GET_CLASS_DATA 6
-
-typedef struct __packed _USB_STRING_DESCRIPTOR_ {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-} USB_STR_DESCRIPTOR;
-
-typedef struct __packed _USB_DEVICE_DESCRIPTOR_ {
-    uint8_t  bLength;
-    uint8_t  bDescriptorType;
-    uint16_t bcdUSB;
-    uint8_t  bDeviceClass;
-    uint8_t  bDeviceSubClass;
-    uint8_t  bDeviceProtocol;
-    uint8_t  bMaxPacketSize0;
-    uint16_t idVendor;
-    uint16_t idProduct;
-    uint16_t bcdDevice;
-    uint8_t  iManufacturer;
-    uint8_t  iProduct;
-    uint8_t  iSerialNumber;
-    uint8_t  bNumConfigurations;
-} USB_DEVICE_DESCRIPTOR;
-
 typedef struct __packed {
     uint32_t EPR[8];
     uint32_t RESERVED[8];
@@ -201,14 +91,14 @@ typedef struct __packed {
 typedef struct __packed {
     uint16_t Value;
     uint16_t _res;
-} USBLIB_PBElement;
+} USB_BufferDescElem;
 
 typedef struct __packed {
-    USBLIB_PBElement TX_Address;
-    USBLIB_PBElement TX_Count;
-    USBLIB_PBElement RX_Address;
-    USBLIB_PBElement RX_Count;
-} USBLIB_EPBuf;
+    USB_BufferDescElem TX_Address;
+    USB_BufferDescElem TX_Count;
+    USB_BufferDescElem RX_Address;
+    USB_BufferDescElem RX_Count;
+} USB_BufferDesc;
 
 typedef struct __packed {
     uint16_t  Number;       // EP number
@@ -221,59 +111,6 @@ typedef struct __packed {
     uint32_t  lRX;          // RX Data length
     bool send_zlp;
 } USBLIB_EPData;
-
-struct __packed usb_setup_packet {
-    union {
-        uint16_t wRequestAndType;
-        struct {
-            uint8_t bmRequestType;
-            uint8_t bRequest;
-        };
-    };
-    union {
-        uint16_t wValue;
-        struct {
-            uint8_t       wValueL;
-            uint8_t       wValueH;
-        };
-    };
-    union {
-        uint16_t wIndex;
-        struct {
-            uint8_t       wIndexL;
-            uint8_t       wIndexH;
-        };
-    };
-    union {
-        uint16_t wLength;
-        struct {
-            uint8_t            wLengthL;
-            uint8_t            wLengthH;
-        };
-    };
-};
-
-typedef struct __packed
-{
-    uint8_t epidx;
-    uint8_t Operation;
-    uint8_t Data[LOG_DATA_LENGTH];
-    uint8_t Length;
-} USBLIB_Log;
-
-typedef struct __packed {
-    uint8_t   Size;
-    uint8_t   DescriptorType;
-    uint16_t *String;
-} USBLIB_StringDesc;
-
-typedef struct __packed {
-    uint32_t baudRate;
-    uint8_t  charFormat;
-    uint8_t  parityType;
-    uint8_t  dataBits;
-} USBLIB_LineCoding;
-
 
 #define USB_REQ_DIR_IN   (1 << 7)
 #define USB_REQ_DIR_OUT  (0 << 7)
@@ -308,9 +145,7 @@ enum {
 
 #define USB_IS_ATTACHED(dev) ((dev->flags & USB_MASK_ATTACHED) == USB_MASK_ATTACHED)
 
-static volatile USB_TypeDef *USB = (USB_TypeDef *)USB_BASE;
-static volatile USBLIB_EPBuf *_endp_buffers = (USBLIB_EPBuf*)USB_PBUFFER;
-static USBLIB_EPData _endp_config[EPCOUNT] =
+static USBLIB_EPData _endp_config[] =
 {
 	{0, EP_CONTROL, 8, 8, 0, 0, 0, 0, 0},
 	{1, EP_INTERRUPT, 64, 64, 0, 0, 0, 0, 0},
@@ -318,389 +153,228 @@ static USBLIB_EPData _endp_config[EPCOUNT] =
 	{3, EP_BULK, 64, 64, 0, 0, 0, 0, 0} //OUT (Host   -> Device)
 };
 
+#define EPCOUNT (sizeof(_endp_config) / sizeof(_endp_config[0]))
+
 struct stm32_usb {
+    struct usbd_device dev;
+
 	uint8_t addr;
-	uint8_t config;
+	uint8_t current_config;
 	uint16_t status;
+
+    volatile USB_TypeDef *hw;
+    volatile USB_BufferDesc *ep_desc;
 };
 
 static struct stm32_usb *_devices[1] = {0};
-//usb_setup_packet *  SetupPacket;
 
-USBLIB_LineCoding lineCoding = {115200, 0, 0, 8};
-
-static const uint8_t USB_DEVICE_DESC[] =
-    {
-        (uint8_t)18,                        //    bLength
-        (uint8_t)USB_DEVICE_DESC_TYPE,      //    bDescriptorType
-        (uint8_t)0x10,                      //    bcdUSB
-        (uint8_t)0x01,                      //    bcdUSB
-        (uint8_t)0,                  //    bDeviceClass
-        (uint8_t)0,                         //    bDeviceSubClass
-        (uint8_t)0,                         //    bDeviceProtocol
-        (uint8_t)8,                         //    bMaxPacketSize0
-        (uint8_t)LOBYTE(DEVICE_VENDOR_ID),  //    idVendor
-        (uint8_t)HIBYTE(DEVICE_VENDOR_ID),  //    idVendor
-        (uint8_t)LOBYTE(DEVICE_PRODUCT_ID), //    idProduct
-        (uint8_t)HIBYTE(DEVICE_PRODUCT_ID), //    idProduct
-        (uint8_t)0x00,                      //    bcdDevice
-        (uint8_t)0x01,                      //    bcdDevice
-        (uint8_t)1,                         //    iManufacturer
-        (uint8_t)2,                         //    iProduct
-        (uint8_t)3,                         //    iSerialNumbert
-        (uint8_t)1                          //    bNumConfigurations
-};
-
-const uint8_t USB_DEVICE_QR_DESC[] = {
-        (uint8_t)10,                        //    bLength
-        (uint8_t)0x06,      //    bDescriptorType
-        (uint8_t)0x00,                      //    bcdUSB
-        (uint8_t)0x02,                      //    bcdUSB
-        (uint8_t)USB_COMM,                  //    bDeviceClass
-        (uint8_t)0,                         //    bDeviceSubClass
-        (uint8_t)0,                         //    bDeviceProtocol
-        (uint8_t)8,                         //    bMaxPacketSize0
-        (uint8_t)1,                         //    bNumConfigurations
-        (uint8_t)0                          // reserved
-};
-
-static const uint8_t USBD_CDC_CFG_DESCRIPTOR[] =
-    {
-        /*Configuration Descriptor*/
-        (uint8_t)0x09, /* bLength: Configuration Descriptor size */
-        (uint8_t)0x02, /* bDescriptorType: Configuration */
-        67,   /* wTotalLength:no of returned bytes */
-        0x00,
-        0x02, /* bNumInterfaces: 2 interface */
-        0x01, /* bConfigurationValue: Configuration value */
-        0x00, /* iConfiguration: Index of string descriptor describing the configuration */
-        0x80, /* bmAttributes - Bus powered */
-        0x32, /* MaxPower 100 mA */
-
-        /*---------------------------------------------------------------------------*/
-
-        /*Interface Descriptor */
-        0x09, /* bLength: Interface Descriptor size */
-        0x04, /* bDescriptorType: Interface */
-        0x00, /* bInterfaceNumber: Number of Interface */
-        0x00, /* bAlternateSetting: Alternate setting */
-        0x01, /* bNumEndpoints: One endpoints used */
-        0x02, /* bInterfaceClass: Communication Interface Class */
-        0x02, /* bInterfaceSubClass: Abstract Control Model */
-        0x01, /* bInterfaceProtocol: Common AT commands */
-        0x00, /* iInterface: */
-
-        /*Header Functional Descriptor*/
-        0x05, /* bLength: Endpoint Descriptor size */
-        0x24, /* bDescriptorType: CS_INTERFACE */
-        0x00, /* bDescriptorSubtype: Header Func Desc */
-        0x10, /* bcdCDC: spec release number */
-        0x01,
-
-        /*Call Management Functional Descriptor*/
-        0x05, /* bFunctionLength */
-        0x24, /* bDescriptorType: CS_INTERFACE */
-        0x01, /* bDescriptorSubtype: Call Management Func Desc */
-        0x00, /* bmCapabilities: D0+D1 */
-        0x01, /* bDataInterface: 1 */
-
-        /*ACM Functional Descriptor*/
-        0x04, /* bFunctionLength */
-        0x24, /* bDescriptorType: CS_INTERFACE */
-        0x02, /* bDescriptorSubtype: Abstract Control Management desc */
-        0x02, /* bmCapabilities */
-
-        /*Union Functional Descriptor*/
-        0x05, /* bFunctionLength */
-        0x24, /* bDescriptorType: CS_INTERFACE */
-        0x06, /* bDescriptorSubtype: Union func desc */
-        0x00, /* bMasterInterface: Communication class interface */
-        0x01, /* bSlaveInterface0: Data Class Interface */
-
-        /*Endpoint 2 Descriptor*/
-        0x07, /* bLength: Endpoint Descriptor size */
-        0x05, /* bDescriptorType: Endpoint */
-        0x81, /* bEndpointAddress IN1 */
-        0x03, /* bmAttributes: Interrupt */
-        0x08, /* wMaxPacketSize LO: */
-        0x00, /* wMaxPacketSize HI: */
-        0x10, /* bInterval: */
-        /*---------------------------------------------------------------------------*/
-
-        /*Data class interface descriptor*/
-        0x09, /* bLength: Endpoint Descriptor size */
-        0x04, /* bDescriptorType: */
-        0x01, /* bInterfaceNumber: Number of Interface */
-        0x00, /* bAlternateSetting: Alternate setting */
-        0x02, /* bNumEndpoints: Two endpoints used */
-        0x0A, /* bInterfaceClass: CDC */
-        0x02, /* bInterfaceSubClass: */
-        0x00, /* bInterfaceProtocol: */
-        0x00, /* iInterface: */
-
-        /*Endpoint IN2 Descriptor*/
-        0x07, /* bLength: Endpoint Descriptor size */
-        0x05, /* bDescriptorType: Endpoint */
-        0x82, /* bEndpointAddress IN2 */
-        0x02, /* bmAttributes: Bulk */
-        64,   /* wMaxPacketSize: */
-        0x00,
-        0x00, /* bInterval: ignore for Bulk transfer */
-
-        /*Endpoint OUT3 Descriptor*/
-        0x07, /* bLength: Endpoint Descriptor size */
-        0x05, /* bDescriptorType: Endpoint */
-        0x03, /* bEndpointAddress */
-        0x02, /* bmAttributes: Bulk */
-        64,   /* wMaxPacketSize: */
-        0,
-        0x00 /* bInterval: ignore for Bulk transfer */
-};
-
-void _stm32_usb_set_tx_status(uint8_t epidx, uint16_t Stat)
+void _stm32_usb_set_tx_status(struct stm32_usb *self, uint8_t epidx, uint16_t Stat)
 {
 	if(epidx >= EPCOUNT) return;
-    register uint16_t val = (uint16_t)USB->EPR[epidx];
-    USB->EPR[epidx]         = (val ^ (Stat & EP_STAT_TX)) & (EP_MASK | EP_STAT_TX);
+    register uint16_t val = (uint16_t)self->hw->EPR[epidx];
+    self->hw->EPR[epidx]         = (val ^ (Stat & EP_STAT_TX)) & (EP_MASK | EP_STAT_TX);
 }
 
-void _stm32_usb_set_rx_status(uint8_t epidx, uint16_t Stat)
+void _stm32_usb_set_rx_status(struct stm32_usb *self, uint8_t epidx, uint16_t Stat)
 {
 	if(epidx >= EPCOUNT) return;
-    register uint16_t val = (uint16_t)USB->EPR[epidx];
-    USB->EPR[epidx]         = (val ^ (Stat & EP_STAT_RX)) & (EP_MASK | EP_STAT_RX);
+    register uint16_t val = (uint16_t)self->hw->EPR[epidx];
+    self->hw->EPR[epidx]         = (val ^ (Stat & EP_STAT_RX)) & (EP_MASK | EP_STAT_RX);
 }
 
 
-void _stm32_usb_reset(void){
-    uint16_t Addr = sizeof(USBLIB_EPBuf) * EPCOUNT;
+void _stm32_usb_reset(struct stm32_usb *self){
+    uint16_t Addr = sizeof(USB_BufferDesc) * EPCOUNT;
     for (uint8_t i = 0; i < EPCOUNT; i++) {
-        _endp_buffers[i].TX_Address.Value = Addr;
-        _endp_buffers[i].TX_Count.Value   = 0;
+        self->ep_desc[i].TX_Address.Value = Addr;
+        self->ep_desc[i].TX_Count.Value   = 0;
         Addr = (uint16_t)(Addr + _endp_config[i].TX_Max);
-        _endp_buffers[i].RX_Address.Value = Addr;
+        self->ep_desc[i].RX_Address.Value = Addr;
 
         // compute number of rx blocks
         if (_endp_config[i].RX_Max > 62)
-            _endp_buffers[i].RX_Count.Value = 0x8000 | (uint16_t)((_endp_config[i].RX_Max / 64) << 10);
+            self->ep_desc[i].RX_Count.Value = 0x8000 | (uint16_t)((_endp_config[i].RX_Max / 64) << 10);
         else
-            _endp_buffers[i].RX_Count.Value = (uint16_t)((_endp_config[i].RX_Max / 2) << 10);
+            self->ep_desc[i].RX_Count.Value = (uint16_t)((_endp_config[i].RX_Max / 2) << 10);
 
         Addr = (uint16_t)(Addr + _endp_config[i].RX_Max);
 
-        USB->EPR[i] = (_endp_config[i].Number | _endp_config[i].Type);
+        self->hw->EPR[i] = (_endp_config[i].Number | _endp_config[i].Type);
 
+        _stm32_usb_set_rx_status(self, i, RX_VALID);
+        _stm32_usb_set_tx_status(self, i, TX_NAK);
     }
 
     // enable all other interrupts and enable the usb peripheral
-    USB->CNTR   = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_SUSPM | USB_CNTR_ERRM;
-    USB->ISTR   = 0x00;
-    USB->BTABLE = 0x00;
-    USB->DADDR  = USB_DADDR_EF;
+    self->hw->CNTR   = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_SUSPM | USB_CNTR_ERRM;
+    self->hw->ISTR   = 0x00;
+    self->hw->BTABLE = 0x00;
+    self->hw->DADDR  = USB_DADDR_EF;
 
     // start receiving on ep 0
-    _stm32_usb_set_rx_status(0, RX_VALID);
+    _stm32_usb_set_rx_status(self, 0, RX_VALID);
 }
 
-void _user_to_pma(uint16_t wPMABufAddr, uint8_t *pbUsrBuf, uint16_t wNBytes)
-{
-  uint32_t n = (uint32_t)((wNBytes + 1) >> 1);   /* n = (wNBytes + 1) / 2 */
-  uint32_t i, temp1, temp2;
-  uint16_t *pdwVal;
-  pdwVal = (uint16_t *)((uint32_t)(wPMABufAddr * 2) + USB_PBUFFER);
-  for (i = n; i != 0; i--)
-  {
-    temp1 = (uint16_t) * pbUsrBuf;
-    pbUsrBuf++;
-    temp2 = temp1 | (uint16_t)((uint16_t) * pbUsrBuf << 8);
-    *pdwVal++ = (uint16_t)temp2;
-    pdwVal++;
-    pbUsrBuf++;
-  }
+static void _user_to_pma(uint16_t wPMABufAddr, uint8_t *pbUsrBuf, uint16_t wNBytes) {
+    uint32_t n = (uint32_t)((wNBytes + 1) >> 1);   /* n = (wNBytes + 1) / 2 */
+    uint32_t i, temp1, temp2;
+    uint16_t *pdwVal;
+    pdwVal = (uint16_t *)((uint32_t)(wPMABufAddr * 2) + USB_PBUFFER);
+    for (i = n; i != 0; i--) {
+        temp1 = (uint16_t) * pbUsrBuf;
+        pbUsrBuf++;
+        temp2 = temp1 | (uint16_t)((uint16_t) * pbUsrBuf << 8);
+        *pdwVal++ = (uint16_t)temp2;
+        pdwVal++;
+        pbUsrBuf++;
+    }
 }
 
-void _pma_to_user(uint8_t *pbUsrBuf, uint16_t wPMABufAddr, uint16_t wNBytes)
-{
-  uint32_t n = (uint32_t)((wNBytes + 1) >> 1);/* /2*/
-  uint32_t i;
-  uint32_t *pdwVal;
-  pdwVal = (uint32_t *)((uint32_t)(wPMABufAddr * 2) + USB_PBUFFER);
-  for (i = n; i != 0; i--)
-  {
-    *(uint16_t*)pbUsrBuf++ = (uint16_t)(*pdwVal);
-    *pdwVal = 0;
-    pdwVal++;
-    pbUsrBuf++;
-  }
+static void _pma_to_user(uint8_t *pbUsrBuf, uint16_t wPMABufAddr, uint16_t wNBytes){
+    uint32_t n = (uint32_t)((wNBytes + 1) >> 1);/* /2*/
+    uint32_t i;
+    uint32_t *pdwVal;
+    pdwVal = (uint32_t *)((uint32_t)(wPMABufAddr * 2) + USB_PBUFFER);
+    for (i = n; i != 0; i--){
+        *(uint16_t*)pbUsrBuf++ = (uint16_t)(*pdwVal);
+        *pdwVal = 0;
+        pdwVal++;
+        pbUsrBuf++;
+    }
 }
 
-
-static size_t _stm32_usb_pma_read(uint8_t epidx){
-    uint16_t count = (uint16_t)(_endp_buffers[epidx].RX_Count.Value & 0x3FF);
+static size_t _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx){
+    uint16_t count = (uint16_t)(self->ep_desc[epidx].RX_Count.Value & 0x3FF);
     if(count > _endp_config[epidx].RX_Max) count = _endp_config[epidx].RX_Max;
     _endp_config[epidx].lRX = count;
-    _pma_to_user((uint8_t*)_endp_config[epidx].pRX_BUFF, _endp_buffers[epidx].RX_Address.Value, count);
-    /*
-    uint32_t *pma = (uint32_t *)(USB_PBUFFER + (uint32_t)(_endp_buffers[epidx].RX_Address.Value * 2));
-    uint16_t *buf = (uint16_t *)_endp_config[epidx].pRX_BUFF;
-    for (uint8_t i = 0; i < count; i++) {
-        *(volatile uint16_t *)buf = *(volatile uint16_t *)pma;
-        buf++;
-        pma++;
-    }
-    */
+    _pma_to_user((uint8_t*)_endp_config[epidx].pRX_BUFF, self->ep_desc[epidx].RX_Address.Value, count);
 	return count;
 }
 
-static void _stm32_usb_pma_write(uint8_t epidx){
+static void _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx){
     uint16_t count = (uint16_t)(_endp_config[epidx].lTX <= _endp_config[epidx].TX_Max) ? (uint16_t)_endp_config[epidx].lTX : (uint16_t)_endp_config[epidx].TX_Max;
-    _user_to_pma(_endp_buffers[epidx].TX_Address.Value, (uint8_t*)_endp_config[epidx].pTX_BUFF, count);
-    /*
-    uint32_t *pma = (uint32_t *)(USB_PBUFFER + (uint32_t)(_endp_buffers[epidx].TX_Address.Value * 2));
-    uint16_t *buf = _endp_config[epidx].pTX_BUFF;
-    for (uint8_t i = 0; i < (count + 1) / 2; i++) {
-        *(volatile uint32_t *)pma = *(volatile uint16_t*)buf;
-        pma++;
-        buf++;
-    }
-    */
+    _user_to_pma(self->ep_desc[epidx].TX_Address.Value, (uint8_t*)_endp_config[epidx].pTX_BUFF, count);
+
     volatile const char *b = (volatile const char*)_endp_config[epidx].pTX_BUFF;
     printk_isr("TX %d %02x%02x%02x%02x%02x%02x%02x%02x\n", count, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
 
     _endp_config[epidx].lTX -= count;
     _endp_config[epidx].pTX_BUFF += (count + 1) / 2;
 
-    _endp_buffers[epidx].TX_Count.Value = count;
+    self->ep_desc[epidx].TX_Count.Value = count;
 }
 
-void _stm32_usb_send(uint8_t epidx, uint16_t *buf, uint16_t count){
+void _stm32_usb_send(struct stm32_usb *self, uint8_t epidx, uint16_t *buf, uint16_t count){
     // setup buffers which will then be handled inside interrupt
     _endp_config[epidx].lTX      = count;
     _endp_config[epidx].pTX_BUFF = buf;
     _endp_config[epidx].send_zlp = count && (count % _endp_config[epidx].TX_Max) == 0;
     if (count > 0) {
-        _stm32_usb_pma_write(epidx);
+        _stm32_usb_pma_write(self, epidx);
     } else {
-        _endp_buffers[epidx].TX_Count.Value = 0;
+        self->ep_desc[epidx].TX_Count.Value = 0;
     }
     //_stm32_usb_set_rx_status(0, RX_NAK);
-    _stm32_usb_set_tx_status(epidx, TX_VALID);
+    _stm32_usb_set_tx_status(self, epidx, TX_VALID);
 }
 
-static void _stm32_usb_send_descriptor(int type, uint8_t index, uint16_t length){
+static int _stm32_usb_send_descriptor(struct stm32_usb *self, int type, uint8_t index, uint16_t length){
     //printk_isr("GD %d %d %d\n", type, index, length);
     switch (type) {
-    case USB_DEVICE_DESC_TYPE:
-        _stm32_usb_send(0, (uint16_t *)&USB_DEVICE_DESC[0], (length < sizeof(USB_DEVICE_DESC))?length:sizeof(USB_DEVICE_DESC));
+    case USB_DESC_TYPE_DEVICE:
+        if(!self->dev.device_desc) goto error;
+        _stm32_usb_send(self, 0, (uint16_t *)self->dev.device_desc, (length < sizeof(struct usb_device_descriptor))?length:sizeof(struct usb_device_descriptor));
         break;
-    case USB_CFG_DESC_TYPE: {
-        //static uint16_t t[2] = {0xdead, 0xbeef};
-        //_stm32_usb_send(0, (uint16_t *)t, 4);
-        _stm32_usb_send(0, (uint16_t *)USBD_CDC_CFG_DESCRIPTOR, (length < sizeof(USBD_CDC_CFG_DESCRIPTOR))?length:sizeof(USBD_CDC_CFG_DESCRIPTOR));
+    case USB_DESC_TYPE_CFG: {
+        if(!self->dev.config_desc) goto error;
+        uint16_t len = (uint16_t)(((uint16_t)self->dev.config_desc->wTotalLengthH << 8) | (uint16_t)self->dev.config_desc->wTotalLengthL);
+        _stm32_usb_send(self, 0, (uint16_t *)self->dev.config_desc, (length < len)?length:len);
     } break;
-    case USB_DEVICE_QR_DESC_TYPE:
-        _stm32_usb_send(0, (uint16_t *)&USB_DEVICE_QR_DESC[0], sizeof(USB_DEVICE_QR_DESC));
+    case USB_DESC_TYPE_DEVICE_QR:
+        _stm32_usb_send(self, 0, 0, 0);
+        //_stm32_usb_send(self, 0, (uint16_t *)self->config, sizeof(USB_DEVICE_QR_DESC));
         break;
-    case USB_STR_DESC_TYPE: {
-        static const struct descriptor {
-                uint8_t  bLength;
-                uint8_t  bDescriptorType;
-                uint8_t  bString[6];
-        } desc[] = {
-            {0x04, 0x03, {0x4, 0x09}},
-            // vendor
-            {0x06, 0x03, {'M', 0, 'S', 0}},
-            // product
-            {0x06, 0x03, {'M', 0, 'S', 0}},
-            // serial
-            {0x06, 0x03, {'M', 0, 'S', 0}},
-            // cdc
-            {0x06, 0x03, {'M', 0, 'S', 0}},
-            // cdcdata
-            {0x06, 0x03, {'M', 0, 'S', 0}}
-        };
-
-        if(index >= (sizeof(desc) / sizeof(desc[0])))  {
-            _stm32_usb_send(0, (uint16_t*)&desc[1], 6);
-        } else {
-            const struct descriptor *pSTR = &desc[index];
-            _stm32_usb_send(0, (uint16_t*)pSTR, pSTR->bLength);
-        }
+    case USB_DESC_TYPE_STR: {
+        if(index >= self->dev.string_desc_count) goto error;
+        const struct usb_string_descriptor *str = self->dev.string_desc[index];
+        if(!str) goto error;
+        _stm32_usb_send(self, 0, (uint16_t*)str, str->bLength);
     } break;
     default:
-        _stm32_usb_send(0, 0, 0);
+        goto error;
         break;
     }
+    return 0;
+error:
+    return -1;
 }
 
 static int _stm32_usb_handle_ep0_setup(struct stm32_usb *self, volatile struct usb_setup_packet *packet, uint16_t epr){
     switch (packet->wRequestAndType) {
     case USB_REQ(0x00, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV):
     case USB_REQ(0x00, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_IFACE):
-        _stm32_usb_send(0, &self->status, 2);
+        _stm32_usb_send(self, 0, &self->status, 2);
         break;
     case USB_REQ(0x06, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV):
     case USB_REQ(0x06, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_IFACE):
-        _stm32_usb_send_descriptor(packet->wValueH, packet->wValueL, packet->wLength);
+        if(_stm32_usb_send_descriptor(self, packet->wValueH, packet->wValueL, packet->wLength) < 0) goto error;
         break;
     case USB_REQ(0x05, USB_REQ_DIR_OUT | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV):
         self->addr = (uint8_t)(packet->wValueL & 0x7F);
-        _stm32_usb_send(0, 0, 0);
+        _stm32_usb_send(self, 0, 0, 0);
         break;
     case USB_REQ(USB_REQUEST_GET_CONFIGURATION, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV): {
-        _stm32_usb_send(0, (uint16_t*)&self->config, 1);
+        _stm32_usb_send(self, 0, (uint16_t*)&self->current_config, 1);
     } break;
     case USB_REQ(USB_REQUEST_SET_CONFIGURATION, USB_REQ_DIR_OUT | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV):
-        self->config = packet->wValueL;
-        _stm32_usb_send(0, 0, 0);
+        self->current_config = packet->wValueL;
+        _stm32_usb_send(self, 0, 0, 0);
         break;
     default:
-        //_stm32_usb_set_rx_status(0, RX_VALID);
-        //_stm32_usb_set_rx_status(epidx, RX_VALID);
-        //_stm32_usb_send(0, 0, 0);
-        //_stm32_usb_send(0, (uint16_t*)packet, 4);
-        //_stm32_usb_send(0, (uint16_t*)&count, 2);
-        //_stm32_usb_set_rx_status(0, RX_STALL);
-        //_stm32_usb_set_tx_status(0, TX_STALL);
+        goto error;
         break;
     }
     return 0;
+error:
+    _stm32_usb_set_rx_status(self, 0, RX_STALL);
+    _stm32_usb_set_tx_status(self, 0, TX_STALL);
+    return -1;
 }
 
 void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx){
     if(!self) return;
-    uint16_t epr  = (uint16_t)USB->EPR[epidx];
+    uint16_t epr  = (uint16_t)self->hw->EPR[epidx];
     if (epidx == 0) {
         //_stm32_usb_set_tx_status(epidx, TX_NAK);
         //_stm32_usb_set_rx_status(epidx, RX_NAK);
 
         if(dir == 0){
             if (epr & EP_CTR_TX) {
-                USB->EPR[epidx] = epr & EP_MASK & ~EP_CTR_TX;
+                self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_TX;
                 // transmission has completed
                 if (self->addr) {
-                    USB->DADDR = (USB->DADDR & 0x0080) | self->addr;
+                    self->hw->DADDR = (self->hw->DADDR & 0x0080) | self->addr;
                     self->addr = 0;
                 }
 
                 // send more data if more data is still to be sent
                 if (_endp_config[epidx].lTX) {
-                    _stm32_usb_pma_write(epidx);
-                    _stm32_usb_set_tx_status(epidx, TX_VALID);
+                    _stm32_usb_pma_write(self, epidx);
+                    _stm32_usb_set_tx_status(self, epidx, TX_VALID);
                 } else if(_endp_config[epidx].send_zlp){
-                    _stm32_usb_send(0, 0, 0);
+                    _stm32_usb_send(self, 0, 0, 0);
                     _endp_config[epidx].send_zlp = false;
                 } else {
-                    _stm32_usb_set_tx_status(epidx, TX_NAK);
+                    _stm32_usb_set_tx_status(self, epidx, TX_NAK);
                     //_stm32_usb_set_tx_status(epidx, TX_STALL);
                     //_stm32_usb_set_rx_status(0, RX_VALID);
                 }
             } else if(epr & EP_CTR_RX){
             }
         } else {
-            int len = (int)_stm32_usb_pma_read(epidx);
+            int len = (int)_stm32_usb_pma_read(self, epidx);
             if (epr & USB_EP0R_SETUP) {
-                USB->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
+                self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
                 volatile struct usb_setup_packet *packet = (volatile struct usb_setup_packet *)_endp_config[0].pRX_BUFF;
                 //volatile const char *b = (volatile const char*)packet;
                 //printk_isr("S %d %02x%02x\n", len, b[6], b[7]);
@@ -709,78 +383,84 @@ void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx
                 _stm32_usb_handle_ep0_setup(self, packet, epr);
                 //_stm32_usb_set_rx_status(0, RX_VALID);
             } else if (epr & EP_CTR_RX) {
-                USB->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
+                self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
                 printk_isr("DAT %d\n", len);
                 //_stm32_usb_set_tx_status(epidx, TX_STALL);
                 //_stm32_usb_send(0, 0, 0);
                 //_stm32_usb_send(0, &self->status, 1);
             }
         }
-    } else {
-        // handle application endpoint
+        _stm32_usb_set_rx_status(self, epidx, RX_VALID);
+    } else if(epidx == 2 && epr & EP_CTR_TX){
+        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_TX;
+        if (_endp_config[epidx].lTX) {
+            _stm32_usb_pma_write(self, epidx);
+            _stm32_usb_set_tx_status(self, epidx, TX_VALID);
+        }
+    } else if(epidx == 3 && epr & EP_CTR_RX){
+        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
+        static uint8_t str[] = {'H', 'e', 'l', 'l', 'o'};
+        _stm32_usb_send(self, 2, (uint16_t*)str, 5);
+        _stm32_usb_set_rx_status(self, epidx, RX_VALID);
     }
-    _stm32_usb_set_rx_status(epidx, RX_VALID);
 }
 
 void USB_LP_CAN1_RX0_IRQHandler(){
 	struct stm32_usb *self = _devices[0];
 
-    uint16_t stat = (uint16_t)USB->ISTR;
+    uint16_t stat = (uint16_t)self->hw->ISTR;
     if (stat & USB_ISTR_RESET) { // Reset
         printk_isr("URST\n");
-        _stm32_usb_reset();
+        _stm32_usb_reset(self);
     }
     if (stat & USB_ISTR_PMAOVR) {
-        USB->ISTR &= (uint32_t)~USB_ISTR_PMAOVR;
+        self->hw->ISTR &= (uint32_t)~USB_ISTR_PMAOVR;
     }
     if (stat & USB_ISTR_SUSP) {
-        USB->ISTR &= (uint16_t)~USB_ISTR_SUSP;
+        self->hw->ISTR &= (uint16_t)~USB_ISTR_SUSP;
     }
     if (stat & USB_ISTR_ERR) {
-        USB->ISTR &= (uint32_t)~USB_ISTR_ERR;
+        self->hw->ISTR &= (uint32_t)~USB_ISTR_ERR;
     }
     if (stat & USB_ISTR_WKUP) {
-        USB->ISTR &= (uint32_t)~USB_ISTR_WKUP;
+        self->hw->ISTR &= (uint32_t)~USB_ISTR_WKUP;
     }
     if (stat & USB_ISTR_SOF) {
-        USB->ISTR &= (uint32_t)~USB_ISTR_SOF;
+        self->hw->ISTR &= (uint32_t)~USB_ISTR_SOF;
     }
     if (stat & USB_ISTR_ESOF) {
-        USB->ISTR &= (uint32_t)~USB_ISTR_ESOF;
+        self->hw->ISTR &= (uint32_t)~USB_ISTR_ESOF;
     }
 
-    //while((stat = (uint16_t)USB->ISTR) & USB_ISTR_CTR) { //Handle data on EP
-    while((stat = (uint16_t)USB->ISTR) & USB_ISTR_CTR){
+    while((stat = (uint16_t)self->hw->ISTR) & USB_ISTR_CTR){
         // flags can only be written as zero so we can clear all flags like this
-        USB->ISTR = 0;
+        self->hw->ISTR = 0;
 		uint8_t epidx = stat & USB_ISTR_EP_ID;
         uint8_t dir = !!(stat & USB_ISTR_DIR);
         _stm32_usb_handle_ep_request(self, dir, epidx);
     }
 }
 
-void USBLIB_Transmit(uint16_t *Data, uint16_t Length, uint16_t Timeout)
-{
-    //    while (USBEP[2] & )
-    //_stm32_usb_send(2, Data, Length);
-}
-
-void uUSBLIB_DataReceivedHandler(uint16_t *Data, uint16_t Length)
-{
-    /* NOTE: This function Should not be modified, when the callback is needed,
-       the uUSBLIB_DataReceivedHandler could be implemented in the user file
-    */
-}
-
-void uUSBLIB_LineStateHandler(uint16_t LineState)
-{
-    /* NOTE: This function Should not be modified, when the callback is needed,
-       the uUSBLIB_LineStateHandler could be implemented in the user file
-    */
-}
 void USBWakeUp_IRQHandler(void){
 	EXTI_ClearITPendingBit(EXTI_Line18);
 }
+
+static int _usb_device_write(usbd_device_t dev, uint8_t ep,  const void *ptr, size_t size, uint32_t timeout_ms){
+    //struct stm32_usb *self = container_of(dev, struct stm32_usb, dev.ops);
+    //_stm32_usb_send(self, ep, ptr, (uint16_t)size);
+    return 0;
+}
+
+static int _usb_device_read(usbd_device_t dev, uint8_t ep, void *ptr, size_t size, uint32_t timeout_ms){
+    //struct stm32_usb *self = container_of(dev, struct stm32_usb, dev.ops);
+    //_stm32_usb_send(self, ep, ptr, (uint16_t)size);
+    return 0;
+}
+
+static const struct usbd_device_ops _usb_device_ops = {
+    .write = _usb_device_write,
+    .read = _usb_device_read
+};
 
 static int _stm32_usb_probe(void *fdt, int fdt_node){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
@@ -790,18 +470,22 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
 	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 
-	for(int i = 0; i < EPCOUNT; i++){
+	for(unsigned int i = 0; i < EPCOUNT; i++){
 		_endp_config[i].pRX_BUFF = (uint16_t *)kzmalloc((size_t)(_endp_config[i].RX_Max * 2));
 	}
 
-    _devices[0] = kzmalloc(sizeof(struct stm32_usb));
+    struct stm32_usb *self = _devices[0] = kzmalloc(sizeof(struct stm32_usb));
+    self->hw = (volatile USB_TypeDef *)USB_BASE;
+    self->ep_desc = (volatile USB_BufferDesc*)USB_PBUFFER;
 
-    _stm32_usb_reset();
+    usbd_device_init(&self->dev, fdt, fdt_node, &_usb_device_ops);
 
-    USB->CNTR   = USB_CNTR_FRES; /* Force USB Reset */
-    USB->BTABLE = 0;
-    USB->DADDR  = 0;
-    USB->ISTR   = 0;
+    _stm32_usb_reset(self);
+
+    self->hw->CNTR   = USB_CNTR_FRES; /* Force USB Reset */
+    self->hw->BTABLE = 0;
+    self->hw->DADDR  = 0;
+    self->hw->ISTR   = 0;
 
 	NVIC_InitTypeDef nvic;
 	nvic.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
@@ -813,7 +497,9 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
     NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
     // clear reset bit and enable reset interrupt
-    USB->CNTR   = USB_CNTR_RESETM;
+    self->hw->CNTR   = USB_CNTR_RESETM;
+
+    usbd_device_register(&self->dev);
 
 	printk("USB: ok\n");
 	return 0;

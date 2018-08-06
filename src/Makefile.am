@@ -20,6 +20,7 @@ libfirmware_a_SOURCES = \
     spi.c\
     time.c\
     ulink.c\
+	usb.c\
     vardir.c
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99
 
