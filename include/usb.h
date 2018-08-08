@@ -1,6 +1,8 @@
 #pragma once
 
 #include "driver.h"
+#include "queue.h"
+#include "sem.h"
 
 /* USB Descriptor Types */
 #define USB_DESC_TYPE_DEVICE 1
@@ -29,8 +31,9 @@
 #define USB_IF_SUBCLASS_CS_INTERFACE 0x24
 #define USB_IF_SUBCLASS_CS_ENDPOINT 0x25
 
-#define USB_LOBYTE(x) ((uint8_t)(x & 0x00FF))
-#define USB_HIBYTE(x) ((uint8_t)((x & 0xFF00) >> 8))
+#define USB_LOBYTE(x) ((uint8_t)((x) & 0x00FF))
+#define USB_HIBYTE(x) ((uint8_t)(((x) & 0xFF00) >> 8))
+#define USB_WORD_HL(h, l) ((uint16_t)(((uint16_t)(h) << 8) | ((l) & 0xff)))
 
 struct __packed usb_device_descriptor {
     uint8_t bLength;
@@ -51,6 +54,11 @@ struct __packed usb_device_descriptor {
     uint8_t iProduct;
     uint8_t iSerialNumber;
     uint8_t bNumConfigurations;
+};
+
+struct __packed usb_descriptor_header {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
 };
 
 struct __packed usb_config_descriptor {
@@ -75,6 +83,16 @@ struct __packed usb_interface_descriptor {
     uint8_t bInterfaceSubClass;
     uint8_t bInterfaceProtocol;
     uint8_t iInterface;
+};
+
+struct __packed usb_endpoint_descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bEndpointAddress;
+    uint8_t bmAttributes;
+    uint8_t wMaxPacketSizeL;
+    uint8_t wMaxPacketSizeH;
+    uint8_t bInterval;
 };
 
 struct __packed usb_string_descriptor {
@@ -124,6 +142,22 @@ struct usbd_device_ops {
 #define usbd_read(s, ep, b, sz, t) (*(s))->read(s, ep, b, sz, t)
 #define usbd_write(s, ep, b, sz, t) (*(s))->write(s, ep, b, sz, t)
 
+struct __packed usb_endpoint_message {
+    // total size is determined by buffer_size in endpoint class
+    uint16_t size; //! stored data size
+    uint16_t cursor; //! cursor
+    uint8_t data[]; //! data follows in memory
+};
+
+struct usb_endpoint {
+    struct semaphore tx_ready;
+    struct semaphore rx_ready;
+    uint8_t *buffer;
+    uint16_t count;
+    uint16_t buffer_size;
+    struct usb_endpoint_descriptor *desc;
+};
+
 struct usbd_device {
     struct list_head list;
     const struct usbd_device_ops *ops;
@@ -133,10 +167,15 @@ struct usbd_device {
     const struct usb_config_descriptor *config_desc;
     const struct usb_string_descriptor **string_desc;
     uint8_t string_desc_count;
+
+    struct usb_endpoint **endpoints;
+    uint8_t endpoint_count;
 };
 
 void usbd_device_init(struct usbd_device *self, void *fdt, int fdt_node, const struct usbd_device_ops *ops);
 int usbd_device_register(struct usbd_device *self);
 usbd_device_t usbd_find(const char *dtb_path);
 usbd_device_t usbd_find_by_node(int fdt_node);
+
+void usb_endpoint_init(struct usb_endpoint *self, struct usb_endpoint_descriptor *desc);
 
