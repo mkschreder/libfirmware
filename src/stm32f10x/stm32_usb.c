@@ -150,6 +150,8 @@ typedef struct __packed {
 #define USB_TR_DIR_OUT 0
 #define USB_TR_DIR_IN 1
 
+#define USB_DEFAULT_PACKET_SIZE 64
+
 enum {
     USB_FLAG_ATTACHED = (1 << 0),
     USB_FLAG_POWERED = (1 << 1),
@@ -180,6 +182,8 @@ struct stm32_usb {
 
     int32_t wake;
 
+    int flags;
+
     struct semaphore isr_ready;
 };
 
@@ -198,11 +202,8 @@ void _stm32_usb_set_rx_status(struct stm32_usb *self, uint8_t epidx, uint16_t St
     register uint16_t val = (uint16_t)self->hw->EPR[epidx];
     self->hw->EPR[epidx]         = (val ^ (Stat & EP_STAT_RX)) & (EP_MASK | EP_STAT_RX);
 }
-static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx){
-    struct usb_endpoint *ep = self->dev.endpoints[epidx];
+static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx, uint8_t *data, size_t size){
     uint16_t count = (uint16_t)(self->ep_desc[epidx].RX_Count.Value & 0x3FF);
-    uint8_t *data = ep->rx_buffer;
-    uint16_t size = ep->rx_count;
 
     if(!data || !size) return 0;
 
@@ -219,23 +220,19 @@ static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx){
         pdwVal++;
     }
 
-    // update pointers for next read
-    ep->rx_buffer = data;
-    ep->rx_count = (uint16_t)(ep->rx_count - count);
-
 	return count;
 }
 
 /* write a single buffer out to pma. The buffer must not be longer than maximum packet size */
-static size_t _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx){
-    struct usb_endpoint *ep = self->dev.endpoints[epidx];
-    uint8_t *data = ep->tx_buffer;
-    size_t size = ep->tx_count;
-
+static int _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx, const uint8_t *data, size_t size){
     if(size && !data) return 0;
 
     uint16_t max_size = self->dev.endpoints[epidx]->buffer_size;
-    if(size > max_size) size = max_size;
+
+    // only split packets if we are addressed
+    if((self->flags & USB_MASK_ADDRESSED) == USB_MASK_ADDRESSED && size > max_size) size = max_size;
+    // if we are not addressed then we only care about packet being withing bounds of maximum size. 
+    else if(size > USB_DEFAULT_PACKET_SIZE) size = USB_DEFAULT_PACKET_SIZE;
 
     uint32_t n = (uint32_t)((size + 1) >> 1);   /* n = (wNBytes + 1) / 2 */
     uint32_t i, temp1, temp2;
@@ -252,12 +249,9 @@ static size_t _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx){
 
     self->ep_desc[epidx].TX_Count.Value = (uint16_t)size;
 
-    ep->tx_buffer = data;
-    ep->tx_count = (uint16_t)(ep->tx_count - size);
-
     printk("TX %d\n", size);
 
-    return size;
+    return (int)size;
 }
 
 void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx){
@@ -268,17 +262,8 @@ void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx
     if(epr & EP_CTR_RX) {
         self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
 
-        // load data into buffer
-        _stm32_usb_pma_read(self, epidx);
-
-        // if there is space left in buffer enable reception and keep waiting for more data
-        if(ep->rx_count > 0){
-            // continue reception of more packets
-            _stm32_usb_set_rx_status(self, epidx, RX_VALID);
-        } else {
-            // we are ready
-            thread_sem_give(&ep->rx_ready);
-        }
+        // signal rx ready to tell the handler that data is available in the PMA
+        thread_sem_give(&ep->rx_ready);
     }
 
     if(epr & EP_CTR_TX){
@@ -287,28 +272,24 @@ void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx
         if (self->addr) {
             self->hw->DADDR = (self->hw->DADDR & 0x0080) | self->addr;
             self->addr = 0;
+            self->flags |= USB_MASK_ADDRESSED;
         }
 
-        // if we get here and the packet was an empty packet then it has already been sent
-        if(_stm32_usb_pma_write(self, epidx) > 0){
-            // if there was more data loaded then we mark transmit buffer for transmission
-            _stm32_usb_set_tx_status(self, epidx, TX_VALID);
-        } else {
-            // transmission has completed, load more data into pma and enable transmission again or bail
-            printk("TXDONE\n");
-            thread_sem_give(&ep->tx_ready);
-        }
+        thread_sem_give(&ep->tx_ready);
+
     }
 }
 
-void _stm32_usb_reset(struct stm32_usb *self){
+static void _stm32_usb_configure_endpoints(struct stm32_usb *self){
     // reconfigure the pma descriptors
-    uint8_t ep_count = self->dev.endpoint_count;
+    bool addressed = (self->flags & USB_FLAG_ADDRESSED);
+    // if we have not been addressed then we only have one endpoint
+    uint8_t ep_count = (!addressed)?1:self->dev.endpoint_count;
     uint32_t Addr = sizeof(USB_BufferDesc) * ep_count;
     for (uint8_t i = 0; i < ep_count; i++) {
         struct usb_endpoint *epb = self->dev.endpoints[i];
         if(!epb) continue;
-        uint16_t buf_size = USB_WORD_HL(epb->desc->wMaxPacketSizeH, epb->desc->wMaxPacketSizeL);
+        uint16_t buf_size = (!addressed)?USB_DEFAULT_PACKET_SIZE:USB_WORD_HL(epb->desc->wMaxPacketSizeH, epb->desc->wMaxPacketSizeL);
         uint16_t endp_type = (uint16_t)((uint16_t)(epb->desc->bmAttributes & 0x6) << 8);
 
         self->ep_desc[i].TX_Address.Value = (uint16_t)Addr;
@@ -328,15 +309,20 @@ void _stm32_usb_reset(struct stm32_usb *self){
         self->hw->EPR[i] = (uint16_t)((uint16_t)i | endp_type);
 
         // start reception but do not respond to transmission requests
-        _stm32_usb_set_rx_status(self, i, RX_NAK);
+        _stm32_usb_set_rx_status(self, i, RX_VALID);
         _stm32_usb_set_tx_status(self, i, TX_NAK);
     }
+}
 
+void _stm32_usb_reset(struct stm32_usb *self){
+    _stm32_usb_configure_endpoints(self);
     // enable all other interrupts and enable the usb peripheral
     self->hw->CNTR   = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_SUSPM | USB_CNTR_ERRM;
     self->hw->ISTR   = 0x00;
     self->hw->BTABLE = 0x00;
     self->hw->DADDR  = USB_DADDR_EF;
+
+    self->flags = USB_MASK_IDLE;
 }
 
 void _stm32_usb_handle_isr(struct stm32_usb *self){
@@ -467,35 +453,42 @@ static int _usb_device_write(usbd_device_t dev, uint8_t epidx,  const void *ptr,
     if(epidx >= self->dev.endpoint_count || !self->dev.endpoints[epidx]) return -1;
     struct usb_endpoint *ep = self->dev.endpoints[epidx];
     uint8_t *data = (uint8_t*)ptr;
-
-    ep->tx_buffer = data;
-    ep->tx_count = (uint16_t)size;
-
-    // load the first packet into memory and enable transmission
-    _stm32_usb_pma_write(self, epidx);
-
-    // start transmission
-    _stm32_usb_set_tx_status(self, epidx, TX_VALID);
-
-    // wait until current transmission is done
     int ret;
-    if((ret = thread_sem_take_wait(&ep->tx_ready, timeout_ms)) < 0) {
-        goto err;
-    }
+    bool send_zlp = ((self->flags & USB_MASK_ADDRESSED) == USB_MASK_ADDRESSED) && size && (size % ep->buffer_size) == 0;
+    int sent = 0;
 
-    // this is necessary if the transfer is multiple of buffer size (send empty packet)
-    if(size && size % ep->buffer_size == 0) {
-        _stm32_usb_pma_write(self, epidx);
+    do {
+        // load data into pma
+        int tc = _stm32_usb_pma_write(self, epidx, data, size);
+
+        if(tc < 0) return tc;
+
+        // set transmission as valid
+        _stm32_usb_set_tx_status(self, epidx, TX_VALID);
+
+        // wait for transmission to complete
+        if((ret = thread_sem_take_wait(&ep->tx_ready, timeout_ms)) < 0){
+            goto err;
+        }
+
+        data += tc;
+        size -= (size_t)tc;
+        sent += tc;
+    } while(size);
+
+    // send one extra zero length packet if data size is a multiple of packet size
+    if(!size && send_zlp) {
+        _stm32_usb_pma_write(self, epidx, NULL, 0);
         _stm32_usb_set_tx_status(self, epidx, TX_VALID);
         if((ret = thread_sem_take_wait(&ep->tx_ready, timeout_ms)) < 0) {
             goto err;
         }
     }
 
-    return (int)(size - ep->tx_count);
+    return sent;
 err:
     dbg_printk("TX timeout\n");
-    return (ep->tx_count != size)?(int)(size - ep->tx_count):-ETIMEDOUT;
+    return (sent)?sent:ret;
 }
 
 static int _usb_device_read(usbd_device_t dev, uint8_t epidx, void *ptr, size_t size, uint32_t timeout_ms){
@@ -503,26 +496,28 @@ static int _usb_device_read(usbd_device_t dev, uint8_t epidx, void *ptr, size_t 
     if(epidx >= self->dev.endpoint_count || !self->dev.endpoints[epidx]) return -1;
     struct usb_endpoint *ep = self->dev.endpoints[epidx];
     uint8_t *data = (uint8_t*)ptr;
+    int ret;
+    int received = 0;
 
-    // wait until usb interrupt is ready to accept reception requests
-    ep->rx_buffer = data;
-    ep->rx_count = (uint16_t)size;
+    do {
+        // wait until there is data available in the PMA
+        if((ret = thread_sem_take_wait(&ep->rx_ready, timeout_ms)) < 0){
+            printk("RX err: %d\n", ret);
+            return (received)?received:ret;
+        }
 
-    // start reception
-    _stm32_usb_set_rx_status(self, epidx, RX_VALID);
+        // load data into buffer
+        int rc = _stm32_usb_pma_read(self, epidx, data, size);
 
-    // wait for reception to be completed
-    int received;
-    if(thread_sem_take_wait(&ep->rx_ready, timeout_ms) < 0){
-        _stm32_usb_set_rx_status(self, epidx, RX_NAK);
-        printk("RXTOUT\n");
-        received = -ETIMEDOUT;
-    } else {
-        received = (int)(size - ep->rx_count);
-    }
+        // signal usb that pma is ready to accept more data
+        _stm32_usb_set_rx_status(self, epidx, RX_VALID);
 
-    ep->rx_buffer = 0;
-    ep->rx_count = 0;
+        if(rc < 0) break;
+
+        data += rc;
+        size -= (size_t)rc;
+        received += rc;
+    } while(size);
 
     // epcount now contains number of bytes left to receive
     // return number of bytes received
@@ -652,6 +647,7 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
 
     usbd_device_init(&self->dev, fdt, fdt_node, &_usb_device_ops);
 
+    _stm32_usb_configure_endpoints(self);
     _stm32_usb_reset(self);
 
     self->hw->CNTR   = USB_CNTR_FRES; /* Force USB Reset */
@@ -678,7 +674,7 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
 		  "usb",
 		  250,
 		  self,
-		  4,
+		  3,
 		  NULL);
 
 	thread_create(
