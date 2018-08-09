@@ -139,8 +139,8 @@ struct usbd_device_ops {
 	int (*read)(usbd_device_t port, uint8_t ep, void *ptr, size_t size, uint32_t timeout_ms);
 };
 
-#define usbd_read(s, ep, b, sz, t) (*(s))->read(s, ep, b, sz, t)
-#define usbd_write(s, ep, b, sz, t) (*(s))->write(s, ep, b, sz, t)
+#define usbd_recv(s, ep, b, sz, t) (*(s))->read(s, ep, b, sz, t)
+#define usbd_send(s, ep, b, sz, t) (*(s))->write(s, ep, b, sz, t)
 
 struct __packed usb_endpoint_message {
     // total size is determined by buffer_size in endpoint class

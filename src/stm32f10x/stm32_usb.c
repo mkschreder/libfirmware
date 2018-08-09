@@ -249,7 +249,7 @@ static int _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx, const uin
 
     self->ep_desc[epidx].TX_Count.Value = (uint16_t)size;
 
-    printk("TX %d\n", size);
+    //printk("TX %d\n", size);
 
     return (int)size;
 }
@@ -281,15 +281,13 @@ void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx
 }
 
 static void _stm32_usb_configure_endpoints(struct stm32_usb *self){
-    // reconfigure the pma descriptors
-    bool addressed = (self->flags & USB_FLAG_ADDRESSED);
     // if we have not been addressed then we only have one endpoint
-    uint8_t ep_count = (!addressed)?1:self->dev.endpoint_count;
+    uint8_t ep_count = self->dev.endpoint_count;
     uint32_t Addr = sizeof(USB_BufferDesc) * ep_count;
     for (uint8_t i = 0; i < ep_count; i++) {
         struct usb_endpoint *epb = self->dev.endpoints[i];
         if(!epb) continue;
-        uint16_t buf_size = (!addressed)?USB_DEFAULT_PACKET_SIZE:USB_WORD_HL(epb->desc->wMaxPacketSizeH, epb->desc->wMaxPacketSizeL);
+        uint16_t buf_size = USB_WORD_HL(epb->desc->wMaxPacketSizeH, epb->desc->wMaxPacketSizeL);
         uint16_t endp_type = (uint16_t)((uint16_t)(epb->desc->bmAttributes & 0x6) << 8);
 
         self->ep_desc[i].TX_Address.Value = (uint16_t)Addr;
@@ -454,7 +452,7 @@ static int _usb_device_write(usbd_device_t dev, uint8_t epidx,  const void *ptr,
     struct usb_endpoint *ep = self->dev.endpoints[epidx];
     uint8_t *data = (uint8_t*)ptr;
     int ret;
-    bool send_zlp = ((self->flags & USB_MASK_ADDRESSED) == USB_MASK_ADDRESSED) && size && (size % ep->buffer_size) == 0;
+    bool send_zlp = epidx == 0 && ((self->flags & USB_MASK_ADDRESSED) == USB_MASK_ADDRESSED) && size && (size % ep->buffer_size) == 0;
     int sent = 0;
 
     do {

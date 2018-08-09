@@ -1,0 +1,33 @@
+#pragma once
+
+#define ADC_Channel_0                               ((uint32_t)0x00)
+#define ADC_Channel_1                               ((uint32_t)0x01)
+#define ADC_Channel_2                               ((uint32_t)0x02)
+#define ADC_Channel_3                               ((uint32_t)0x03)
+#define ADC_Channel_4                               ((uint32_t)0x04)
+#define ADC_Channel_5                               ((uint32_t)0x05)
+#define ADC_Channel_6                               ((uint32_t)0x06)
+#define ADC_Channel_7                               ((uint32_t)0x07)
+#define ADC_Channel_8                               ((uint32_t)0x08)
+#define ADC_Channel_9                               ((uint32_t)0x09)
+#define ADC_Channel_10                              ((uint32_t)0x0A)
+#define ADC_Channel_11                              ((uint32_t)0x0B)
+#define ADC_Channel_12                              ((uint32_t)0x0C)
+#define ADC_Channel_13                              ((uint32_t)0x0D)
+#define ADC_Channel_14                              ((uint32_t)0x0E)
+#define ADC_Channel_15                              ((uint32_t)0x0F)
+#define ADC_Channel_16                              ((uint32_t)0x10)
+#define ADC_Channel_17                              ((uint32_t)0x11)
+
+#define ADC_Channel_TempSensor                      ((uint32_t)ADC_Channel_16)
+#define ADC_Channel_Vrefint                         ((uint32_t)ADC_Channel_17)
+
+#define ADC_SampleTime_1Cycles5                    ((uint32_t)0x00)
+#define ADC_SampleTime_7Cycles5                    ((uint32_t)0x01)
+#define ADC_SampleTime_13Cycles5                   ((uint32_t)0x02)
+#define ADC_SampleTime_28Cycles5                   ((uint32_t)0x03)
+#define ADC_SampleTime_41Cycles5                   ((uint32_t)0x04)
+#define ADC_SampleTime_55Cycles5                   ((uint32_t)0x05)
+#define ADC_SampleTime_71Cycles5                   ((uint32_t)0x06)
+#define ADC_SampleTime_239Cycles5                  ((uint32_t)0x07)
+

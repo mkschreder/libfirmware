@@ -1,4 +1,11 @@
-pkginclude_HEADERS = atomic.h \
+nobase_pkginclude_HEADERS = \
+	dts/stm32f10x.dtsi\
+	dts/stm32f10x.h\
+	dts/stm32f10x_gpio.h\
+	dts/stm32f4xx.dtsi\
+	dts/stm32f4xx.h\
+	dts/stm32f4xx_gpio.h\
+	atomic.h \
 	adc.h\
     avl-cmp.h\
     avl.h\

@@ -1,0 +1,10 @@
+// default dts for 4xx devices
+
+/dts-v1/;
+
+#include "stm32f4xx.dtsi"
+#include "stm32f4xx.h"
+#include "stm32f4xx_gpio.h"
+
+/ {
+};

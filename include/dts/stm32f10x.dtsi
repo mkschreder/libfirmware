@@ -1,0 +1,6 @@
+/** just a default root node **/
+/ {
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+

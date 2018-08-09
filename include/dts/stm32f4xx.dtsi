@@ -1,0 +1,14 @@
+
+/ {
+	#address-cells = <4>;
+	#size-cells = <0>;
+/*
+	cpus {
+		cpu@0 {
+			compatible = "arm,cortex-m4";
+			frequency = <168000000>;
+		};
+	};
+	*/
+};
+

@@ -80,6 +80,7 @@ struct stm32_i2c {
     uint8_t er_irq;
     uint32_t peripheral;
     */
+	int32_t wake;
 };
 
 static struct stm32_i2c *_devices[2] = {0, 0};
@@ -616,7 +617,7 @@ void i2c_ev_handler(struct stm32_i2c *self){
             } else if(self->isr.stop_sent){
 				// if this was the last byte and stop was sent then we are done
                 I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
-                thread_sem_give_from_isr(&self->done);
+                thread_sem_give_from_isr(&self->done, &self->wake);
             }
 		} break;
 		/* Master TRANSMITTER mode --------------------------*/
@@ -642,7 +643,7 @@ void i2c_ev_handler(struct stm32_i2c *self){
 			if(self->isr.stop_sent){
 				// stop has been sent and transmission has finished so we quit
                 I2C_ITConfig(self->hw, I2C_IT_EVT | I2C_IT_BUF | I2C_IT_ERR, DISABLE);
-                thread_sem_give_from_isr(&self->done);
+                thread_sem_give_from_isr(&self->done, &self->wake);
             } else if(self->isr.cursor == self->isr.len){
 				// we are done sending data but have not sent stop yet
 				I2C_AcknowledgeConfig(self->hw, DISABLE);
@@ -665,33 +666,37 @@ void i2c_ev_handler(struct stm32_i2c *self){
             (void)I2C_ReceiveData(self->hw);
             I2C_GenerateSTOP(self->hw, ENABLE);
             self->isr.error = -I2C_ERR_UNKNOWN_EVENT;
-            thread_sem_give_from_isr(&self->done);
+            thread_sem_give_from_isr(&self->done, &self->wake);
         } break;
     }
 }
 
 void I2C1_ER_IRQHandler(void){
-    struct stm32_i2c *dev = _devices[0];
-    if(!dev) return;
-    i2c_er_handler(dev);
+    struct stm32_i2c *self = _devices[0];
+    if(!self) return;
+    i2c_er_handler(self);
+	thread_yield_from_isr(self->wake); self->wake = 0;
 }
 
 void I2C1_EV_IRQHandler(void){
-    struct stm32_i2c *dev = _devices[0];
-    if(!dev) return;
-    i2c_ev_handler(dev);
+    struct stm32_i2c *self = _devices[0];
+    if(!self) return;
+    i2c_ev_handler(self);
+	thread_yield_from_isr(self->wake); self->wake = 0;
 }
 
 void I2C2_ER_IRQHandler(void){
-    struct stm32_i2c *dev = _devices[1];
-    if(!dev) return;
-    i2c_er_handler(dev);
+    struct stm32_i2c *self = _devices[1];
+    if(!self) return;
+    i2c_er_handler(self);
+	thread_yield_from_isr(self->wake); self->wake = 0;
 }
 
 void I2C2_EV_IRQHandler(void){
-    struct stm32_i2c *dev = _devices[1];
-    if(!dev) return;
-    i2c_ev_handler(dev);
+    struct stm32_i2c *self = _devices[1];
+    if(!self) return;
+    i2c_ev_handler(self);
+	thread_yield_from_isr(self->wake); self->wake = 0;
 }
 
 static const struct i2c_device_ops _stm32_i2c_ops = {

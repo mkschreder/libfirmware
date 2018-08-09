@@ -141,6 +141,36 @@ static const uint8_t _default_config_desc[] = {
     0x04, /* bDescriptorType: Interface */
     0x02, /* bInterfaceNumber: Number of Interface */
     0x00, /* bAlternateSetting: Alternate setting */
+    0x02, /* bNumEndpoints: One endpoints used */
+    0xff, /* bInterfaceClass: Communication Interface Class */
+    0x00, /* bInterfaceSubClass: Abstract Control Model */
+    0x00, /* bInterfaceProtocol: Common AT commands */
+    0x00, /* iInterface: */
+
+    /*Endpoint IN2 Descriptor*/
+    0x07, /* bLength: Endpoint Descriptor size */
+    0x05, /* bDescriptorType: Endpoint */
+    0x84, /* bEndpointAddress IN2 */
+    0x02, /* bmAttributes: Bulk */
+    64,   /* wMaxPacketSize: */
+    0x00,
+    0x00, /* bInterval: ignore for Bulk transfer */
+
+    /*Endpoint OUT3 Descriptor*/
+    0x07, /* bLength: Endpoint Descriptor size */
+    0x05, /* bDescriptorType: Endpoint */
+    0x05, /* bEndpointAddress */
+    0x02, /* bmAttributes: Bulk */
+    64,   /* wMaxPacketSize: */
+    0,
+    0x00 /* bInterval: ignore for Bulk transfer */
+
+#if 0
+    /*Interface Descriptor */
+    0x09, /* bLength: Interface Descriptor size */
+    0x04, /* bDescriptorType: Interface */
+    0x02, /* bInterfaceNumber: Number of Interface */
+    0x00, /* bAlternateSetting: Alternate setting */
     0x01, /* bNumEndpoints: One endpoints used */
     0x02, /* bInterfaceClass: Communication Interface Class */
     0x02, /* bInterfaceSubClass: Abstract Control Model */
@@ -211,6 +241,7 @@ static const uint8_t _default_config_desc[] = {
     64,   /* wMaxPacketSize: */
     0,
     0x00 /* bInterval: ignore for Bulk transfer */
+#endif
 };
 
 static const char *_default_vendor = "Default Vendor";
