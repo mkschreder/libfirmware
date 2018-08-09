@@ -27,6 +27,7 @@
 #include "serial.h"
 #include "list.h"
 #include "thread.h"
+#include "mutex.h"
 #include "driver.h"
 
 static serial_port_t _default_serial_port = 0;
@@ -65,13 +66,25 @@ int serial_set_printk_port(serial_port_t port){
 }
 
 int printk(const char *fmt, ...){
-	if(!_default_serial_port) return -1;
+    static bool _printk_mutex_inited = false;
+    static struct mutex _printk_lock;
     static char buf[80];
+
+	if(!_default_serial_port) return -1;
+    if(!_printk_mutex_inited) {
+        thread_mutex_init(&_printk_lock);
+        _printk_mutex_inited = true;
+    }
+
+    thread_mutex_lock(&_printk_lock);
 
 	va_list argptr;
 	va_start(argptr, fmt);
 	int len = vsnprintf(buf, sizeof(buf), fmt, argptr);
 	va_end(argptr);
+
+    thread_mutex_unlock(&_printk_lock);
+
 	return serial_write(_default_serial_port, buf, (size_t)len, 10);
 }
 

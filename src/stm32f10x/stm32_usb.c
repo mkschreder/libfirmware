@@ -179,6 +179,8 @@ struct stm32_usb {
     volatile USB_BufferDesc *ep_desc;
 
     int32_t wake;
+
+    struct semaphore isr_ready;
 };
 
 static struct stm32_usb *_devices[1] = {0};
@@ -196,7 +198,108 @@ void _stm32_usb_set_rx_status(struct stm32_usb *self, uint8_t epidx, uint16_t St
     register uint16_t val = (uint16_t)self->hw->EPR[epidx];
     self->hw->EPR[epidx]         = (val ^ (Stat & EP_STAT_RX)) & (EP_MASK | EP_STAT_RX);
 }
+static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx){
+    struct usb_endpoint *ep = self->dev.endpoints[epidx];
+    uint16_t count = (uint16_t)(self->ep_desc[epidx].RX_Count.Value & 0x3FF);
+    uint8_t *data = ep->rx_buffer;
+    uint16_t size = ep->rx_count;
 
+    if(!data || !size) return 0;
+
+    if(count > size) count = (uint16_t)size;
+
+    uint32_t n = (uint32_t)((count + 1) >> 1);/* /2*/
+    uint32_t i;
+    uint32_t *pdwVal = (uint32_t *)((uint32_t)(self->ep_desc[epidx].RX_Address.Value * 2) + USB_PBUFFER);
+    for (i = n; i != 0; i--){
+        *(uint16_t*)data = (uint16_t)(*pdwVal);
+        data+=2;
+
+        *pdwVal = 0;
+        pdwVal++;
+    }
+
+    // update pointers for next read
+    ep->rx_buffer = data;
+    ep->rx_count = (uint16_t)(ep->rx_count - count);
+
+	return count;
+}
+
+/* write a single buffer out to pma. The buffer must not be longer than maximum packet size */
+static size_t _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx){
+    struct usb_endpoint *ep = self->dev.endpoints[epidx];
+    uint8_t *data = ep->tx_buffer;
+    size_t size = ep->tx_count;
+
+    if(size && !data) return 0;
+
+    uint16_t max_size = self->dev.endpoints[epidx]->buffer_size;
+    if(size > max_size) size = max_size;
+
+    uint32_t n = (uint32_t)((size + 1) >> 1);   /* n = (wNBytes + 1) / 2 */
+    uint32_t i, temp1, temp2;
+    uint16_t *pdwVal;
+    pdwVal = (uint16_t *)((uint32_t)(self->ep_desc[epidx].TX_Address.Value * 2) + USB_PBUFFER);
+    for (i = n; i != 0; i--) {
+        temp1 = (uint16_t) *data;
+        data++;
+        temp2 = temp1 | (uint16_t)((uint16_t) * data << 8);
+        *pdwVal++ = (uint16_t)temp2;
+        pdwVal++;
+        data++;
+    }
+
+    self->ep_desc[epidx].TX_Count.Value = (uint16_t)size;
+
+    ep->tx_buffer = data;
+    ep->tx_count = (uint16_t)(ep->tx_count - size);
+
+    printk("TX %d\n", size);
+
+    return size;
+}
+
+void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx){
+    if(!self) return;
+    uint16_t epr  = (uint16_t)self->hw->EPR[epidx];
+    struct usb_endpoint *ep = self->dev.endpoints[epidx];
+
+    if(epr & EP_CTR_RX) {
+        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
+
+        // load data into buffer
+        _stm32_usb_pma_read(self, epidx);
+
+        // if there is space left in buffer enable reception and keep waiting for more data
+        if(ep->rx_count > 0){
+            // continue reception of more packets
+            _stm32_usb_set_rx_status(self, epidx, RX_VALID);
+        } else {
+            // we are ready
+            thread_sem_give(&ep->rx_ready);
+        }
+    }
+
+    if(epr & EP_CTR_TX){
+        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_TX;
+
+        if (self->addr) {
+            self->hw->DADDR = (self->hw->DADDR & 0x0080) | self->addr;
+            self->addr = 0;
+        }
+
+        // if we get here and the packet was an empty packet then it has already been sent
+        if(_stm32_usb_pma_write(self, epidx) > 0){
+            // if there was more data loaded then we mark transmit buffer for transmission
+            _stm32_usb_set_tx_status(self, epidx, TX_VALID);
+        } else {
+            // transmission has completed, load more data into pma and enable transmission again or bail
+            printk("TXDONE\n");
+            thread_sem_give(&ep->tx_ready);
+        }
+    }
+}
 
 void _stm32_usb_reset(struct stm32_usb *self){
     // reconfigure the pma descriptors
@@ -225,10 +328,8 @@ void _stm32_usb_reset(struct stm32_usb *self){
         self->hw->EPR[i] = (uint16_t)((uint16_t)i | endp_type);
 
         // start reception but do not respond to transmission requests
-        _stm32_usb_set_rx_status(self, i, RX_VALID);
+        _stm32_usb_set_rx_status(self, i, RX_NAK);
         _stm32_usb_set_tx_status(self, i, TX_NAK);
-
-        thread_sem_give_from_isr(&epb->tx_ready, &self->wake);
     }
 
     // enable all other interrupts and enable the usb peripheral
@@ -238,96 +339,11 @@ void _stm32_usb_reset(struct stm32_usb *self){
     self->hw->DADDR  = USB_DADDR_EF;
 }
 
-static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx, uint8_t *data, size_t size){
-    uint16_t count = (uint16_t)(self->ep_desc[epidx].RX_Count.Value & 0x3FF);
-    if(count > size) count = (uint16_t)size;
-
-    uint32_t n = (uint32_t)((count + 1) >> 1);/* /2*/
-    uint32_t i;
-    uint32_t *pdwVal = (uint32_t *)((uint32_t)(self->ep_desc[epidx].RX_Address.Value * 2) + USB_PBUFFER);
-    for (i = n; i != 0; i--){
-        *(uint16_t*)data = (uint16_t)(*pdwVal);
-        data+=2;
-
-        *pdwVal = 0;
-        pdwVal++;
-    }
-
-	return count;
-}
-
-/* write a single buffer out to pma. The buffer must not be longer than maximum packet size */
-static size_t _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx){
-    struct usb_endpoint *ep = self->dev.endpoints[epidx];
-    uint8_t *data = ep->buffer;
-    size_t size = ep->count;
-    uint16_t max_size = self->dev.endpoints[epidx]->buffer_size;
-    if(size > max_size) size = max_size;
-    uint32_t n = (uint32_t)((size + 1) >> 1);   /* n = (wNBytes + 1) / 2 */
-    uint32_t i, temp1, temp2;
-    uint16_t *pdwVal;
-    pdwVal = (uint16_t *)((uint32_t)(self->ep_desc[epidx].TX_Address.Value * 2) + USB_PBUFFER);
-    for (i = n; i != 0; i--) {
-        temp1 = (uint16_t) *data;
-        data++;
-        temp2 = temp1 | (uint16_t)((uint16_t) * data << 8);
-        *pdwVal++ = (uint16_t)temp2;
-        pdwVal++;
-        data++;
-    }
-
-    self->ep_desc[epidx].TX_Count.Value = (uint16_t)size;
-    //_stm32_usb_set_tx_status(self, epidx, TX_VALID);
-
-    ep->buffer += size;
-    ep->count = (uint16_t)(ep->count - size);
-
-    printk_isr("TX %d\n", size);
-
-    return size;
-}
-
-void _stm32_usb_handle_ep_request(struct stm32_usb *self, int dir, uint8_t epidx){
-    if(!self) return;
-    uint16_t epr  = (uint16_t)self->hw->EPR[epidx];
-    struct usb_endpoint *ep = self->dev.endpoints[epidx];
-
-    if(epr & EP_CTR_RX) {
-        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_RX;
-
-        _stm32_usb_set_rx_status(self, epidx, RX_NAK);
-
-        thread_sem_give_from_isr(&ep->rx_ready, &self->wake);
-    }
-
-    if(epr & EP_CTR_TX){
-        self->hw->EPR[epidx] = epr & EP_MASK & ~EP_CTR_TX;
-
-        _stm32_usb_set_tx_status(self, epidx, TX_NAK);
-
-        printk_isr("TXDONE\n");
-        if (self->addr) {
-            self->hw->DADDR = (self->hw->DADDR & 0x0080) | self->addr;
-            self->addr = 0;
-        }
-
-        // if we get here and the packet was an empty packet then it has already been sent
-        if(_stm32_usb_pma_write(self, epidx) > 0){
-            // if there was more data loaded then we mark transmit buffer for transmission
-            _stm32_usb_set_tx_status(self, epidx, TX_VALID);
-        } else {
-            // transmission has completed, load more data into pma and enable transmission again or bail
-            thread_sem_give_from_isr(&ep->tx_ready, &self->wake);
-        }
-    }
-}
-
-void USB_LP_CAN1_RX0_IRQHandler(){
-	struct stm32_usb *self = _devices[0];
-
+void _stm32_usb_handle_isr(struct stm32_usb *self){
     uint16_t stat = (uint16_t)self->hw->ISTR;
     if (stat & USB_ISTR_RESET) { // Reset
-        printk_isr("URST\n");
+        //self->usb_is_ready = false;
+        printk("URST\n");
         /*
          * Set when the USB peripheral detects an active USB RESET signal at its inputs. The USB
          * peripheral, in response to a RESET, just resets its internal protocol state machine, generating
@@ -353,7 +369,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * during Isochronous transfers (no isochronous transaction is anyway retried) leading to a loss
          * of data in this case. 
          */
-        printk_isr("PMAOVR\n");
+        printk("PMAOVR\n");
     }
     if (stat & USB_ISTR_SUSP) {
         self->hw->ISTR &= (uint16_t)~USB_ISTR_SUSP;
@@ -363,7 +379,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * immediately after any USB reset and it is disabled by the hardware when the suspend mode
          * is active (FSUSP=1) until the end of resume sequence.
          */
-        //printk_isr("SUSP\n");
+        //printk("SUSP\n");
     }
     if (stat & USB_ISTR_ERR) {
         self->hw->ISTR &= (uint32_t)~USB_ISTR_ERR;
@@ -382,7 +398,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * the USB bus, to flag possible problems to the user (e.g. loose connector, too noisy
          * environment, broken conductor in the USB cable and so on). 
          */
-        printk_isr("ERR\n");
+        printk("ERR\n");
     }
     if (stat & USB_ISTR_WKUP) {
         self->hw->ISTR &= (uint32_t)~USB_ISTR_WKUP;
@@ -392,7 +408,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * CTLR register and activates the USB_WAKEUP line, which can be used to notify the rest of
          * the device (e.g. wakeup unit) about the start of the resume process.
          */
-        printk_isr("WKUP\n");
+        printk("WKUP\n");
     }
     if (stat & USB_ISTR_SOF) {
         self->hw->ISTR &= (uint32_t)~USB_ISTR_SOF;
@@ -402,7 +418,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * 1 mS synchronization event to the USB host and to safely read the USB_FNR register which
          * is updated at the SOF packet reception (this could be useful for isochronous applications).
          */
-        //printk_isr("SOF\n");
+        //printk("SOF\n");
     }
     if (stat & USB_ISTR_ESOF) {
         self->hw->ISTR &= (uint32_t)~USB_ISTR_ESOF;
@@ -414,7 +430,7 @@ void USB_LP_CAN1_RX0_IRQHandler(){
          * generated. This bit is set even when the missing SOF packets occur while the Suspend
          * Timer is not yet locked.
          */
-        //printk_isr("ESOF\n");
+        //printk("ESOF\n");
     }
 
     while((stat = (uint16_t)self->hw->ISTR) & USB_ISTR_CTR){
@@ -429,6 +445,14 @@ void USB_LP_CAN1_RX0_IRQHandler(){
         uint8_t dir = !!(stat & USB_ISTR_DIR);
         _stm32_usb_handle_ep_request(self, dir, epidx);
     }
+}
+
+void USB_LP_CAN1_RX0_IRQHandler(){
+	struct stm32_usb *self = _devices[0];
+
+    thread_sem_give_from_isr(&self->isr_ready, &self->wake);
+
+	NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
 
     thread_yield_from_isr(self->wake);
     self->wake = 0;
@@ -444,31 +468,34 @@ static int _usb_device_write(usbd_device_t dev, uint8_t epidx,  const void *ptr,
     struct usb_endpoint *ep = self->dev.endpoints[epidx];
     uint8_t *data = (uint8_t*)ptr;
 
-    int ret = 0;
+    ep->tx_buffer = data;
+    ep->tx_count = (uint16_t)size;
+
+    // load the first packet into memory and enable transmission
+    _stm32_usb_pma_write(self, epidx);
+
+    // start transmission
+    _stm32_usb_set_tx_status(self, epidx, TX_VALID);
+
+    // wait until current transmission is done
+    int ret;
     if((ret = thread_sem_take_wait(&ep->tx_ready, timeout_ms)) < 0) {
         goto err;
     }
 
-    NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+    // this is necessary if the transfer is multiple of buffer size (send empty packet)
+    if(size && size % ep->buffer_size == 0) {
+        _stm32_usb_pma_write(self, epidx);
+        _stm32_usb_set_tx_status(self, epidx, TX_VALID);
+        if((ret = thread_sem_take_wait(&ep->tx_ready, timeout_ms)) < 0) {
+            goto err;
+        }
+    }
 
-    ep->buffer = data;
-    ep->count = (uint16_t)size;
-
-    // load the first packet into memory and enable transmission
-    _stm32_usb_pma_write(self, epidx);
-    _stm32_usb_set_tx_status(self, epidx, TX_VALID);
-
-    NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-/*
-        data += sent;
-        size -= sent;
-        count += (int)sent;
-    } while(size);
-*/
-    return (int)(size - ep->count);
+    return (int)(size - ep->tx_count);
 err:
     dbg_printk("TX timeout\n");
-    return (ep->count != size)?(int)(size - ep->count):-ETIMEDOUT;
+    return (ep->tx_count != size)?(int)(size - ep->tx_count):-ETIMEDOUT;
 }
 
 static int _usb_device_read(usbd_device_t dev, uint8_t epidx, void *ptr, size_t size, uint32_t timeout_ms){
@@ -477,33 +504,29 @@ static int _usb_device_read(usbd_device_t dev, uint8_t epidx, void *ptr, size_t 
     struct usb_endpoint *ep = self->dev.endpoints[epidx];
     uint8_t *data = (uint8_t*)ptr;
 
-    do {
-        int ret = 0;
-        // tell the usb peripheral that we are ready for a frame
-	    NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
-        _stm32_usb_set_rx_status(self, epidx, RX_VALID);
-	    NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    // wait until usb interrupt is ready to accept reception requests
+    ep->rx_buffer = data;
+    ep->rx_count = (uint16_t)size;
 
-        // wait for a frame to be received
-        if((ret = thread_sem_take_wait(&ep->rx_ready, timeout_ms)) < 0){
-            printk_isr("RXTOUT\n");
-            return ret;
-        }
+    // start reception
+    _stm32_usb_set_rx_status(self, epidx, RX_VALID);
 
-	    NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+    // wait for reception to be completed
+    int received;
+    if(thread_sem_take_wait(&ep->rx_ready, timeout_ms) < 0){
+        _stm32_usb_set_rx_status(self, epidx, RX_NAK);
+        printk("RXTOUT\n");
+        received = -ETIMEDOUT;
+    } else {
+        received = (int)(size - ep->rx_count);
+    }
 
-        // attempt to read the pma of an endpoint
-        size_t len = (size > ep->buffer_size)?ep->buffer_size:size;
-        int count = _stm32_usb_pma_read(self, epidx, data, len);
+    ep->rx_buffer = 0;
+    ep->rx_count = 0;
 
-	    NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-
-        // use number of bytes actually received to increment cursor
-        data += count;
-        size -= (size_t)count;
-    } while(size);
-
-    return 0;
+    // epcount now contains number of bytes left to receive
+    // return number of bytes received
+    return received;
 }
 
 static const struct usbd_device_ops _usb_device_ops = {
@@ -539,6 +562,9 @@ static int _stm32_usb_send_descriptor(struct stm32_usb *self, int type, uint8_t 
     }
     return 0;
 error:
+    printk("STALL\n");
+    //_stm32_usb_set_tx_status(self, 0, TX_STALL);
+    //_stm32_usb_set_rx_status(self, 0, RX_STALL);
     _usb_device_write(&self->dev.ops, 0, NULL, 0, USB_CONTROL_WRITE_TIMEOUT);
     return -1;
 }
@@ -556,7 +582,6 @@ static int _stm32_usb_control_setup(struct stm32_usb *self, volatile struct usb_
         break;
     case USB_REQ(0x05, USB_REQ_DIR_OUT | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV):
         self->addr = (uint8_t)(packet->wValueL & 0x7F);
-        //self->hw->DADDR = (self->hw->DADDR & 0x0080) | self->addr;
         _usb_device_write(&self->dev.ops, 0, (uint8_t*)&self->status, 0, USB_CONTROL_WRITE_TIMEOUT);
         break;
     case USB_REQ(USB_REQUEST_GET_CONFIGURATION, USB_REQ_DIR_IN | USB_REQ_TYPE_STD | USB_REQ_RCP_DEV): {
@@ -573,13 +598,26 @@ static int _stm32_usb_control_setup(struct stm32_usb *self, volatile struct usb_
     }
     return 0;
 error:
-    _stm32_usb_set_rx_status(self, 0, RX_STALL);
-    _stm32_usb_set_tx_status(self, 0, TX_STALL);
+    printk("STALL2\n");
+    _usb_device_write(&self->dev.ops, 0, NULL, 0, USB_CONTROL_WRITE_TIMEOUT);
+    //_stm32_usb_set_rx_status(self, 0, RX_STALL);
+    //_stm32_usb_set_tx_status(self, 0, TX_STALL);
     return -1;
 }
 
 
 // control handler task for a usb device. This task takes care of control transactions.
+static void _usb_interrupt_task(void *ptr){
+    struct stm32_usb *self = (struct stm32_usb*)ptr;
+    while(1){
+        thread_sem_take(&self->isr_ready);
+
+        _stm32_usb_handle_isr(self);
+
+	    NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    }
+}
+
 static void _usb_control_task(void *ptr){
     struct stm32_usb *self = (struct stm32_usb*)ptr;
     while(1){
@@ -610,6 +648,7 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
     struct stm32_usb *self = _devices[0] = kzmalloc(sizeof(struct stm32_usb));
     self->hw = (volatile USB_TypeDef *)USB_BASE;
     self->ep_desc = (volatile USB_BufferDesc*)USB_PBUFFER;
+    thread_sem_init(&self->isr_ready);
 
     usbd_device_init(&self->dev, fdt, fdt_node, &_usb_device_ops);
 
@@ -633,6 +672,14 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
     self->hw->CNTR   = USB_CNTR_RESETM;
 
     usbd_device_register(&self->dev);
+
+	thread_create(
+		  _usb_interrupt_task,
+		  "usb",
+		  250,
+		  self,
+		  4,
+		  NULL);
 
 	thread_create(
 		  _usb_control_task,

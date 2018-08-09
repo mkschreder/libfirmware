@@ -26,10 +26,15 @@ int thread_sem_give(struct semaphore *self){
 	return -1;
 }
 
-int thread_sem_give_from_isr(struct semaphore *self){
-	BaseType_t wake = 0;
-	if(xSemaphoreGiveFromISR(self->sem, &wake) == pdTRUE){
-		if(wake) return 1;
+int thread_sem_give_from_isr(struct semaphore *self, int32_t *wake){
+	if(xSemaphoreGiveFromISR(self->sem, wake) == pdTRUE){
+		return 0;
+	}
+	return -1;
+}
+
+int thread_sem_take_from_isr(struct semaphore *self, int32_t *wake){
+	if(xSemaphoreTakeFromISR(self->sem, wake) == pdTRUE){
 		return 0;
 	}
 	return -1;

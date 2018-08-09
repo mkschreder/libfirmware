@@ -39,7 +39,7 @@ int thread_queue_overwrite(struct thread_queue *self, void *data){
 }
 
 long thread_queue_length( struct thread_queue *self){
-	return (long)uxQueueSpacesAvailable(self->handle);
+	return (long)uxQueueMessagesWaiting(self->handle);
 }
 
 int thread_queue_cleanup(struct thread_queue *self){

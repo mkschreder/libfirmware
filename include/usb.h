@@ -152,8 +152,8 @@ struct __packed usb_endpoint_message {
 struct usb_endpoint {
     struct semaphore tx_ready;
     struct semaphore rx_ready;
-    uint8_t *buffer;
-    uint16_t count;
+    uint8_t *tx_buffer, *rx_buffer;
+    uint16_t tx_count, rx_count;
     uint16_t buffer_size;
     struct usb_endpoint_descriptor *desc;
 };

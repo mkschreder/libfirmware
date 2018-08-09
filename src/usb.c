@@ -217,14 +217,16 @@ static const char *_default_vendor = "Default Vendor";
 static const char *_default_product = "Default Product";
 
 static struct usb_string_descriptor *_alloc_string_desc(const char *str){
-    size_t dat_len = strlen(str) * 2;
+    size_t str_len = strlen(str);
     // limit string size so our descriptor does not become too large
-    if(dat_len > 127 - 2) dat_len = 125;
+    if(str_len > 126) str_len = 126;
+
+    size_t dat_len = str_len * 2;
     struct usb_string_descriptor *s = kzmalloc(sizeof(struct usb_string_descriptor) + dat_len);
-    s->bLength = (uint8_t)(2 + dat_len);
+    s->bLength = (uint8_t)(sizeof(struct usb_string_descriptor) + dat_len);
     s->bDescriptorType = USB_DESC_TYPE_STR;
     uint8_t *data = (uint8_t*)s + sizeof(struct usb_string_descriptor);
-    for(size_t c = 0; c < dat_len; c++){
+    for(size_t c = 0; c < str_len; c++){
         data[c * 2] = str[c];
         data[c * 2 + 1] = 0;
     }

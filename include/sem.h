@@ -34,3 +34,4 @@ int thread_sem_take(struct semaphore *self);
 int thread_sem_take_wait(struct semaphore *self, uint32_t timeout);
 int thread_sem_give(struct semaphore *self);
 int thread_sem_give_from_isr(struct semaphore *self, int32_t *wake);
+int thread_sem_take_from_isr(struct semaphore *self, int32_t *wake);
