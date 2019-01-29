@@ -1,5 +1,5 @@
 #include <stm32f4xx.h>
-#include <libfirmware/chip.h>
+#include "chip.h"
 
 // Activate the bootloader without BOOT* pins.
 void chip_reset_to_bootloader(void) {

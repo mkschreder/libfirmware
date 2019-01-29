@@ -124,6 +124,12 @@ void UART5_IRQHandler(void){
 	//portYIELD_FROM_ISR(wake);
 }
 
+void USART6_IRQHandler(void){
+	struct stm32_uart *hw = _get_hw(6);
+	int32_t __unused wake = _uart_irq(hw);
+	//portYIELD_FROM_ISR(wake);
+}
+
 static const struct serial_ops _serial_ops = {
 	.read = _serial_read,
 	.write = _serial_write
@@ -136,6 +142,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
 
 	int baud = fdt_get_int_or_default(fdt, (int)fdt_node, "baud", 9600);
 	USART_TypeDef *UARTx = (USART_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
@@ -144,6 +151,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	int irq_sub_prio = fdt_get_int_or_default(fdt, (int)fdt_node, "irq_sub_prio", 0);
 	int tx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "tx_queue", 64);
 	int rx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "rx_queue", 64);
+	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
 
 	if(UARTx == 0) {
 		return -EINVAL;
@@ -160,6 +168,8 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 		idx = 4;
 	} else if(UARTx == UART5) {
 		idx = 5;
+	} else if(UARTx == USART6) {
+		idx = 6;
 	};
 
 	if(idx == -1){
@@ -209,6 +219,8 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	if(serial_device_register(&self->dev) < 0){
 		return -1;
 	}
+
+    if(def_port) serial_set_printk_port(&self->dev.ops);
 
 	return 0;
 }

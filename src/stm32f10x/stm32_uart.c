@@ -24,6 +24,7 @@ struct stm32_uart {
 	struct thread_queue tx_queue;
 	struct thread_queue rx_queue;
     struct mutex wr_lock, rd_lock;
+    int crlf;
 };
 
 
@@ -37,6 +38,12 @@ static int _serial_write(serial_port_t serial, const void *data, size_t size, ui
 	uint8_t *buf = (uint8_t*)data;
 	int sent = 0;
 	for(size_t c = 0; c < size; c++){
+        if(self->crlf && buf[c] == '\n') {
+            char ch = '\r';
+            if(thread_queue_send(&self->tx_queue, &ch, timeout) < 0){
+                break;
+            }
+        }
 		if(thread_queue_send(&self->tx_queue, &buf[c], timeout) < 0){
 			// on timeout we break and just return the number of bytes sent so far
 			break;
@@ -66,6 +73,7 @@ static int _serial_read(serial_port_t serial, void *data, size_t size, uint32_t 
         thread_mutex_unlock(&self->rd_lock);
         return -ETIMEDOUT;
     }
+    thread_mutex_unlock(&self->rd_lock);
 	return pos;
 }
 
@@ -79,9 +87,9 @@ static int32_t _uart_irq(struct stm32_uart *hw){
 	int32_t wake = 0;
 	// we check for incoming data on this device, ack the interrupt and copy data into the queue
 	if( USART_GetITStatus(hw->hw, USART_IT_RXNE) ){
-		USART_ClearITPendingBit(hw->hw, USART_IT_RXNE);
 		char t = (char)hw->hw->DR;
 		thread_queue_send_from_isr(&hw->rx_queue, &t, &wake);
+		USART_ClearITPendingBit(hw->hw, USART_IT_RXNE);
 	}
 
 	// we check for transmission read on this device, ack the interrupt and either send next byte or turn off the interrupt
@@ -134,6 +142,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	int tx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "tx_queue", 64);
 	int rx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "rx_queue", 64);
 	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
+	int crlf = fdt_get_int_or_default(fdt, (int)fdt_node, "insert-cr-before-lf", 1);
 
 	if(UARTx == 0) {
 		return -EINVAL;
@@ -171,6 +180,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
     thread_mutex_init(&self->wr_lock);
     thread_mutex_init(&self->rd_lock);
 
+    self->crlf = crlf;
 	self->hw = UARTx;
 	_uart_ptr[idx - 1] = self;
 
@@ -186,7 +196,6 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	conf.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	conf.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 	USART_Init(UARTx, &conf);
-	(void)irq;
 
 	if(irq > 0){
 		NVIC_InitTypeDef nvic;

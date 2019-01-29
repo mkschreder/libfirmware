@@ -30,10 +30,11 @@
   *
   ******************************************************************************
   */
+#include "stm32f4xx_rcc.h"
+
 #if defined (STM32F40_41xxx)
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_fsmc.h"
-#include "stm32f4xx_rcc.h"
 
 /** @addtogroup STM32F4xx_StdPeriph_Driver
   * @{

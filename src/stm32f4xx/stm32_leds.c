@@ -1,5 +1,5 @@
-#include <libfirmware/leds.h>
-#include <libfirmware/driver.h>
+#include "leds.h"
+#include "driver.h"
 #include <libfdt/libfdt.h>
 #include <stm32f4xx_gpio.h>
 

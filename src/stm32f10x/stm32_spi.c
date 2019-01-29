@@ -195,7 +195,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
     spi.SPI_CPOL = SPI_CPOL_High;
     spi.SPI_CPHA = SPI_CPHA_2Edge;
     spi.SPI_NSS = SPI_NSS_Soft;
-    spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
     spi.SPI_FirstBit = SPI_FirstBit_MSB;
 
     SPI_Init(SPIx, &spi);

@@ -35,6 +35,16 @@
 #define USB_HIBYTE(x) ((uint8_t)(((x) & 0xFF00) >> 8))
 #define USB_WORD_HL(h, l) ((uint16_t)(((uint16_t)(h) << 8) | ((l) & 0xff)))
 
+/* EP_TYPE: EndPoint Types */
+#define USB_EP_TYPE_CONTROL 0x00        /* BULK EndPoint */
+#define USB_EP_TYPE_ISOCHRONOUS 0x01     /* CONTROL EndPoint */
+#define USB_EP_TYPE_BULK 0x02 /* ISOCHRONOUS EndPoint */
+#define USB_EP_TYPE_INTERRUPT 0x03   /* INTERRUPT EndPoint */
+#define USB_EP_ISO_NO_SYNC (0x0 << 2)
+#define USB_EP_ISO_ASYNC (0x1 << 2)
+#define USB_EP_ISO_ADAPTIVE (0x2 << 2)
+#define USB_EP_ISO_SYNC (0x3 << 2)
+
 struct __packed usb_device_descriptor {
     uint8_t bLength;
     uint8_t bDescriptorType;

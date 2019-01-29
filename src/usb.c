@@ -39,7 +39,7 @@ static struct usb_endpoint_descriptor _ep0_desc = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x00, /* bEndpointAddress IN1 */
-    0x02, /* bmAttributes: Control */
+    USB_EP_TYPE_CONTROL, /* bmAttributes: Control */
     0x08, /* wMaxPacketSize LO: */
     0x00, /* wMaxPacketSize HI: */
     0x00, /* bInterval: */
@@ -101,7 +101,7 @@ static const uint8_t _default_config_desc[] = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x81, /* bEndpointAddress IN1 */
-    0x03, /* bmAttributes: Interrupt */
+    USB_EP_TYPE_INTERRUPT, /* bmAttributes: Interrupt */
     0x08, /* wMaxPacketSize LO: */
     0x00, /* wMaxPacketSize HI: */
     0x10, /* bInterval: */
@@ -122,7 +122,7 @@ static const uint8_t _default_config_desc[] = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x82, /* bEndpointAddress IN2 */
-    0x02, /* bmAttributes: Bulk */
+    USB_EP_TYPE_BULK, /* bmAttributes: Bulk */
     64,   /* wMaxPacketSize: */
     0x00,
     0x00, /* bInterval: ignore for Bulk transfer */
@@ -131,7 +131,7 @@ static const uint8_t _default_config_desc[] = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x03, /* bEndpointAddress */
-    0x02, /* bmAttributes: Bulk */
+    USB_EP_TYPE_BULK, /* bmAttributes: Bulk */
     64,   /* wMaxPacketSize: */
     0,
     0x00, /* bInterval: ignore for Bulk transfer */
@@ -151,7 +151,7 @@ static const uint8_t _default_config_desc[] = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x84, /* bEndpointAddress IN2 */
-    0x02, /* bmAttributes: Bulk */
+    USB_EP_TYPE_ISOCHRONOUS, /* bmAttributes: Bulk */
     64,   /* wMaxPacketSize: */
     0x00,
     0x00, /* bInterval: ignore for Bulk transfer */
@@ -160,7 +160,7 @@ static const uint8_t _default_config_desc[] = {
     0x07, /* bLength: Endpoint Descriptor size */
     0x05, /* bDescriptorType: Endpoint */
     0x05, /* bEndpointAddress */
-    0x02, /* bmAttributes: Bulk */
+    USB_EP_TYPE_ISOCHRONOUS | USB_EP_ISO_ASYNC, /* bmAttributes: Bulk */
     64,   /* wMaxPacketSize: */
     0,
     0x00 /* bInterval: ignore for Bulk transfer */

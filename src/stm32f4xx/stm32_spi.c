@@ -26,12 +26,14 @@ struct stm32_spi _devices[2];
 // RX
 void DMA2_Stream0_IRQHandler(void){
 	struct stm32_spi *self = &_devices[0];
+    int32_t wake = 0;
 	if(DMA_GetITStatus(DMA2_Stream0, DMA_IT_TCIF0) != RESET){
 		DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0);
 
 		SPI_Cmd(SPI1, DISABLE);
-		thread_sem_give_from_isr(&self->rx_sem);
+		thread_sem_give_from_isr(&self->rx_sem, &wake);
 	}
+    thread_yield_from_isr(wake);
 }
 
 // TX
@@ -44,12 +46,14 @@ void DMA2_Stream3_IRQHandler(void){
 // RX
 void DMA1_Stream3_IRQHandler(void){
 	struct stm32_spi *self = &_devices[1];
+    int32_t wake = 0;
 	if(DMA_GetITStatus(DMA1_Stream3, DMA_IT_TCIF3) != RESET){
 		DMA_ClearITPendingBit(DMA1_Stream3, DMA_IT_TCIF3);
 
-		thread_sem_give_from_isr(&self->rx_sem);
+		thread_sem_give_from_isr(&self->rx_sem, &wake);
 		SPI_Cmd(SPI2, DISABLE);
 	}
+    thread_yield_from_isr(wake);
 }
 
 // TX

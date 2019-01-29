@@ -79,6 +79,7 @@ libfirmware_a_SOURCES += \
     stm32f10x/stm32_adc.c\
     stm32f10x/stm32_can.c\
     stm32f10x/stm32_chip.c\
+    stm32f10x/stm32_enc_out.c\
     stm32f10x/stm32_gpio.c\
     stm32f10x/stm32_i2c.c\
     stm32f10x/stm32_leds.c\
@@ -101,7 +102,7 @@ libfirmware_a_SOURCES += \
 	freertos/kernel/timers.c\
 	freertos/kernel/portable/MemMang/heap_1.c\
 	freertos/kernel/portable/GCC/ARM_CM3/port.c
-libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
 endif
 
 STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
@@ -170,14 +171,19 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
 	freertos/kernel/portable/MemMang/heap_2.c\
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
 
+if WITH_TARGET_STM32F427
+libfirmware_a_SOURCES += $(STM32F4XX_FILES)
+libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+endif
+
 if WITH_TARGET_STM32F429
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
-libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
 endif
 
 if WITH_TARGET_STM32F407
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
-libfirmware_a_CFLAGS += -I$(top_srcdir)/include -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 endif
 
 AUTOMAKE_OPTIONS = subdir-objects

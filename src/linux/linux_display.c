@@ -1,10 +1,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <libfirmware/driver.h>
-#include <libfirmware/gpio.h>
-#include <libfirmware/display.h>
-#include <libfirmware/mutex.h>
+#include "driver.h"
+#include "gpio.h"
+#include "display.h"
+#include "mutex.h"
 
 #include <libfdt/libfdt.h>
 

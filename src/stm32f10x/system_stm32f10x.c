@@ -69,6 +69,7 @@ void SystemInit(void)
 	SCB->AIRCR = AIRCR_VECTKEY_MASK | NVIC_PriorityGroup_4;
 
 	SetSysClock(false);
+    SystemCoreClockUpdate();
 
     __libc_init_array();
 

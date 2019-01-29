@@ -639,6 +639,8 @@ WITH_TARGET_STM32F10X_FALSE
 WITH_TARGET_STM32F10X_TRUE
 WITH_TARGET_STM32F407_FALSE
 WITH_TARGET_STM32F407_TRUE
+WITH_TARGET_STM32F427_FALSE
+WITH_TARGET_STM32F427_TRUE
 WITH_TARGET_STM32F429_FALSE
 WITH_TARGET_STM32F429_TRUE
 WITH_TARGET_LINUX_FALSE
@@ -12049,7 +12051,7 @@ CC=$lt_save_CC
 if test "${with_target+set}" = set; then :
   withval=$with_target;
 else
-  with_target=linux
+  as_fn_error $? "\"\nYou must specify target for libfirmware!\n    Use --with-target=<target> to set target!\n\"" "$LINENO" 5
 fi
 
 
@@ -12078,6 +12080,20 @@ fi
 if test -z "$WITH_TARGET_STM32F429_TRUE"; then :
   (
 $as_echo "#define WITH_TARGET_STM32F429 1" >>confdefs.h
+)
+fi
+
+ if test x$with_target = xstm32f427; then
+  WITH_TARGET_STM32F427_TRUE=
+  WITH_TARGET_STM32F427_FALSE='#'
+else
+  WITH_TARGET_STM32F427_TRUE='#'
+  WITH_TARGET_STM32F427_FALSE=
+fi
+
+if test -z "$WITH_TARGET_STM32F427_TRUE"; then :
+  (
+$as_echo "#define WITH_TARGET_STM32F427 1" >>confdefs.h
 )
 fi
 
@@ -12287,6 +12303,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_STM32F429_TRUE}" && test -z "${WITH_TARGET_STM32F429_FALSE}"; then
   as_fn_error $? "conditional \"WITH_TARGET_STM32F429\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WITH_TARGET_STM32F427_TRUE}" && test -z "${WITH_TARGET_STM32F427_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_TARGET_STM32F427\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_STM32F407_TRUE}" && test -z "${WITH_TARGET_STM32F407_FALSE}"; then

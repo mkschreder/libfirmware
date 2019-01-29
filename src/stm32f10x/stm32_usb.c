@@ -70,11 +70,10 @@
 #define RX_NAK 0x2000     /* NAKed */
 #define RX_VALID 0x3000   /* Valid */
 
-/* EP_TYPE: EndPoint Types */
-#define EP_BULK 0x0000        /* BULK EndPoint */
-#define EP_CONTROL 0x0200     /* CONTROL EndPoint */
-#define EP_ISOCHRONOUS 0x0400 /* ISOCHRONOUS EndPoint */
-#define EP_INTERRUPT 0x0600   /* INTERRUPT EndPoint */
+#define STM32USB_EP_TYPE_BULK 0x0000        /* BULK EndPoint */
+#define STM32USB_EP_TYPE_CONTROL 0x0200     /* CONTROL EndPoint */
+#define STM32USB_EP_TYPE_ISOCHRONOUS 0x0400 /* ISOCHRONOUS EndPoint */
+#define STM32USB_EP_TYPE_INTERRUPT 0x0600   /* INTERRUPT EndPoint */
 
 // maximum number of supported eps by stm32
 #define MAX_ENDPOINTS 8
@@ -205,7 +204,7 @@ void _stm32_usb_set_rx_status(struct stm32_usb *self, uint8_t epidx, uint16_t St
 static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx, uint8_t *data, size_t size){
     uint16_t count = (uint16_t)(self->ep_desc[epidx].RX_Count.Value & 0x3FF);
 
-    if(!data || !size) return 0;
+    if(!self || !data || !size) return 0;
 
     if(count > size) count = (uint16_t)size;
 
@@ -225,7 +224,7 @@ static int _stm32_usb_pma_read(struct stm32_usb *self, uint8_t epidx, uint8_t *d
 
 /* write a single buffer out to pma. The buffer must not be longer than maximum packet size */
 static int _stm32_usb_pma_write(struct stm32_usb *self, uint8_t epidx, const uint8_t *data, size_t size){
-    if(size && !data) return 0;
+    if(!self || (size && !data)) return 0;
 
     uint16_t max_size = self->dev.endpoints[epidx]->buffer_size;
 
@@ -288,7 +287,13 @@ static void _stm32_usb_configure_endpoints(struct stm32_usb *self){
         struct usb_endpoint *epb = self->dev.endpoints[i];
         if(!epb) continue;
         uint16_t buf_size = USB_WORD_HL(epb->desc->wMaxPacketSizeH, epb->desc->wMaxPacketSizeL);
-        uint16_t endp_type = (uint16_t)((uint16_t)(epb->desc->bmAttributes & 0x6) << 8);
+        uint16_t endp_type = 0;
+        switch(epb->desc->bmAttributes & 0x3){
+            case USB_EP_TYPE_CONTROL: endp_type = STM32USB_EP_TYPE_CONTROL; break;
+            case USB_EP_TYPE_BULK: endp_type = STM32USB_EP_TYPE_BULK; break;
+            case USB_EP_TYPE_ISOCHRONOUS: endp_type = STM32USB_EP_TYPE_ISOCHRONOUS; break;
+            case USB_EP_TYPE_INTERRUPT: endp_type = STM32USB_EP_TYPE_INTERRUPT; break;
+        }
 
         self->ep_desc[i].TX_Address.Value = (uint16_t)Addr;
         self->ep_desc[i].TX_Count.Value   = 0;
@@ -429,6 +434,17 @@ void _stm32_usb_handle_isr(struct stm32_usb *self){
         uint8_t dir = !!(stat & USB_ISTR_DIR);
         _stm32_usb_handle_ep_request(self, dir, epidx);
     }
+}
+
+void USB_HP_CAN1_TX_IRQHandler(){
+    struct stm32_usb *self = _devices[0];
+
+    thread_sem_give_from_isr(&self->isr_ready, &self->wake);
+
+	NVIC_DisableIRQ(USB_HP_CAN1_TX_IRQn);
+
+    thread_yield_from_isr(self->wake);
+    self->wake = 0;
 }
 
 void USB_LP_CAN1_RX0_IRQHandler(){
@@ -608,6 +624,7 @@ static void _usb_interrupt_task(void *ptr){
         _stm32_usb_handle_isr(self);
 
 	    NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+	    NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
     }
 }
 
@@ -630,6 +647,7 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
 	NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+	NVIC_DisableIRQ(USB_HP_CAN1_TX_IRQn);
 
 	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
@@ -659,8 +677,11 @@ static int _stm32_usb_probe(void *fdt, int fdt_node){
     nvic.NVIC_IRQChannelSubPriority = 0;
     nvic.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic);
+	nvic.NVIC_IRQChannel = USB_HP_CAN1_TX_IRQn;
+    NVIC_Init(&nvic);
 
     NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
 
     // clear reset bit and enable reset interrupt
     self->hw->CNTR   = USB_CNTR_RESETM;

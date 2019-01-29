@@ -2,7 +2,7 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_tim.h"
-#include <libfirmware/pwm.h>
+#include "pwm.h"
 
 static void _led_pwm_init(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
