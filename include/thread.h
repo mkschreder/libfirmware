@@ -59,3 +59,4 @@ void thread_meminfo();
 unsigned long thread_get_free_heap();
 unsigned long thread_get_total_heap();
  
+void thread_update_clocks();

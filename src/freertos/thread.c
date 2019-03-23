@@ -33,9 +33,15 @@ int thread_sleep_ms(uint32_t ms){
 }
 
 int thread_sleep_us(uint32_t us){
+	// TODO: this needs to be fixed by making it portable!
+	return thread_sleep_ms(1);
+	/*
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
     uint32_t ms = us / 1000;
     if(ms == 0){
-        uint32_t ticks = SystemCoreClock / 1000000 / 5 * us;
+        uint32_t ticks = clocks.HCLK_Frequency / 1000000 / 5 * us;
         asm volatile (  "MOV R0,%[loops]\n\t"\
             "1: \n\t"\
             "SUB R0, #1\n\t"\
@@ -46,6 +52,7 @@ int thread_sleep_us(uint32_t us){
     }
 
     return thread_sleep_ms((ms == 0)?1:ms);
+	*/
 }
 
 void thread_yield_from_isr(int32_t wake){
@@ -152,5 +159,4 @@ void thread_meminfo(){
 		printk("(none)\n");
 	}
 }
-
 
