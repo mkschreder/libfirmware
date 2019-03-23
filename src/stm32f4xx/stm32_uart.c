@@ -21,6 +21,7 @@ struct stm32_uart {
 	USART_TypeDef *hw;
 	struct thread_queue tx_queue;
 	struct thread_queue rx_queue;
+    int crlf;
 };
 
 #define UART_NUM_DEVICES 6
@@ -32,6 +33,12 @@ static int _serial_write(serial_port_t serial, const void *data, size_t size, ui
 	uint8_t *buf = (uint8_t*)data;
 	int sent = 0;
 	for(size_t c = 0; c < size; c++){
+		if(self->crlf && buf[c] == '\n') {
+            char ch = '\r';
+            if(thread_queue_send(&self->tx_queue, &ch, timeout) < 0){
+                break;
+            }
+        }
 		if(thread_queue_send(&self->tx_queue, &buf[c], timeout) < 0){
 			// on timeout we break and just return the number of bytes sent so far
 			break;
@@ -84,7 +91,7 @@ static int32_t _uart_irq(struct stm32_uart *self){
 	if( USART_GetITStatus(self->hw, USART_IT_TXE) ){
 		USART_ClearITPendingBit(self->hw, USART_IT_TXE);
 		char ch;
-        if(thread_queue_recv_from_isr(&self->tx_queue, &ch, &wake) == 0){
+        if(thread_queue_recv_from_isr(&self->tx_queue, &ch, &wake)){
             self->hw->DR = ch;
             USART_ITConfig(self->hw, USART_IT_TXE, ENABLE);
         } else {
@@ -152,6 +159,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	int tx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "tx_queue", 64);
 	int rx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "rx_queue", 64);
 	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
+	int crlf = fdt_get_int_or_default(fdt, (int)fdt_node, "insert-cr-before-lf", 1);
 
 	if(UARTx == 0) {
 		return -EINVAL;
@@ -187,6 +195,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
     BUG_ON(uart_queue_alloc_fail);
 
 	self->hw = UARTx;
+    self->crlf = crlf;
 	_uart_ptr[idx - 1] = self;
 
 	USART_InitTypeDef conf;

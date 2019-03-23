@@ -143,6 +143,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	int rx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "rx_queue", 64);
 	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
 	int crlf = fdt_get_int_or_default(fdt, (int)fdt_node, "insert-cr-before-lf", 1);
+	int stop_bits = fdt_get_int_or_default(fdt, (int)fdt_node, "stop_bits", 1);
 
 	if(UARTx == 0) {
 		return -EINVAL;
@@ -170,6 +171,16 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 		return -EINVAL;
 	}
 
+    switch(stop_bits){
+        case 1: stop_bits = USART_StopBits_1; break;
+        case 5: stop_bits = USART_StopBits_0_5; break;
+        case 2: stop_bits = USART_StopBits_2; break;
+        case 15: stop_bits = USART_StopBits_1_5; break;
+        default:
+            printk("stm32_uart: invalid number of stop bits!\n");
+            return -EINVAL;
+    }
+
 	struct stm32_uart *self = kzmalloc(sizeof(struct stm32_uart));
 	if(!self) return -ENOMEM;
 
@@ -191,7 +202,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	// uart itself
 	conf.USART_BaudRate = (uint32_t)baud;
 	conf.USART_WordLength = USART_WordLength_8b;
-	conf.USART_StopBits = USART_StopBits_1;
+	conf.USART_StopBits = (uint16_t)stop_bits;
 	conf.USART_Parity = USART_Parity_No;
 	conf.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	conf.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;

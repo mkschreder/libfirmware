@@ -1,5 +1,5 @@
-#include <libfirmware/driver.h>
-#include <libfirmware/serial.h>
+#include "driver.h"
+#include "serial.h"
 #include <libfdt/libfdt.h>
 
 #include <stm32f10x_tim.h>

@@ -254,10 +254,10 @@
 //#define PLL_M      25
 #define PLL_M      8
 /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
-#define PLL_Q      7
+#define PLL_Q      4
 
 #if defined (STM32F40_41xxx)
-#define PLL_N      336
+#define PLL_N      200
 /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_P      2
 #endif /* STM32F40_41xxx */
@@ -292,8 +292,10 @@
   * @{
   */
 
+#if 0
 #if defined (STM32F40_41xxx)
-  uint32_t SystemCoreClock = 168000000;
+  //uint32_t SystemCoreClock = 168000000;
+  uint32_t SystemCoreClock = 100000000;
 #endif /* STM32F40_41xxx */
 
 #if defined (STM32F427_437xx) || defined (STM32F429_439xx)
@@ -303,7 +305,7 @@
 #if defined (STM32F401xx)
   uint32_t SystemCoreClock = 84000000;
 #endif /* STM32F401xx */
-
+#endif
   __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**
@@ -355,6 +357,18 @@ __libc_init_array (void)
     __init_array_start[i] ();
 }
 
+static void _enable_fpu( void ){
+    __asm volatile
+    (   
+        "   ldr.w r0, =0xE000ED88       \n" /* The FPU enable bits are in the CPACR. */
+        "   ldr r1, [r0]                \n"      
+        "                               \n"      
+        "   orr r1, r1, #( 0xf << 20 )  \n" /* Enable CP10 and CP11 coprocessors, then save back. */
+        "   str r1, [r0]                \n"      
+        "   bx r14                      "        
+    );
+}     
+
 /**
   * @brief  Setup the microcontroller system
   *         Initialize the Embedded Flash Interface, the PLL and update the 
@@ -393,8 +407,6 @@ void SystemInit(void)
          
   /* Configure the System clock source, PLL Multiplier and Divider factors, 
      AHB/APBx prescalers and Flash settings ----------------------------------*/
-    SetSysClock();
-    SystemCoreClockUpdate();
 
   /* Configure the Vector Table location add offset address ------------------*/
 #ifdef VECT_TAB_SRAM
@@ -447,9 +459,10 @@ void SystemInit(void)
   * @param  None
   * @retval None
   */
+#if 0
 void SystemCoreClockUpdate(void)
 {
-  uint32_t tmp = 0, pllvco = 0, pllp = 2, pllsource = 0, pllm = 2;
+  uint32_t tmp = 0, pllsource = 0;
   
   /* Get SYSCLK source -------------------------------------------------------*/
   tmp = RCC->CFGR & RCC_CFGR_SWS;
@@ -468,8 +481,8 @@ void SystemCoreClockUpdate(void)
          SYSCLK = PLL_VCO / PLL_P
          */    
       pllsource = (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) >> 22;
-      pllm = RCC->PLLCFGR & RCC_PLLCFGR_PLLM;
-      
+      uint32_t pllm = RCC->PLLCFGR & RCC_PLLCFGR_PLLM;
+      uint32_t pllvco = 0;
       if (pllsource != 0)
       {
         /* HSE used as PLL clock source */
@@ -481,7 +494,7 @@ void SystemCoreClockUpdate(void)
         pllvco = (HSI_VALUE / pllm) * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 6);      
       }
 
-      pllp = (((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >>16) + 1 ) *2;
+      uint32_t pllp = (((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >>16) + 1 ) *2;
       SystemCoreClock = pllvco/pllp;
       break;
     default:
@@ -495,6 +508,8 @@ void SystemCoreClockUpdate(void)
   SystemCoreClock >>= tmp;
 }
 
+#endif 
+
 /**
   * @brief  Configures the System clock source, PLL Multiplier and Divider factors, 
   *         AHB/APBx prescalers and Flash settings
@@ -505,6 +520,7 @@ void SystemCoreClockUpdate(void)
   */
 static void SetSysClock(void)
 {
+	return;
 /******************************************************************************/
 /*            PLL (clocked by HSE) used as System clock source                */
 /******************************************************************************/
@@ -536,8 +552,11 @@ static void SetSysClock(void)
     PWR->CR |= PWR_CR_VOS;
 
     /* HCLK = SYSCLK / 1*/
-    RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
-
+    RCC->CFGR |= RCC_CFGR_HPRE_DIV2;
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
+    //RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (PLL_P << 16) | RCC_PLLCFGR_PLLSRC_HSE | (PLL_Q << 24);
+#if 0
 #if defined (STM32F40_41xxx) || defined (STM32F427_437xx) || defined (STM32F429_439xx)      
     /* PCLK2 = HCLK / 2*/
     RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
@@ -546,14 +565,14 @@ static void SetSysClock(void)
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
 #endif /* STM32F40_41xxx || STM32F427_437x || STM32F429_439xx */
 
-#if defined (STM32F401xx)
+#if defined (STM32F01xx)
     /* PCLK2 = HCLK / 2*/
     RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
     
     /* PCLK1 = HCLK / 4*/
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;
 #endif /* STM32F401xx */
-   
+#endif
     /* Configure the main PLL */
     RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
                    ((HSEStatus)?RCC_PLLCFGR_PLLSRC_HSE:RCC_PLLCFGR_PLLSRC_HSI) | (PLL_Q << 24);
@@ -562,10 +581,8 @@ static void SetSysClock(void)
     RCC->CR |= RCC_CR_PLLON;
 
     /* Wait till the main PLL is ready */
-    while((RCC->CR & RCC_CR_PLLRDY) == 0)
-    {
-    }
-   
+    while((RCC->CR & RCC_CR_PLLRDY) == 0) { }
+#if 0
 #if defined (STM32F427_437xx) || defined (STM32F429_439xx)
     /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
     PWR->CR |= PWR_CR_ODEN;
@@ -582,13 +599,15 @@ static void SetSysClock(void)
 
 #if defined (STM32F40_41xxx)     
     /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
-    FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
+    FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_3WS;
 #endif /* STM32F40_41xxx  */
 
 #if defined (STM32F401xx)
     /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
     FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_2WS;
 #endif /* STM32F401xx */
+#endif
+    FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_3WS;
 
     /* Select the main PLL as system clock source */
     RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
@@ -612,17 +631,17 @@ static void SetSysClock(void)
     FLASH->ACR |= FLASH_ACR_LATENCY_5WS;                     // Flash 5 wait state
 
     RCC->CFGR |= RCC_CFGR_HPRE_DIV1;                         // HCLK = SYSCLK
-    RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;                        // APB1 = HCLK/4
-    RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;                        // APB2 = HCLK/2
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;                        // APB1 = HCLK/4
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;                        // APB2 = HCLK/2
 
     RCC->CR &= ~RCC_CR_PLLON;                                // Disable PLL
 
     // PLL configuration:  VCO = HSI/M * N,  Sysclk = VCO/P
     RCC->PLLCFGR = ( 16ul                   |                // PLL_M =  16
-                 (384ul <<  6)            |                // PLL_N = 384
-                 (  3ul << 16)            |                // PLL_P =   8
+                 (192ul <<  6)            |                // PLL_N = 384
+                 (  2ul << 16)            |                // PLL_P =   8
                  (RCC_PLLCFGR_PLLSRC_HSI) |                // PLL_SRC = HSI
-                 (  8ul << 24)             );              // PLL_Q =   8
+                 (  4ul << 24)             );              // PLL_Q =   8
 
     RCC->CR |= RCC_CR_PLLON;                                 // Enable PLL
     while((RCC->CR & RCC_CR_PLLRDY) == 0) __NOP();           // Wait till PLL is ready

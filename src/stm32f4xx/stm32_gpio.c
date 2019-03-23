@@ -231,8 +231,14 @@ static const struct gpio_device_ops _gpio_ops = {
 };
 
 static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
-    int len = 0;
+    int len = 0, defs_len = 0;
     const fdt32_t *val = (const fdt32_t*)fdt_getprop(fdt, fdt_node, "pinctrl", &len);
+    const fdt32_t *defs = (const fdt32_t*)fdt_getprop(fdt, fdt_node, "defaults", &defs_len);
+
+	if(defs && (len != (defs_len * 3))){
+		printk("gpio: defaults not supplied for all pins\n");
+		return -1;
+	}
 
     if(len == 0 || !val) return -1;
 
@@ -253,6 +259,9 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
         uint16_t pin = (uint16_t)fdt32_to_cpu(*(base + 1));
         uint32_t opts = (uint32_t)fdt32_to_cpu(*(base + 2));
 
+		self->pins[c].gpio = GPIOx;
+        self->pins[c].pin = pin;
+
         GPIO_InitTypeDef gpio;
         GPIO_StructInit(&gpio);
         gpio.GPIO_Pin = pin;
@@ -265,7 +274,10 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
         uint16_t idx = (uint16_t)ffs(pin);
         if(gpio.GPIO_Mode == GPIO_Mode_AF && idx != 0){
             GPIO_PinAFConfig(GPIOx, (uint16_t)(idx - 1), (opts & 0xf));
-        }
+        } else if(defs){
+        	uint16_t en = (uint16_t)fdt32_to_cpu(*(defs + c));
+			GPIO_WriteBit(GPIOx, pin, en);
+		}
     }
 
     gpio_device_register(&self->dev);

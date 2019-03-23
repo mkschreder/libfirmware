@@ -21,7 +21,7 @@ struct stm32_spi {
 	struct semaphore rx_sem;
 };
 
-struct stm32_spi _devices[2];
+struct stm32_spi _devices[3];
 
 // RX
 void DMA2_Stream0_IRQHandler(void){
@@ -93,7 +93,8 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 			SPI_Cmd(self->hw, DISABLE);
 			return -ETIMEDOUT;
 		}
-	} else if(self->hw == SPI2){
+		SPI_Cmd(self->hw, DISABLE);
+	} else {
 		// Currently DMA does not seem to work. Need to debug it.
 		//_dma_set_data(DMA1_Stream3, (uint32_t)rx_data, size);
 		//_dma_set_data(DMA1_Stream4, (uint32_t)tx_data, size);
@@ -109,10 +110,9 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 			while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY));
 			rx[c] = (uint8_t)self->hw->DR;
 		}
+		SPI_Cmd(self->hw, DISABLE);
 	}
 
-
-	SPI_Cmd(self->hw, DISABLE);
 	return 0;
 }
 
@@ -121,33 +121,33 @@ const struct spi_device_ops _ops = {
 };
 
 static int _stm32_spi_probe(void *fdt, int fdt_node){
-
 	SPI_TypeDef *SPIx = (SPI_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 
 	struct stm32_spi *self = NULL;
 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
+
+	SPI_Cmd(SPIx, DISABLE);
+
+	SPI_InitTypeDef spi;
+	SPI_StructInit(&spi);
+
+	spi.SPI_Mode = SPI_Mode_Master;
+	spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	spi.SPI_DataSize = SPI_DataSize_8b;
+	spi.SPI_CPOL = SPI_CPOL_High;
+	spi.SPI_CPHA = SPI_CPHA_2Edge;
+	spi.SPI_NSS = SPI_NSS_Soft;
+	spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+	spi.SPI_FirstBit = SPI_FirstBit_MSB;
+
+	SPI_Init(SPIx, &spi);
+	SPI_CalculateCRC(SPIx, DISABLE);
+
 	if(SPIx == SPI1){
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
-
-		SPI_Cmd(SPIx, DISABLE);
-
-		SPI_InitTypeDef spi;
-		SPI_StructInit(&spi);
-
-		spi.SPI_Mode = SPI_Mode_Master;
-		spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-		spi.SPI_DataSize = SPI_DataSize_8b;
-		spi.SPI_CPOL = SPI_CPOL_High;
-		spi.SPI_CPHA = SPI_CPHA_2Edge;
-		spi.SPI_NSS = SPI_NSS_Soft;
-		spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
-		spi.SPI_FirstBit = SPI_FirstBit_MSB;
-
-		SPI_Init(SPIx, &spi);
-		SPI_CalculateCRC(SPIx, DISABLE);
-
-
 		DMA_InitTypeDef dma;
 		DMA_StructInit(&dma);
 
@@ -189,26 +189,9 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 
 		self = &_devices[0];
+
+		printk("spi1: ready\n");
 	} else if(SPIx == SPI2){
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-
-		SPI_Cmd(SPIx, DISABLE);
-
-		SPI_InitTypeDef spi;
-		SPI_StructInit(&spi);
-
-		spi.SPI_Mode = SPI_Mode_Master;
-		spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-		spi.SPI_DataSize = SPI_DataSize_8b;
-		spi.SPI_CPOL = SPI_CPOL_High;
-		spi.SPI_CPHA = SPI_CPHA_2Edge;
-		spi.SPI_NSS = SPI_NSS_Soft;
-		spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
-		spi.SPI_FirstBit = SPI_FirstBit_MSB;
-
-		SPI_Init(SPIx, &spi);
-		SPI_CalculateCRC(SPIx, DISABLE);
-
 		#if 0
 		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 
@@ -255,6 +238,12 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		#endif
 
 		self = &_devices[1];
+
+		printk("spi2: ready\n");
+	} else if(SPIx == SPI3){
+		self = &_devices[2];
+
+		printk("spi3: ready\n");
 	} else {
 		return -EINVAL;
 	}
