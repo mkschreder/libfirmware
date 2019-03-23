@@ -637,12 +637,12 @@ LTLIBOBJS
 LIBOBJS
 WITH_TARGET_STM32F10X_FALSE
 WITH_TARGET_STM32F10X_TRUE
-WITH_TARGET_STM32F407_FALSE
-WITH_TARGET_STM32F407_TRUE
+WITH_TARGET_STM32F40_41XXX_FALSE
+WITH_TARGET_STM32F40_41XXX_TRUE
 WITH_TARGET_STM32F427_FALSE
 WITH_TARGET_STM32F427_TRUE
-WITH_TARGET_STM32F429_FALSE
-WITH_TARGET_STM32F429_TRUE
+WITH_TARGET_STM32F429_439XX_FALSE
+WITH_TARGET_STM32F429_439XX_TRUE
 WITH_TARGET_LINUX_FALSE
 WITH_TARGET_LINUX_TRUE
 CPP
@@ -12069,17 +12069,17 @@ $as_echo "#define WITH_TARGET_LINUX 1" >>confdefs.h
 )
 fi
 
- if test x$with_target = xstm32f429; then
-  WITH_TARGET_STM32F429_TRUE=
-  WITH_TARGET_STM32F429_FALSE='#'
+ if test x$with_target = xstm32f429_439xx; then
+  WITH_TARGET_STM32F429_439XX_TRUE=
+  WITH_TARGET_STM32F429_439XX_FALSE='#'
 else
-  WITH_TARGET_STM32F429_TRUE='#'
-  WITH_TARGET_STM32F429_FALSE=
+  WITH_TARGET_STM32F429_439XX_TRUE='#'
+  WITH_TARGET_STM32F429_439XX_FALSE=
 fi
 
-if test -z "$WITH_TARGET_STM32F429_TRUE"; then :
+if test -z "$WITH_TARGET_STM32F429_439XX_TRUE"; then :
   (
-$as_echo "#define WITH_TARGET_STM32F429 1" >>confdefs.h
+$as_echo "#define WITH_TARGET_STM32F429_439XX 1" >>confdefs.h
 )
 fi
 
@@ -12097,17 +12097,17 @@ $as_echo "#define WITH_TARGET_STM32F427 1" >>confdefs.h
 )
 fi
 
- if test x$with_target = xstm32f407; then
-  WITH_TARGET_STM32F407_TRUE=
-  WITH_TARGET_STM32F407_FALSE='#'
+ if test x$with_target = xstm32f40_41xxx; then
+  WITH_TARGET_STM32F40_41XXX_TRUE=
+  WITH_TARGET_STM32F40_41XXX_FALSE='#'
 else
-  WITH_TARGET_STM32F407_TRUE='#'
-  WITH_TARGET_STM32F407_FALSE=
+  WITH_TARGET_STM32F40_41XXX_TRUE='#'
+  WITH_TARGET_STM32F40_41XXX_FALSE=
 fi
 
-if test -z "$WITH_TARGET_STM32F407_TRUE"; then :
+if test -z "$WITH_TARGET_STM32F40_41XXX_TRUE"; then :
   (
-$as_echo "#define WITH_TARGET_STM32F407 1" >>confdefs.h
+$as_echo "#define WITH_TARGET_STM32F40_41XXX 1" >>confdefs.h
 )
 fi
 
@@ -12301,16 +12301,16 @@ if test -z "${WITH_TARGET_LINUX_TRUE}" && test -z "${WITH_TARGET_LINUX_FALSE}"; 
   as_fn_error $? "conditional \"WITH_TARGET_LINUX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_TARGET_STM32F429_TRUE}" && test -z "${WITH_TARGET_STM32F429_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_TARGET_STM32F429\" was never defined.
+if test -z "${WITH_TARGET_STM32F429_439XX_TRUE}" && test -z "${WITH_TARGET_STM32F429_439XX_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_TARGET_STM32F429_439XX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_STM32F427_TRUE}" && test -z "${WITH_TARGET_STM32F427_FALSE}"; then
   as_fn_error $? "conditional \"WITH_TARGET_STM32F427\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_TARGET_STM32F407_TRUE}" && test -z "${WITH_TARGET_STM32F407_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_TARGET_STM32F407\" was never defined.
+if test -z "${WITH_TARGET_STM32F40_41XXX_TRUE}" && test -z "${WITH_TARGET_STM32F40_41XXX_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_TARGET_STM32F40_41XXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_STM32F10X_TRUE}" && test -z "${WITH_TARGET_STM32F10X_FALSE}"; then

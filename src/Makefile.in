@@ -167,10 +167,10 @@ host_triplet = @host@
 @WITH_TARGET_STM32F10X_TRUE@am__append_4 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
 @WITH_TARGET_STM32F427_TRUE@am__append_5 = $(STM32F4XX_FILES)
 @WITH_TARGET_STM32F427_TRUE@am__append_6 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
-@WITH_TARGET_STM32F429_TRUE@am__append_7 = $(STM32F4XX_FILES)
-@WITH_TARGET_STM32F429_TRUE@am__append_8 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
-@WITH_TARGET_STM32F407_TRUE@am__append_9 = $(STM32F4XX_FILES)
-@WITH_TARGET_STM32F407_TRUE@am__append_10 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F429_439XX_TRUE@am__append_7 = $(STM32F4XX_FILES)
+@WITH_TARGET_STM32F429_439XX_TRUE@am__append_8 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F40_41XXX_TRUE@am__append_9 = $(STM32F4XX_FILES)
+@WITH_TARGET_STM32F40_41XXX_TRUE@am__append_10 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -309,11 +309,12 @@ am__libfirmware_a_SOURCES_DIST = adc.c avl-cmp.c avl.c baro.c can.c \
 	stm32f4xx/stdperiph/stm32f4xx_wwdg.c stm32f4xx/chip.c \
 	stm32f4xx/dac.c stm32f4xx/debug.c stm32f4xx/interrupts.c \
 	stm32f4xx/pwm.c stm32f4xx/stm32_adc.c stm32f4xx/stm32_can.c \
-	stm32f4xx/stm32_gpio.c stm32f4xx/stm32_leds.c \
-	stm32f4xx/stm32_pwm_motor.c stm32f4xx/stm32_spi.c \
-	stm32f4xx/stm32_timer.c stm32f4xx/stm32_uart.c \
-	stm32f4xx/system_stm32f4xx.c stm32f4xx/timestamp.c \
-	stm32f4xx/watchdog.c freertos/kernel/portable/MemMang/heap_2.c \
+	stm32f4xx/stm32_cpu.c stm32f4xx/stm32_gpio.c \
+	stm32f4xx/stm32_leds.c stm32f4xx/stm32_pwm_motor.c \
+	stm32f4xx/stm32_spi.c stm32f4xx/stm32_timer.c \
+	stm32f4xx/stm32_uart.c stm32f4xx/system_stm32f4xx.c \
+	stm32f4xx/timestamp.c stm32f4xx/watchdog.c \
+	freertos/kernel/portable/MemMang/heap_2.c \
 	freertos/kernel/portable/GCC/ARM_CM4F/port.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_LINUX_TRUE@am__objects_1 =  \
@@ -431,6 +432,7 @@ am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-pwm.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_adc.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_can.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_cpu.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_gpio.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_leds.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT) \
@@ -455,8 +457,8 @@ am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
 	freertos/kernel/portable/MemMang/libfirmware_a-heap_2.$(OBJEXT) \
 	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
 @WITH_TARGET_STM32F427_TRUE@am__objects_4 = $(am__objects_3)
-@WITH_TARGET_STM32F429_TRUE@am__objects_5 = $(am__objects_3)
-@WITH_TARGET_STM32F407_TRUE@am__objects_6 = $(am__objects_3)
+@WITH_TARGET_STM32F429_439XX_TRUE@am__objects_5 = $(am__objects_3)
+@WITH_TARGET_STM32F40_41XXX_TRUE@am__objects_6 = $(am__objects_3)
 am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-avl-cmp.$(OBJEXT) libfirmware_a-avl.$(OBJEXT) \
 	libfirmware_a-baro.$(OBJEXT) libfirmware_a-can.$(OBJEXT) \
@@ -709,6 +711,7 @@ STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
     stm32f4xx/pwm.c\
 	stm32f4xx/stm32_adc.c\
     stm32f4xx/stm32_can.c\
+    stm32f4xx/stm32_cpu.c\
     stm32f4xx/stm32_gpio.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
@@ -1163,6 +1166,8 @@ stm32f4xx/libfirmware_a-stm32_adc.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_can.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/libfirmware_a-stm32_cpu.$(OBJEXT):  \
+	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_gpio.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_leds.$(OBJEXT):  \
@@ -1319,6 +1324,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-pwm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_adc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_can.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_gpio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_pwm_motor.Po@am__quote@
@@ -3291,6 +3297,20 @@ stm32f4xx/libfirmware_a-stm32_can.obj: stm32f4xx/stm32_can.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_can.c' object='stm32f4xx/libfirmware_a-stm32_can.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_can.obj `if test -f 'stm32f4xx/stm32_can.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_can.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_can.c'; fi`
+
+stm32f4xx/libfirmware_a-stm32_cpu.o: stm32f4xx/stm32_cpu.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_cpu.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Tpo -c -o stm32f4xx/libfirmware_a-stm32_cpu.o `test -f 'stm32f4xx/stm32_cpu.c' || echo '$(srcdir)/'`stm32f4xx/stm32_cpu.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_cpu.c' object='stm32f4xx/libfirmware_a-stm32_cpu.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_cpu.o `test -f 'stm32f4xx/stm32_cpu.c' || echo '$(srcdir)/'`stm32f4xx/stm32_cpu.c
+
+stm32f4xx/libfirmware_a-stm32_cpu.obj: stm32f4xx/stm32_cpu.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_cpu.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Tpo -c -o stm32f4xx/libfirmware_a-stm32_cpu.obj `if test -f 'stm32f4xx/stm32_cpu.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_cpu.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_cpu.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_cpu.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_cpu.c' object='stm32f4xx/libfirmware_a-stm32_cpu.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_cpu.obj `if test -f 'stm32f4xx/stm32_cpu.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_cpu.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_cpu.c'; fi`
 
 stm32f4xx/libfirmware_a-stm32_gpio.o: stm32f4xx/stm32_gpio.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_gpio.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_gpio.Tpo -c -o stm32f4xx/libfirmware_a-stm32_gpio.o `test -f 'stm32f4xx/stm32_gpio.c' || echo '$(srcdir)/'`stm32f4xx/stm32_gpio.c

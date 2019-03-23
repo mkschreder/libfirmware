@@ -147,6 +147,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/pwm.c\
 	stm32f4xx/stm32_adc.c\
     stm32f4xx/stm32_can.c\
+    stm32f4xx/stm32_cpu.c\
     stm32f4xx/stm32_gpio.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
@@ -176,12 +177,12 @@ libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
 endif
 
-if WITH_TARGET_STM32F429
+if WITH_TARGET_STM32F429_439XX
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
 endif
 
-if WITH_TARGET_STM32F407
+if WITH_TARGET_STM32F40_41XXX
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 endif
