@@ -57,7 +57,7 @@ static int _serial_read(serial_port_t serial, void *data, size_t size, uint32_t 
 	char *buf = (char*)data;
 	int pos = 0;
 	// pop characters off the queue
-	while(size && thread_queue_recv(&self->rx_queue, &ch, (pos == 0)?(timeout):0) == 0){
+	while(size && thread_queue_recv(&self->rx_queue, &ch, (pos == 0)?(timeout):0) == 1){
 		*(buf + pos) = ch;
 		pos++;
 		size--;
@@ -91,7 +91,7 @@ static int32_t _uart_irq(struct stm32_uart *self){
 	if( USART_GetITStatus(self->hw, USART_IT_TXE) ){
 		USART_ClearITPendingBit(self->hw, USART_IT_TXE);
 		char ch;
-        if(thread_queue_recv_from_isr(&self->tx_queue, &ch, &wake)){
+        if(thread_queue_recv_from_isr(&self->tx_queue, &ch, &wake) == 1){
             self->hw->DR = ch;
             USART_ITConfig(self->hw, USART_IT_TXE, ENABLE);
         } else {

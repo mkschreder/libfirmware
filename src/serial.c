@@ -60,6 +60,15 @@ serial_port_t serial_find(const char *dtb_path){
 	return NULL;
 }
 
+serial_port_t serial_find_by_node(void *fdt, int node){
+	struct serial_device *dev;
+    if(node < 0) return NULL;
+    list_for_each_entry(dev, &_serial_ports, list){
+		if(dev->fdt_node == node) return &dev->ops;
+	}
+	return NULL;
+}
+
 int serial_set_printk_port(serial_port_t port){
     _default_serial_port = port;
     return 0;

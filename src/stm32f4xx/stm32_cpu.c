@@ -6,6 +6,8 @@
 #include "FreeRTOSConfig.h"
 #include "portmacro.h"
 
+#include "console.h"
+
 #ifndef configSYSTICK_CLOCK_HZ
 	#define configSYSTICK_CLOCK_HZ configCPU_CLOCK_HZ
 	/* Ensure the SysTick is clocked at the same frequency as the core. */
@@ -130,3 +132,35 @@ static int _stm32_cpu_remove(void *fdt, int fdt_node){
 }
 
 DEVICE_DRIVER(stm32_cpu, "st,stm32_cpu", _stm32_cpu_probe, _stm32_cpu_remove)
+
+/* add console command for showing cpu info */
+
+static int _stm32_cpuinfo_cmd(console_t con, int argc, char **argv){
+	printk("cpuinfo\n");
+	return 0;
+}
+
+static int _stm32_cpuinfo_probe(void *fdt, int fdt_node){
+	int node = fdt_find_node_by_ref(fdt, fdt_node, "console");
+	if(node < 0){
+		printk("cpuinfo: no console device\n");
+		return -1;
+	}
+	console_t con = console_find_by_node(fdt, node);
+	if(!con){
+		printk("cpuinfo: console not found\n");
+		return -1;
+	}
+	
+	struct console_command *cmd = kzmalloc(sizeof(struct console_command));
+	console_command_init(cmd, "cpuinfo", "show cpu info", "", _stm32_cpuinfo_cmd);
+	console_add_command(con, cmd);
+
+	return 0;
+}
+
+static int _stm32_cpuinfo_remove(void *fdt, int fdt_node){
+	return -1;
+}
+
+DEVICE_DRIVER(stm32_cpuinfo, "st,stm32_cpuinfo", _stm32_cpuinfo_probe, _stm32_cpuinfo_remove)

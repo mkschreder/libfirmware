@@ -21,38 +21,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#pragma once
 
 #include "serial.h"
+#include "list.h"
 
-#define CONSOLE_MAX_PS_TASKS 10
-// TODO: make this configurable from the devicetree
-#define CONSOLE_MAX_LINE 80
-#define CONSOLE_MAX_ARGS 16
+typedef const struct console_ops ** console_t;
 
-struct console {
-	serial_port_t serial;
-	struct console_command *commands;
-	size_t ncommands;
-
-	struct vardir *vars;
-
-	//! this is used for displaying task stats
-#if 0
-	TaskStatus_t prev_status[CONSOLE_MAX_PS_TASKS];
-#endif
-	char printf_buffer[CONSOLE_MAX_LINE];
-	char line[CONSOLE_MAX_LINE];
-	char *argv[CONSOLE_MAX_ARGS];
-};
-
+struct console;
 struct console_command {
 	const char *name;
-	int (*proc)(struct console *self, int argc, char **argv);
+	int (*proc)(console_t dev, int argc, char **argv);
 	const char *options;
 	const char *description;
+	struct list_head list;
 };
 
-void console_init(struct console *self, serial_port_t port, struct console_command *commands, size_t ncommands, struct vardir *vars);
-int console_start(struct console *self);
+void console_command_init(struct console_command *self,
+		const char *name,
+		const char *description,
+		const char *options,
+		int (*proc)(console_t con, int argc, char **argv)
+);
 
-void con_printf(struct console *self, const char *fmt, ...);
+struct console_ops {
+	int (*add_command)(console_t dev, struct console_command *cmd);
+};
+
+#define console_add_command(dev, cmd) (*(dev))->add_command(dev, cmd)
+
+struct console_device {
+	struct list_head list;
+	const struct console_ops *ops;
+	void *fdt;
+	int fdt_node;
+};
+
+void console_init(struct console_device *self, void *fdt, int fdt_node, const struct console_ops *ops);
+int console_register(struct console_device *self);
+console_t console_find(const char *dtb_path);
+console_t console_find_by_node(void *fdt, int node);
+
