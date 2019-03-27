@@ -311,7 +311,7 @@ am__libfirmware_a_SOURCES_DIST = adc.c avl-cmp.c avl.c baro.c can.c \
 	stm32f4xx/pwm.c stm32f4xx/stm32_adc.c stm32f4xx/stm32_can.c \
 	stm32f4xx/stm32_cpu.c stm32f4xx/stm32_gpio.c \
 	stm32f4xx/stm32_leds.c stm32f4xx/stm32_pwm_motor.c \
-	stm32f4xx/stm32_spi.c stm32f4xx/stm32_timer.c \
+	stm32f4xx/stm32_spi.c stm32f4xx/stm32_tim.c \
 	stm32f4xx/stm32_uart.c stm32f4xx/system_stm32f4xx.c \
 	stm32f4xx/timestamp.c stm32f4xx/watchdog.c \
 	freertos/kernel/portable/MemMang/heap_2.c \
@@ -437,7 +437,7 @@ am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_leds.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_spi.$(OBJEXT) \
-	stm32f4xx/libfirmware_a-stm32_timer.$(OBJEXT) \
+	stm32f4xx/libfirmware_a-stm32_tim.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-stm32_uart.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-system_stm32f4xx.$(OBJEXT) \
 	stm32f4xx/libfirmware_a-timestamp.$(OBJEXT) \
@@ -716,7 +716,7 @@ STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
     stm32f4xx/stm32_spi.c\
-    stm32f4xx/stm32_timer.c\
+    stm32f4xx/stm32_tim.c\
     stm32f4xx/stm32_uart.c\
     stm32f4xx/system_stm32f4xx.c\
     stm32f4xx/timestamp.c\
@@ -1176,7 +1176,7 @@ stm32f4xx/libfirmware_a-stm32_pwm_motor.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_spi.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
-stm32f4xx/libfirmware_a-stm32_timer.$(OBJEXT):  \
+stm32f4xx/libfirmware_a-stm32_tim.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
 stm32f4xx/libfirmware_a-stm32_uart.$(OBJEXT):  \
 	stm32f4xx/$(am__dirstamp) stm32f4xx/$(DEPDIR)/$(am__dirstamp)
@@ -1329,7 +1329,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_leds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_pwm_motor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_spi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-system_stm32f4xx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/$(DEPDIR)/libfirmware_a-timestamp.Po@am__quote@
@@ -3368,19 +3368,19 @@ stm32f4xx/libfirmware_a-stm32_spi.obj: stm32f4xx/stm32_spi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_spi.obj `if test -f 'stm32f4xx/stm32_spi.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_spi.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_spi.c'; fi`
 
-stm32f4xx/libfirmware_a-stm32_timer.o: stm32f4xx/stm32_timer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_timer.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo -c -o stm32f4xx/libfirmware_a-stm32_timer.o `test -f 'stm32f4xx/stm32_timer.c' || echo '$(srcdir)/'`stm32f4xx/stm32_timer.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_timer.c' object='stm32f4xx/libfirmware_a-stm32_timer.o' libtool=no @AMDEPBACKSLASH@
+stm32f4xx/libfirmware_a-stm32_tim.o: stm32f4xx/stm32_tim.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_tim.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Tpo -c -o stm32f4xx/libfirmware_a-stm32_tim.o `test -f 'stm32f4xx/stm32_tim.c' || echo '$(srcdir)/'`stm32f4xx/stm32_tim.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_tim.c' object='stm32f4xx/libfirmware_a-stm32_tim.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_timer.o `test -f 'stm32f4xx/stm32_timer.c' || echo '$(srcdir)/'`stm32f4xx/stm32_timer.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_tim.o `test -f 'stm32f4xx/stm32_tim.c' || echo '$(srcdir)/'`stm32f4xx/stm32_tim.c
 
-stm32f4xx/libfirmware_a-stm32_timer.obj: stm32f4xx/stm32_timer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_timer.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo -c -o stm32f4xx/libfirmware_a-stm32_timer.obj `if test -f 'stm32f4xx/stm32_timer.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_timer.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_timer.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_timer.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_timer.c' object='stm32f4xx/libfirmware_a-stm32_timer.obj' libtool=no @AMDEPBACKSLASH@
+stm32f4xx/libfirmware_a-stm32_tim.obj: stm32f4xx/stm32_tim.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_tim.obj -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Tpo -c -o stm32f4xx/libfirmware_a-stm32_tim.obj `if test -f 'stm32f4xx/stm32_tim.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_tim.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_tim.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Tpo stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_tim.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/stm32_tim.c' object='stm32f4xx/libfirmware_a-stm32_tim.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_timer.obj `if test -f 'stm32f4xx/stm32_timer.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_timer.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_timer.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/libfirmware_a-stm32_tim.obj `if test -f 'stm32f4xx/stm32_tim.c'; then $(CYGPATH_W) 'stm32f4xx/stm32_tim.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/stm32_tim.c'; fi`
 
 stm32f4xx/libfirmware_a-stm32_uart.o: stm32f4xx/stm32_uart.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/libfirmware_a-stm32_uart.o -MD -MP -MF stm32f4xx/$(DEPDIR)/libfirmware_a-stm32_uart.Tpo -c -o stm32f4xx/libfirmware_a-stm32_uart.o `test -f 'stm32f4xx/stm32_uart.c' || echo '$(srcdir)/'`stm32f4xx/stm32_uart.c

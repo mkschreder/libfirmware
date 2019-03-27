@@ -33,18 +33,24 @@ struct gpio_device_ops {
 
 #define gpio_set(gpio, pin) (*(gpio))->write_pin(gpio, pin, true)
 #define gpio_reset(gpio, pin) (*(gpio))->write_pin(gpio, pin, false)
-#define gpio_read(gpio, pin) ({bool val; (*(gpio))->read_pin(gpio, pin, &val); val;})
+static inline bool gpio_read(gpio_device_t gpio, uint32_t pin) {
+	bool __val; 
+	(*(gpio))->read_pin(gpio, pin, &__val);
+	return __val;
+}
 
 struct gpio_device {
 	struct list_head list;
 	const struct gpio_device_ops *ops;
+	void *fdt;
 	int fdt_node;
 };
 
-void gpio_device_init(struct gpio_device *self, int fdt_node, const struct gpio_device_ops *ops);
+void gpio_device_init(struct gpio_device *self, void *fdt, int fdt_node, const struct gpio_device_ops *ops);
 int gpio_device_register(struct gpio_device *self);
-gpio_device_t gpio_find(const char *dtb_path);
+gpio_device_t gpio_find(void *fdt, const char *dtb_path);
 gpio_device_t gpio_find_by_node(void *fdt, int node);
+gpio_device_t gpio_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
 
 // old pins ops
 /*

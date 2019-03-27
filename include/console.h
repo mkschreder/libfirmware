@@ -30,25 +30,28 @@ typedef const struct console_ops ** console_t;
 
 struct console;
 struct console_command {
-	const char *name;
-	int (*proc)(console_t dev, int argc, char **argv);
-	const char *options;
-	const char *description;
+	char *name;
+	int (*proc)(console_t dev, void *userptr, int argc, char **argv);
+	char *options;
+	char *description;
+	void *userptr;
 	struct list_head list;
 };
 
-void console_command_init(struct console_command *self,
+struct console_ops {
+	int (*add_command)(console_t dev, struct console_command *cmd);
+	int (*printf)(console_t dev, const char *fmt, ...);
+};
+
+int console_add_command(console_t con,
+		void *userptr,
 		const char *name,
 		const char *description,
 		const char *options,
-		int (*proc)(console_t con, int argc, char **argv)
+		int (*proc)(console_t con, void *userptr, int argc, char **argv)
 );
 
-struct console_ops {
-	int (*add_command)(console_t dev, struct console_command *cmd);
-};
-
-#define console_add_command(dev, cmd) (*(dev))->add_command(dev, cmd)
+#define console_printf(dev, ...) (*(dev))->printf(dev, ##__VA_ARGS__)
 
 struct console_device {
 	struct list_head list;
@@ -61,4 +64,5 @@ void console_init(struct console_device *self, void *fdt, int fdt_node, const st
 int console_register(struct console_device *self);
 console_t console_find(const char *dtb_path);
 console_t console_find_by_node(void *fdt, int node);
+console_t console_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
 

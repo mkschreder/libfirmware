@@ -49,6 +49,7 @@ void spi_device_init(struct spi_device *self, int fdt_node, const struct spi_dev
 int spi_device_register(struct spi_device *self);
 spi_device_t spi_find(const char *dtb_path);
 spi_device_t spi_find_by_node(void *fdt, int node);
+spi_device_t spi_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
 
 void spi_transfer_init(struct spi_transfer *self);
 

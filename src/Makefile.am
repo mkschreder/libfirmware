@@ -152,7 +152,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
     stm32f4xx/stm32_spi.c\
-    stm32f4xx/stm32_timer.c\
+    stm32f4xx/stm32_tim.c\
     stm32f4xx/stm32_uart.c\
     stm32f4xx/system_stm32f4xx.c\
     stm32f4xx/timestamp.c\

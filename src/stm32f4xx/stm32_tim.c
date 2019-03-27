@@ -2,6 +2,7 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_adc.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <libfdt/libfdt.h>
 
@@ -205,9 +206,12 @@ void TIM1_UP_TIM10_IRQHandler(void){
     }
 }
 
-static int _stm32_timer_probe(void *fdt, int fdt_node){
+static int _stm32_tim_probe(void *fdt, int fdt_node){
 	TIM_TypeDef *TIMx = (TIM_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 	int mode = fdt_get_int_or_default(fdt, (int)fdt_node, "mode", 0);
+	int clock_div = fdt_get_int_or_default(fdt, (int)fdt_node, "clock_div", 0);
+	int rep_count = fdt_get_int_or_default(fdt, (int)fdt_node, "rep_count", 0);
+	uint32_t freq = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "freq", 0);
     int idx = -1;
     if(TIMx == TIM1) idx = 0;
     else if(TIMx == TIM2) idx = 1;
@@ -220,8 +224,7 @@ static int _stm32_timer_probe(void *fdt, int fdt_node){
     else return -1;
 
     if(!mode) {
-        printk("tim1: no mode supplied. Valid modes are:\n");
-        printk("\t1: pwm 3phase\n");
+        printk("stm32_tim: mode not defined\n");
         return -1;
     }
 
@@ -230,23 +233,118 @@ static int _stm32_timer_probe(void *fdt, int fdt_node){
         return -1;
     }
 
+	if(freq == 0){
+		printk("tim: must specify nonzero frequency!\n");
+		return -1;
+	}
+
     struct stm32_timer *self = kzmalloc(sizeof(struct stm32_timer));
     self->hw = TIMx;
     _timers[idx] = self;
 
-    switch(mode){
-        case 0: {
-	        int pwm_freq = fdt_get_int_or_default(fdt, (int)fdt_node, "pwm_freq", 0);
-            if(pwm_freq){
-                _stm32_timer_init_pwm_bldc(self, (uint32_t)pwm_freq);
-            }
-        } break;
-    }
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
+	const char *name = "";
+	uint32_t base = 0;
+	if(TIMx == TIM1){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+		name = "tim1";
+		base = clocks.PCLK2_Frequency;
+	} else if(TIMx == TIM2){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+		name = "tim2";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM3){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+		name = "tim3";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM4){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+		name = "tim4";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM5){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+		name = "tim5";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM6){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+		name = "tim6";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM7){
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
+		name = "tim7";
+		base = clocks.PCLK1_Frequency;
+	} else if(TIMx == TIM8){
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
+		name = "tim8";
+		base = clocks.PCLK2_Frequency;
+	} else {
+		printk("stm32_tim: unsupported timer\n");
+		return -1;
+	}
+
+
+	TIM_TimeBaseInitTypeDef tim;
+	TIM_TimeBaseStructInit(&tim);
+	tim.TIM_CounterMode = (uint16_t)mode;
+
+	uint32_t presc = 1;
+	uint32_t period = 0;
+	while((period = (base / presc / (freq * 2))) > 0xFFFFUL){
+		presc++;
+	}
+
+	tim.TIM_Prescaler = (uint16_t)(presc - 1);
+	tim.TIM_Period = (uint16_t)period;
+	tim.TIM_ClockDivision = (uint16_t)clock_div;
+	tim.TIM_RepetitionCounter = (uint8_t)rep_count;
+	TIM_TimeBaseInit(TIMx, &tim);
+
+	for(int c = 1; c <= 4; c++){
+		char chan_name[16];
+		snprintf(chan_name, sizeof(chan_name), "channel%d", c);
+		int node = fdt_subnode_offset(fdt, fdt_node, chan_name);
+		if(node > 0){
+			int oc_mode = fdt_get_int_or_default(fdt, (int)node, "mode", 0);
+			int pout_en = fdt_get_int_or_default(fdt, (int)node, "pout_en", 0);
+			int nout_en = fdt_get_int_or_default(fdt, (int)node, "nout_en", 0);
+			int pulse = fdt_get_int_or_default(fdt, (int)node, "pulse", 0);
+			int ppol = fdt_get_int_or_default(fdt, (int)node, "ppol", 0);
+			int npol = fdt_get_int_or_default(fdt, (int)node, "npol", 0);
+			int pidle = fdt_get_int_or_default(fdt, (int)node, "pidle", 0);
+			int nidle = fdt_get_int_or_default(fdt, (int)node, "nidle", 0);
+			
+			TIM_OCInitTypeDef oc;
+			TIM_OCStructInit(&oc);
+			oc.TIM_OCMode = (uint16_t)oc_mode;
+			oc.TIM_OutputState = (pout_en)?TIM_OutputState_Enable:TIM_OutputState_Disable;
+			oc.TIM_OutputNState = (nout_en)?TIM_OutputNState_Enable:TIM_OutputNState_Disable;
+			oc.TIM_Pulse = (uint16_t)pulse;
+			oc.TIM_OCPolarity = (ppol)?TIM_OCPolarity_High:TIM_OCPolarity_Low;
+			oc.TIM_OCNPolarity = (npol)?TIM_OCNPolarity_High:TIM_OCNPolarity_Low;
+			oc.TIM_OCIdleState = (pidle)?TIM_OCIdleState_Set:TIM_OCIdleState_Reset;
+			oc.TIM_OCNIdleState = (nidle)?TIM_OCNIdleState_Set:TIM_OCNIdleState_Reset;
+			switch(c){
+				case 1: TIM_OC1Init(TIMx, &oc); break;
+				case 2: TIM_OC2Init(TIMx, &oc); break;
+				case 3: TIM_OC3Init(TIMx, &oc); break;
+				case 4: TIM_OC4Init(TIMx, &oc); break;
+			}
+			printk("%s: OC%d pulse %d\n", name, c, pulse);
+		}
+	}
+
+	TIM_Cmd(TIMx, ENABLE);
+	TIM_CtrlPWMOutputs(TIMx, ENABLE);
+
+	printk("%s: base %d, presc %d, reload %d\n", name, base, presc, period);
+
     return 0;
 }
 
-static int _stm32_timer_remove(void *fdt, int fdt_node){
+static int _stm32_tim_remove(void *fdt, int fdt_node){
     return 0;
 }
 
-DEVICE_DRIVER(stm32_timer, "st,stm32_timer", _stm32_timer_probe, _stm32_timer_remove)
+DEVICE_DRIVER(stm32_tim, "st,stm32_tim", _stm32_tim_probe, _stm32_tim_remove)

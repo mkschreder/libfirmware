@@ -68,15 +68,37 @@ console_t console_find_by_node(void *fdt, int node){
 	return NULL;
 }
 
-void console_command_init(struct console_command *self,
+console_t console_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
+	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
+	if(node < 0){
+		return 0;
+	}
+
+	console_t dev = console_find_by_node(fdt, node);
+	if(!dev){
+		return 0;
+	}
+	return dev;
+}
+
+int console_add_command(console_t con,
+		void *userptr,
 		const char *name,
 		const char *description,
 		const char *options,
-		int (*proc)(console_t con, int argc, char **argv)
+		int (*proc)(console_t con, void *userptr, int argc, char **argv)
 ){
-	memset(self, 0, sizeof(*self));
-	self->name = name;
-	self->description = description;
-	self->options = options;
+	struct console_command *self = kzmalloc(sizeof(struct console_command));
+	self->name = kzmalloc(strlen(name) + 1);
+	if(!self->name) return -ENOMEM;
+	strcpy(self->name, name);
+	self->description = kzmalloc(strlen(description) + 1);
+	if(!self->description) return -ENOMEM;
+	strcpy(self->description, description);
+	self->options = kzmalloc(strlen(options) + 1);
+	if(!self->options) return -ENOMEM;
+	strcpy(self->options, options);
 	self->proc = proc;
+	self->userptr = userptr;
+	return (*(con))->add_command(con, self);
 }

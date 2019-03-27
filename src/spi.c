@@ -57,3 +57,16 @@ spi_device_t spi_find(const char *dtb_path){
     return spi_find_by_node(_devicetree, node);
 }
 
+spi_device_t spi_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
+	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
+	if(node < 0){
+		return 0;
+	}
+
+	spi_device_t dev = spi_find_by_node(fdt, node);
+	if(!dev){
+		return 0;
+	}
+	return dev;
+}
+

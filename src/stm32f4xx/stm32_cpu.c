@@ -7,6 +7,7 @@
 #include "portmacro.h"
 
 #include "console.h"
+#include "chip.h"
 
 #ifndef configSYSTICK_CLOCK_HZ
 	#define configSYSTICK_CLOCK_HZ configCPU_CLOCK_HZ
@@ -135,10 +136,35 @@ DEVICE_DRIVER(stm32_cpu, "st,stm32_cpu", _stm32_cpu_probe, _stm32_cpu_remove)
 
 /* add console command for showing cpu info */
 
-static int _stm32_cpuinfo_cmd(console_t con, int argc, char **argv){
-	printk("cpuinfo\n");
+static int _stm32_cmd_cpuinfo(console_t con, void *userptr, int argc, char **argv){
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+	console_printf(con, "SYSCLK: %d, HCLK: %d, PCLK1: %d, PCLK2: %d\n",
+			clocks.SYSCLK_Frequency,
+			clocks.HCLK_Frequency,
+			clocks.PCLK1_Frequency,
+			clocks.PCLK2_Frequency
+	);
 	return 0;
 }
+
+static int _stm32_cmd_reboot(console_t con, void *userptr, int argc, char **argv){
+	(void)argc;
+	(void)argv;
+
+	if(argc == 2 && strcmp(argv[1], "b") == 0){
+		console_printf(con, "Rebooting to bootloader..\n");
+		thread_sleep_ms(100);
+		chip_reset_to_bootloader();
+	} else if(argc == 1){
+		chip_reset();
+	} else {
+		console_printf(con, "invalid argument!\n");
+	}
+
+	return 0;
+}
+
 
 static int _stm32_cpuinfo_probe(void *fdt, int fdt_node){
 	int node = fdt_find_node_by_ref(fdt, fdt_node, "console");
@@ -152,9 +178,8 @@ static int _stm32_cpuinfo_probe(void *fdt, int fdt_node){
 		return -1;
 	}
 	
-	struct console_command *cmd = kzmalloc(sizeof(struct console_command));
-	console_command_init(cmd, "cpuinfo", "show cpu info", "", _stm32_cpuinfo_cmd);
-	console_add_command(con, cmd);
+	console_add_command(con, NULL, "cpuinfo", "show cpu info", "", _stm32_cmd_cpuinfo);
+	console_add_command(con, NULL, "reboot", "reboot cpu", "", _stm32_cmd_reboot);
 
 	return 0;
 }

@@ -5,6 +5,7 @@ nobase_pkginclude_HEADERS = \
 	dts/stm32f4xx.dtsi\
 	dts/stm32f4xx.h\
 	dts/stm32f4xx_gpio.h\
+	dts/stm32f4xx_tim.h\
 	atomic.h \
 	adc.h\
     avl-cmp.h\

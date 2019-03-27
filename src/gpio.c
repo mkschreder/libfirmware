@@ -27,9 +27,10 @@
 
 static LIST_HEAD(_gpio_ports);
 
-void gpio_device_init(struct gpio_device *self, int fdt_node, const struct gpio_device_ops *ops){
+void gpio_device_init(struct gpio_device *self, void *fdt, int fdt_node, const struct gpio_device_ops *ops){
 	memset(self, 0, sizeof(*self));
 	INIT_LIST_HEAD(&self->list);
+	self->fdt = fdt;
 	self->fdt_node = fdt_node;
 	self->ops = ops;
 }
@@ -47,14 +48,27 @@ gpio_device_t gpio_find_by_node(void *fdt, int node){
 	struct gpio_device *dev;
     if(node < 0) return NULL;
     list_for_each_entry(dev, &_gpio_ports, list){
-		if(dev->fdt_node == node) return &dev->ops;
+		if(dev->fdt == fdt && dev->fdt_node == node) return &dev->ops;
 	}
 	return NULL;
 }
 
-gpio_device_t gpio_find(const char *dtb_path){
-	int node = fdt_path_offset(_devicetree, dtb_path);
+gpio_device_t gpio_find(void *fdt, const char *dtb_path){
+	int node = fdt_path_offset(fdt, dtb_path);
 	if(node < 0) return NULL;
     return gpio_find_by_node(_devicetree, node);
+}
+
+gpio_device_t gpio_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
+	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
+	if(node < 0){
+		return 0;
+	}
+
+	gpio_device_t dev = gpio_find_by_node(fdt, node);
+	if(!dev){
+		return 0;
+	}
+	return dev;
 }
 
