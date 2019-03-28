@@ -8,6 +8,7 @@ nobase_pkginclude_HEADERS = \
 	dts/stm32f4xx_tim.h\
 	atomic.h \
 	adc.h\
+	analog.h\
     avl-cmp.h\
     avl.h\
 	baro.h\

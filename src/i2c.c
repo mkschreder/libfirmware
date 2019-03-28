@@ -27,9 +27,10 @@
 
 static LIST_HEAD(_i2c_ports);
 
-void i2c_device_init(struct i2c_device *self, int fdt_node, const struct i2c_device_ops *ops){
+void i2c_device_init(struct i2c_device *self, void *fdt, int fdt_node, const struct i2c_device_ops *ops){
 	memset(self, 0, sizeof(*self));
 	INIT_LIST_HEAD(&self->list);
+	self->fdt = fdt;
 	self->fdt_node = fdt_node;
 	self->ops = ops;
 }
@@ -47,15 +48,15 @@ i2c_device_t i2c_find_by_node(void *fdt, int node){
 	struct i2c_device *dev;
     if(node < 0) return NULL;
     list_for_each_entry(dev, &_i2c_ports, list){
-		if(dev->fdt_node == node) return &dev->ops;
+		if(dev->fdt == fdt && dev->fdt_node == node) return &dev->ops;
 	}
 	return NULL;
 }
 
-i2c_device_t i2c_find(const char *dtb_path){
+i2c_device_t i2c_find(void *fdt, const char *dtb_path){
 	int node = fdt_path_offset(_devicetree, dtb_path);
 	if(node < 0) return NULL;
-    return i2c_find_by_node(_devicetree, node);
+    return i2c_find_by_node(fdt, node);
 }
 
 int i2c_write_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data){
@@ -66,5 +67,18 @@ int i2c_read_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data){
     uint8_t ch;
     if(!data) data = &ch;
     return i2c_read_buf(dev, addr, reg, data, 1);
+}
+
+i2c_device_t i2c_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
+	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
+	if(node < 0){
+		return 0;
+	}
+
+	i2c_device_t dev = i2c_find_by_node(fdt, node);
+	if(!dev){
+		return 0;
+	}
+	return dev;
 }
 

@@ -11,6 +11,7 @@
 #include "queue.h"
 #include "sem.h"
 #include "work.h"
+#include "analog.h"
 
 //#include "timer.h"
 #include "mutex.h"
@@ -18,13 +19,14 @@
 
 #include <errno.h>
 
-struct stm32_timer {
+struct stm32_tim {
     TIM_TypeDef *hw;
+	struct analog_device analog;
 };
 
-static struct stm32_timer *_timers[8] = {0};
+static struct stm32_tim *_timers[8] = {0};
 
-static int _stm32_timer_init_pwm_bldc(struct stm32_timer *self, uint32_t pwm_freq){
+static int _stm32_tim_init_pwm_bldc(struct stm32_tim *self, uint32_t pwm_freq){
     TIM_TypeDef *hw = self->hw;
     if(!hw) return -EINVAL;
 
@@ -96,7 +98,7 @@ static int _stm32_timer_init_pwm_bldc(struct stm32_timer *self, uint32_t pwm_fre
     return 0;
 }
 
-static int _stm32_timer_init_hall(struct stm32_timer *self, uint16_t prescaler, uint32_t period){
+static int _stm32_tim_init_hall(struct stm32_tim *self, uint16_t prescaler, uint32_t period){
 	TIM_TimeBaseInitTypeDef tim;
 	TIM_TypeDef *hw = self->hw;
     uint8_t irq_channel = 0;
@@ -179,7 +181,7 @@ static int _stm32_timer_init_hall(struct stm32_timer *self, uint16_t prescaler, 
 }
 
 void TIM4_IRQHandler(void){
-    struct stm32_timer *self = _timers[3];
+    struct stm32_tim *self = _timers[3];
     if(!self) return;
 
 	// this will be called whenever hall input is toggled and timer is reset
@@ -205,6 +207,27 @@ void TIM1_UP_TIM10_IRQHandler(void){
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
     }
 }
+
+static int _tim_analog_read(analog_device_t dev, unsigned int chan, float *value){
+	return -EINVAL;
+}
+
+static int _tim_analog_write(analog_device_t dev, unsigned int chan, float value){
+	struct stm32_tim *self = container_of(dev, struct stm32_tim, analog.ops);
+	switch(chan){
+		case 0: TIM_SetCompare1(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
+		case 1: TIM_SetCompare2(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
+		case 2: TIM_SetCompare3(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
+		case 3: TIM_SetCompare4(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
+		default: return -EINVAL;
+	}
+	return 0;
+}
+
+static struct analog_device_ops _tim_analog_ops = {
+	.read = _tim_analog_read,
+	.write = _tim_analog_write
+};
 
 static int _stm32_tim_probe(void *fdt, int fdt_node){
 	TIM_TypeDef *TIMx = (TIM_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
@@ -238,7 +261,7 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		return -1;
 	}
 
-    struct stm32_timer *self = kzmalloc(sizeof(struct stm32_timer));
+    struct stm32_tim *self = kzmalloc(sizeof(struct stm32_tim));
     self->hw = TIMx;
     _timers[idx] = self;
 
@@ -331,12 +354,17 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 				case 3: TIM_OC3Init(TIMx, &oc); break;
 				case 4: TIM_OC4Init(TIMx, &oc); break;
 			}
+
 			printk("%s: OC%d pulse %d\n", name, c, pulse);
 		}
 	}
 
 	TIM_Cmd(TIMx, ENABLE);
 	TIM_CtrlPWMOutputs(TIMx, ENABLE);
+
+	// register timer as an anlog device for pwm
+	analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);
+	analog_device_register(&self->analog);
 
 	printk("%s: base %d, presc %d, reload %d\n", name, base, presc, period);
 

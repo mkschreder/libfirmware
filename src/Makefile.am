@@ -1,6 +1,7 @@
 lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = \
 	adc.c\
+	analog.c\
 	avl-cmp.c\
     avl.c\
 	baro.c\
@@ -149,6 +150,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stm32_can.c\
     stm32f4xx/stm32_cpu.c\
     stm32f4xx/stm32_gpio.c\
+    stm32f4xx/stm32_i2c.c\
     stm32f4xx/stm32_leds.c\
     stm32f4xx/stm32_pwm_motor.c\
     stm32f4xx/stm32_spi.c\

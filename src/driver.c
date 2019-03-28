@@ -27,8 +27,6 @@ static int _init_subnodes(void *fdt, int root){
 	int node;
 	fdt_for_each_subnode(node, fdt, root){
         struct device_driver *driver;
-		// initialize children recursively
-		_init_subnodes(fdt, node);
 
         list_for_each_entry(driver, &_driver_list, list){
             if(!driver->compatible || !driver->probe) continue;
@@ -37,6 +35,9 @@ static int _init_subnodes(void *fdt, int root){
                 break;
             }
         }
+
+		// initialize children recursively
+		_init_subnodes(fdt, node);
 	}
 	return 0;
 }

@@ -32,13 +32,15 @@ struct i2c_device_ops {
 struct i2c_device {
 	struct list_head list;
 	const struct i2c_device_ops *ops;
+	void *fdt;
 	int fdt_node;
 };
 
-void i2c_device_init(struct i2c_device *self, int fdt_node, const struct i2c_device_ops *ops);
+void i2c_device_init(struct i2c_device *self, void *fdt, int fdt_node, const struct i2c_device_ops *ops);
 int i2c_device_register(struct i2c_device *self);
-i2c_device_t i2c_find(const char *dtb_path);
+i2c_device_t i2c_find(void *fdt, const char *dtb_path);
 i2c_device_t i2c_find_by_node(void *fdt, int node);
+i2c_device_t i2c_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
 
 #define i2c_write_buf(dev, addr, reg, buf, len) (*(dev))->write(dev, addr, reg, buf, len)
 #define i2c_read_buf(dev, addr, reg, buf, len) (*(dev))->read(dev, addr, reg, buf, len)
