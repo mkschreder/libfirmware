@@ -11,11 +11,11 @@ struct stm32_leds {
 	} leds[MAX_LEDS];
 	uint8_t count;
 	bool inverted;
-	const struct led_controller_ops *led_ops;
+	struct leds_device dev;
 };
 
 void _stm32_leds_on(led_controller_t leds, uint8_t id){
-	struct stm32_leds *self = container_of(leds, struct stm32_leds, led_ops);
+	struct stm32_leds *self = container_of(leds, struct stm32_leds, dev.ops);
 	if(id >= self->count) return;
 	if(self->inverted){
 		GPIO_ResetBits(self->leds[id].gpio, self->leds[id].pin);
@@ -25,7 +25,7 @@ void _stm32_leds_on(led_controller_t leds, uint8_t id){
 }
 
 void _stm32_leds_off(led_controller_t leds, uint8_t id){
-	struct stm32_leds *self = container_of(leds, struct stm32_leds, led_ops);
+	struct stm32_leds *self = container_of(leds, struct stm32_leds, dev.ops);
 	if(id >= self->count) return;
 	if(self->inverted){
 		GPIO_SetBits(self->leds[id].gpio, self->leds[id].pin);
@@ -35,12 +35,12 @@ void _stm32_leds_off(led_controller_t leds, uint8_t id){
 }
 
 void _stm32_leds_toggle(led_controller_t leds, uint8_t id){
-	struct stm32_leds *self = container_of(leds, struct stm32_leds, led_ops);
+	struct stm32_leds *self = container_of(leds, struct stm32_leds, dev.ops);
 	if(id >= self->count) return;
 	GPIO_ToggleBits(self->leds[id].gpio, self->leds[id].pin);
 }
 
-static const struct led_controller_ops _led_ops = {
+static const struct leds_device_ops _led_ops = {
 	.on = _stm32_leds_on,
 	.off = _stm32_leds_off,
 	.toggle = _stm32_leds_toggle,
@@ -73,9 +73,9 @@ static int _stm32_leds_probe(void *fdt, int fdt_node){
 		self->leds[c].pin = (uint16_t)fdt32_to_cpu(*(base + 1));
 	}
 
-	self->led_ops = &_led_ops;
+	leds_device_init(&self->dev, fdt, fdt_node, &_led_ops);
+	leds_device_register(&self->dev);
 
-	leds_register(fdt, fdt_node, &self->led_ops);
 	return 0;
 }
 

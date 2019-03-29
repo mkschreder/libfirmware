@@ -22,10 +22,12 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "list.h"
+#include "driver.h"
 
-typedef const struct serial_ops ** serial_port_t;
+#define serial_port_t serial_device_t
+typedef const struct serial_device_ops ** serial_port_t;
 
-struct serial_ops {
+struct serial_device_ops {
 	int (*write)(serial_port_t port, const void *ptr, size_t size, uint32_t timeout_ms);
 	int (*read)(serial_port_t port, void *ptr, size_t size, uint32_t timeout_ms);
 };
@@ -33,15 +35,7 @@ struct serial_ops {
 #define serial_read(s, b, sz, t) (*(s))->read(s, b, sz, t)
 #define serial_write(s, b, sz, t) (*(s))->write(s, b, sz, t)
 
-struct serial_device {
-	struct list_head list;
-	const struct serial_ops *ops;
-	int fdt_node;
-};
-
-void serial_device_init(struct serial_device *self, int fdt_node, const struct serial_ops *ops);
-int serial_device_register(struct serial_device *self);
-serial_port_t serial_find(const char *dtb_path);
-serial_port_t serial_find_by_node(void *fdt, int node);
-
 int serial_set_printk_port(serial_port_t port);
+
+DECLARE_DEVICE_CLASS(serial)
+

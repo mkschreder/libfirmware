@@ -20,6 +20,7 @@
 
 #include "timestamp.h"
 #include "list.h"
+#include "driver.h"
 
 typedef const struct adc_device_ops ** adc_device_t;
 
@@ -28,17 +29,8 @@ struct adc_device_ops {
     int (*read)(adc_device_t dev, unsigned int channel, int16_t *value);
 };
 
-struct adc_device {
-	struct list_head list;
-	const struct adc_device_ops *ops;
-	int fdt_node;
-};
-
-void adc_device_init(struct adc_device *self, int fdt_node, const struct adc_device_ops *ops);
-int adc_device_register(struct adc_device *self);
-adc_device_t adc_find(const char *dtb_path);
-adc_device_t adc_find_by_node(void *fdt, int node);
-
-#define adc_read(dev, channel) (*(dev))->read(dev, channel)
+#define adc_read(dev, channel, value) (*(dev))->read(dev, channel, value)
 #define adc_trigger(dev) (*(dev))->trigger(dev)
+
+DECLARE_DEVICE_CLASS(adc)
 

@@ -137,7 +137,7 @@ void USART6_IRQHandler(void){
 	//portYIELD_FROM_ISR(wake);
 }
 
-static const struct serial_ops _serial_ops = {
+static const struct serial_device_ops _serial_ops = {
 	.read = _serial_read,
 	.write = _serial_write
 };
@@ -187,7 +187,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	struct stm32_uart *self = kzmalloc(sizeof(struct stm32_uart));
 	if(!self) return -1;
 
-	serial_device_init(&self->dev, fdt_node, &_serial_ops);
+	serial_device_init(&self->dev, fdt, fdt_node, &_serial_ops);
 
     bool uart_queue_alloc_fail = (thread_queue_init(&self->tx_queue, (size_t)tx_queue, sizeof(char)) < 0 ||
         thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char)) < 0);

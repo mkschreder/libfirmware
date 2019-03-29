@@ -32,42 +32,7 @@
 
 static serial_port_t _default_serial_port = 0;
 
-static LIST_HEAD(_serial_ports);
-
-void serial_device_init(struct serial_device *self, int fdt_node, const struct serial_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt_node = fdt_node;
-	self->ops = ops;
-}
-
-int serial_device_register(struct serial_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->write);
-	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_serial_ports);
-	return 0;
-}
-
-serial_port_t serial_find(const char *dtb_path){
-	struct serial_device *serial;
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-	list_for_each_entry(serial, &_serial_ports, list){
-		if(serial->fdt_node == node) return &serial->ops;
-	}
-	return NULL;
-}
-
-serial_port_t serial_find_by_node(void *fdt, int node){
-	struct serial_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_serial_ports, list){
-		if(dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
-}
+DEFINE_DEVICE_CLASS(serial)
 
 int serial_set_printk_port(serial_port_t port){
     _default_serial_port = port;

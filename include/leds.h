@@ -23,11 +23,13 @@
 
 
 #include "list.h"
+#include "driver.h"
 
-typedef const struct led_controller_ops ** led_controller_t;
-typedef const struct led_controller_ops ** leds_t;
+#define led_controller_t leds_device_t
 
-struct led_controller_ops {
+typedef const struct leds_device_ops ** led_controller_t;
+
+struct leds_device_ops {
 	void (*on)(led_controller_t leds, uint8_t led);
 	void (*off)(led_controller_t leds, uint8_t led);
 	void (*toggle)(led_controller_t leds, uint8_t led);
@@ -37,12 +39,5 @@ struct led_controller_ops {
 #define led_off(c, l) (*(c))->off(c, l)
 #define led_toggle(c, l) (*(c))->toggle(c, l)
 
-struct leds_device {
-	int fdt_node;
-	led_controller_t ctrl;
-	struct list_head list;
-};
-
-int leds_register(void *fdt, int fdt_node, led_controller_t ctrl);
-led_controller_t leds_find(const char *dtb_path);
+DECLARE_DEVICE_CLASS(leds)
 

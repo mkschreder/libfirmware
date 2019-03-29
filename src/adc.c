@@ -25,35 +25,5 @@
 
 #include <errno.h>
 
-static LIST_HEAD(_adc_devices);
-
-void adc_device_init(struct adc_device *self, int fdt_node, const struct adc_device_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt_node = fdt_node;
-	self->ops = ops;
-}
-
-int adc_device_register(struct adc_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_adc_devices);
-	return 0;
-}
-
-adc_device_t adc_find_by_node(void *fdt, int node){
-	struct adc_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_adc_devices, list){
-		if(dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
-}
-
-adc_device_t adc_find(const char *dtb_path){
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-    return adc_find_by_node(_devicetree, node);
-}
+DEFINE_DEVICE_CLASS(adc)
 

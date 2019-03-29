@@ -240,15 +240,20 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
 		return -1;
 	}
 
-    if(len == 0 || !val) return -1;
+    if(len == 0 || !val) {
+		printk("gpio: no pinctrl parameter\n");
+		return -1;
+	}
 
     int pin_count = (uint8_t)(len / 4 / 3);
 
     struct stm32_gpio *self = kzmalloc(sizeof(struct stm32_gpio));
-    if(!self) return -ENOMEM;
-
     self->pins = kzmalloc(sizeof(struct stm32_gpio_pin) * (unsigned)pin_count);
-    if(!self->pins) return -ENOMEM;
+
+    if(!self || !self->pins) {
+		printk("gpio: nomem\n");
+		return -ENOMEM;
+	}
 
     gpio_device_init(&self->dev, fdt, fdt_node, &_gpio_ops);
     self->npins = (uint8_t)pin_count;

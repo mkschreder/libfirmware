@@ -26,22 +26,5 @@
 
 #include <errno.h>
 
-static LIST_HEAD(_leds);
+DEFINE_DEVICE_CLASS(leds)
 
-int leds_register(void *fdt, int fdt_node, led_controller_t ctrl){
-	struct leds_device *leds = kzmalloc(sizeof(struct leds_device));
-	leds->ctrl = ctrl;
-	leds->fdt_node = (int)fdt_node;
-	list_add_tail(&leds->list, &_leds);
-    return 0;
-}
-
-led_controller_t leds_find(const char *dtb_path){
-	struct leds_device *leds;
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-	list_for_each_entry(leds, &_leds, list){
-		if(leds->fdt_node == node) return leds->ctrl;
-	}
-	return NULL;
-}

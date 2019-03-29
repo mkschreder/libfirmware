@@ -214,11 +214,14 @@ static int _tim_analog_read(analog_device_t dev, unsigned int chan, float *value
 
 static int _tim_analog_write(analog_device_t dev, unsigned int chan, float value){
 	struct stm32_tim *self = container_of(dev, struct stm32_tim, analog.ops);
+	uint16_t arr = (uint16_t)((float)self->hw->ARR * value);
+	// basic duty cycle limit TODO: this can be an issue
+	if(!self->hw->ARR || arr < 2 || arr > (self->hw->ARR - 2)) return -1;
 	switch(chan){
-		case 0: TIM_SetCompare1(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
-		case 1: TIM_SetCompare2(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
-		case 2: TIM_SetCompare3(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
-		case 3: TIM_SetCompare4(self->hw, (uint16_t)((float)self->hw->ARR * value)); break;
+		case 0: TIM_SetCompare1(self->hw, arr); break;
+		case 1: TIM_SetCompare2(self->hw, arr); break;
+		case 2: TIM_SetCompare3(self->hw, arr); break;
+		case 3: TIM_SetCompare4(self->hw, arr); break;
 		default: return -EINVAL;
 	}
 	return 0;
@@ -361,6 +364,15 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 
 	TIM_Cmd(TIMx, ENABLE);
 	TIM_CtrlPWMOutputs(TIMx, ENABLE);
+
+	TIM_BDTRInitTypeDef dt;
+	dt.TIM_OSSRState = TIM_OSSRState_Enable;
+	dt.TIM_OSSIState = TIM_OSSIState_Enable;
+	dt.TIM_LOCKLevel = TIM_LOCKLevel_OFF;
+	dt.TIM_DeadTime = 80;
+	dt.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+	dt.TIM_Break = TIM_Break_Disable;
+	TIM_BDTRConfig(TIMx, &dt);
 
 	// register timer as an anlog device for pwm
 	analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);
