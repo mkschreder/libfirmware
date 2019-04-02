@@ -56,10 +56,11 @@ int _stm32_i2c_read(i2c_device_t dev, uint8_t address, uint8_t reg, const void *
 	return value;
 }
 #endif
-int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, size_t len) {
+int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t wr_len, void *data, size_t len) {
 	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
 	I2C_TypeDef *I2Cx = self->hw;
 	uint8_t *result = (uint8_t*)data;
+	uint8_t *wr_buf = (uint8_t*)wr_data;
 
 	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
 
@@ -71,9 +72,12 @@ int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, siz
 
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
-	I2C_SendData(I2Cx, reg);
+	// write header with secondary address and any other command bytes
+	for(size_t c = 0; c < wr_len; c++){
+		I2C_SendData(I2Cx, *wr_buf++);
 
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	}
 
 	I2C_GenerateSTOP(I2Cx, ENABLE);
 
@@ -97,85 +101,14 @@ int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, siz
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
 	*result++ = I2C_ReceiveData(I2Cx);
 
-	#if 0 
-	I2Cx->CR1 |= I2C_CR1_START;				// Generate START condition
-
-	while (!(I2Cx->SR1 & I2C_SR1_SB)); 		// Wait for EV5
-	I2Cx->DR = (uint8_t)(address<<1);					// Write device address (W)
-
-	while (!(I2Cx->SR1 & I2C_SR1_ADDR));	// Wait for EV6
-    (void)I2Cx->SR2;						// Read SR2
-
-	while (!(I2Cx->SR1 & I2C_SR1_TXE));		// Wait for EV8_1
-	I2Cx->DR = reg;					// Write registry address
-
-//	I2Cx->CR1 |= I2C_CR1_STOP;				// Generate STOP condition
-
-	I2Cx->CR1 |= I2C_CR1_START;				// Generate START condition
-
-	while (!(I2Cx->SR1 & I2C_SR1_SB)); 		// Wait for EV5
-	I2Cx->DR = (uint8_t)((address << 1 ) | 1);			// Write device address (R)
-
-	if(len==2)
-	{
-	    while (!(I2Cx->SR1 & I2C_SR1_ADDR));	// Wait for EV6
-
-	    I2Cx->CR1 = (uint16_t)(I2Cx->CR1 & ~I2C_CR1_ACK);              // No ACK
-	    I2Cx->CR1 |= I2C_CR1_POS;               // POS
-	    (void)I2Cx->SR2;
-
-	    while (!(I2Cx->SR1 & I2C_SR1_BTF));	    // Wait for BTF
-	    I2Cx->CR1 |= I2C_CR1_STOP;			    // Generate STOP condition
-
-	    *result++ = (uint8_t)I2Cx->DR;          // Read value
-	    *result++ = (uint8_t)I2Cx->DR;          // Read value
-	}
-	if(len>2)
-	{
-	    while (!(I2Cx->SR1 & I2C_SR1_ADDR));	// Wait for EV6
-	    (void)I2Cx->SR2;
-
-	    len--;
-	    while(len--)
-	    {
-		    while (!(I2Cx->SR1 & I2C_SR1_BTF));	    // Wait for BTF
-		    *result++ = (uint8_t)I2Cx->DR;          // Read value
-
-		    if(len==1)
-		    {
-			    I2Cx->CR1 = (uint16_t)(I2Cx->CR1 & ~I2C_CR1_ACK);              // No ACK
-			    I2Cx->CR1 |= I2C_CR1_STOP;			    // Generate STOP condition
-		    }
-	    }
-
-	    *result++ = (uint8_t)I2Cx->DR;          // Read value
-	}
-#endif
 	return 0;
 }
-#if 0
-static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr_, uint8_t reg_, const void *data, size_t len){
-	I2Cx->CR1 |= I2C_CR1_START;				// Generate START condition
 
-	while (!(I2Cx->SR1 & I2C_SR1_SB)); 		// Wait for EV5
-	I2Cx->DR = address<<1;					// Write device address (W)
-
-	while (!(I2Cx->SR1 & I2C_SR1_ADDR));	// Wait for EV6
-    (void)I2Cx->SR2;						// Read SR2
-
-	while (!(I2Cx->SR1 & I2C_SR1_TXE));		// Wait for EV8_1
-	I2Cx->DR = registry;					// Write registry address
-
-	while (!(I2Cx->SR1 & I2C_SR1_BTF));	    // Wait for BTF
-	I2Cx->DR = data;
-
-	I2Cx->CR1 |= I2C_CR1_STOP;			    // Generate STOP condition
-}
-#endif
-static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *data, size_t len){
+static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t wr_len, const void *data, size_t len){
 	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
 	I2C_TypeDef *I2Cx = self->hw;
 	const uint8_t *buf = (uint8_t*)data;
+	const uint8_t *wr_buf = (uint8_t*)wr_data;
 
 	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
 
@@ -187,9 +120,10 @@ static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, uint8_t reg, const v
 
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
-	I2C_SendData(I2Cx, reg);
-
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	for(size_t c = 0; c < wr_len; c++){
+		I2C_SendData(I2Cx, *wr_buf++);
+		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	}
 
 	for(size_t c = 0; c < len; c++){
 		I2C_SendData(I2Cx, *buf++);
@@ -212,17 +146,22 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
 	int idx = 0;
 	if(I2Cx == I2C1){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
 		idx = 1;
 	} else if(I2Cx == I2C2){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
+		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, ENABLE);
 		idx = 2;
 	} else if(I2Cx == I2C3){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C3, ENABLE);
+		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C3, ENABLE);
 		idx = 3;
 	} else {
 		printk("i2c: unsupported device\n");
 		return -1;
 	}
+
+	thread_sleep_ms(50);
 
 	I2C_DeInit(I2Cx);
 	I2C_InitTypeDef i2c;
@@ -237,11 +176,16 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
     I2C_Cmd(I2Cx, ENABLE);
     I2C_Init(I2Cx, &i2c);
 
+	I2C_GenerateSTART(I2Cx, ENABLE);
+	I2C_GenerateSTOP(I2Cx, ENABLE);
+
 	struct stm32_i2c *self = kzmalloc(sizeof(struct stm32_i2c));
 	self->hw = I2Cx;
 	i2c_device_init(&self->dev, fdt, fdt_node, &_i2c_ops);
 	i2c_device_register(&self->dev);
 	printk("i2c%d: ready (speed %d)\n", idx, baud);
+
+	thread_sleep_ms(50);
 
 	return 0;
 }

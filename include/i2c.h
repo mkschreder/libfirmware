@@ -21,29 +21,28 @@
 
 #include "timestamp.h"
 #include "list.h"
+#include "driver.h"
 
 typedef const struct i2c_device_ops ** i2c_device_t;
 
 struct i2c_device_ops {
-    int (*write)(i2c_device_t dev, uint8_t addr_, uint8_t reg_, const void *data, size_t len);
-    int (*read)(i2c_device_t dev, uint8_t addr_, uint8_t reg_, void *data, size_t len);
+    int (*write)(i2c_device_t dev, uint8_t addr_, const void *wr_data, size_t wr_len, const void *data, size_t len);
+    int (*read)(i2c_device_t dev, uint8_t addr_, const void *wr_data, size_t wr_len, void *data, size_t len);
 };
 
-struct i2c_device {
-	struct list_head list;
-	const struct i2c_device_ops *ops;
-	void *fdt;
-	int fdt_node;
-};
+#define i2c_write_xfer(dev, addr, wr_buf, wr_len, buf, len) (*(dev))->write(dev, addr, wr_buf, wr_len, buf, len)
+#define i2c_read_xfer(dev, addr, wr_buf, wr_len, buf, len) (*(dev))->read(dev, addr, wr_buf, wr_len, buf, len)
 
-void i2c_device_init(struct i2c_device *self, void *fdt, int fdt_node, const struct i2c_device_ops *ops);
-int i2c_device_register(struct i2c_device *self);
-i2c_device_t i2c_find(void *fdt, const char *dtb_path);
-i2c_device_t i2c_find_by_node(void *fdt, int node);
-i2c_device_t i2c_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
+DECLARE_DEVICE_CLASS(i2c)
 
-#define i2c_write_buf(dev, addr, reg, buf, len) (*(dev))->write(dev, addr, reg, buf, len)
-#define i2c_read_buf(dev, addr, reg, buf, len) (*(dev))->read(dev, addr, reg, buf, len)
+int i2c_write8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *data, size_t len);
+int i2c_read8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, size_t len);
 
-int i2c_write_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data);
-int i2c_read_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data);
+int i2c_write16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, const void *data, size_t len);
+int i2c_read16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, void *data, size_t len);
+
+int i2c_write8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data);
+int i2c_read8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data);
+
+int i2c_write16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, const uint8_t data);
+int i2c_read16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, uint8_t *data);

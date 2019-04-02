@@ -25,60 +25,37 @@
 
 #include <errno.h>
 
-static LIST_HEAD(_i2c_ports);
+DEFINE_DEVICE_CLASS(i2c)
 
-void i2c_device_init(struct i2c_device *self, void *fdt, int fdt_node, const struct i2c_device_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt = fdt;
-	self->fdt_node = fdt_node;
-	self->ops = ops;
+int i2c_write8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *data, size_t len){
+	return i2c_write_xfer(dev, addr, &reg, 1, data, len);
 }
 
-int i2c_device_register(struct i2c_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->write);
-	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_i2c_ports);
-	return 0;
+int i2c_read8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, size_t len){
+	return i2c_read_xfer(dev, addr, &reg, 1, data, len);
 }
 
-i2c_device_t i2c_find_by_node(void *fdt, int node){
-	struct i2c_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_i2c_ports, list){
-		if(dev->fdt == fdt && dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
+int i2c_write16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, const void *data, size_t len){
+	return i2c_write_xfer(dev, addr, &reg, 2, data, len);
 }
 
-i2c_device_t i2c_find(void *fdt, const char *dtb_path){
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-    return i2c_find_by_node(fdt, node);
+int i2c_read16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, void *data, size_t len){
+	return i2c_read_xfer(dev, addr, &reg, 2, data, len);
 }
 
-int i2c_write_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data){
-    return i2c_write_buf(dev, addr, reg, &data, 1);
+int i2c_write8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data){
+	return i2c_write_xfer(dev, addr, &reg, 1, &data, 1);
 }
 
-int i2c_read_reg(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data){
-    uint8_t ch;
-    if(!data) data = &ch;
-    return i2c_read_buf(dev, addr, reg, data, 1);
+int i2c_read8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data){
+	return i2c_read_xfer(dev, addr, &reg, 1, data, 1);
 }
 
-i2c_device_t i2c_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
-	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
-	if(node < 0){
-		return 0;
-	}
+int i2c_write16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, const uint8_t data){
+	return i2c_write_xfer(dev, addr, &reg, 2, &data, 1);
+}
 
-	i2c_device_t dev = i2c_find_by_node(fdt, node);
-	if(!dev){
-		return 0;
-	}
-	return dev;
+int i2c_read16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, uint8_t *data){
+	return i2c_read_xfer(dev, addr, &reg, 2, data, 1);
 }
 

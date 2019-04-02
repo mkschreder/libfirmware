@@ -29,6 +29,7 @@ nobase_pkginclude_HEADERS = \
     leds.h\
     list.h\
     math.h\
+	memory.h\
     motor.h\
     mutex.h\
 	pointer.h\

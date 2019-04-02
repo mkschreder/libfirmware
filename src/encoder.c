@@ -20,13 +20,10 @@
 #include <errno.h>
 
 #include "encoder.h"
-#include "list.h"
-#include "thread.h"
-#include "work.h"
-#include "timestamp.h"
-#include "math.h"
-#include "driver.h"
 
+DEFINE_DEVICE_CLASS(encoder)
+
+#if 0
 static LIST_HEAD(_encoders);
 
 void _encoder_update_estimate(struct work *work){
@@ -99,3 +96,4 @@ float encoder_get_velocity(encoder_t encoder){
 	thread_mutex_unlock(&self->mx);
 	return v;
 }
+#endif

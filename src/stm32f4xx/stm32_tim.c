@@ -12,6 +12,7 @@
 #include "sem.h"
 #include "work.h"
 #include "analog.h"
+#include "encoder.h"
 
 //#include "timer.h"
 #include "mutex.h"
@@ -22,6 +23,7 @@
 struct stm32_tim {
     TIM_TypeDef *hw;
 	struct analog_device analog;
+	struct encoder_device enc_dev;
 };
 
 static struct stm32_tim *_timers[8] = {0};
@@ -232,12 +234,21 @@ static struct analog_device_ops _tim_analog_ops = {
 	.write = _tim_analog_write
 };
 
+static int32_t _encoder_read(encoder_device_t dev){
+	struct stm32_tim *self = container_of(dev, struct stm32_tim, enc_dev.ops);
+	return (int16_t)self->hw->CNT;
+}
+
+static struct encoder_device_ops _encoder_ops = {
+	.read = _encoder_read
+};
+
 static int _stm32_tim_probe(void *fdt, int fdt_node){
 	TIM_TypeDef *TIMx = (TIM_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
-	int mode = fdt_get_int_or_default(fdt, (int)fdt_node, "mode", 0);
+	int mode = fdt_get_int_or_default(fdt, (int)fdt_node, "mode", -1);
 	int clock_div = fdt_get_int_or_default(fdt, (int)fdt_node, "clock_div", 0);
 	int rep_count = fdt_get_int_or_default(fdt, (int)fdt_node, "rep_count", 0);
-	uint32_t freq = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "freq", 0);
+	uint32_t freq = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "freq", 1);
     int idx = -1;
     if(TIMx == TIM1) idx = 0;
     else if(TIMx == TIM2) idx = 1;
@@ -249,7 +260,7 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
     else if(TIMx == TIM8) idx = 7;
     else return -1;
 
-    if(!mode) {
+    if(mode == -1) {
         printk("stm32_tim: mode not defined\n");
         return -1;
     }
@@ -310,22 +321,38 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		return -1;
 	}
 
+	TIM_DeInit(TIMx);
 
-	TIM_TimeBaseInitTypeDef tim;
-	TIM_TimeBaseStructInit(&tim);
-	tim.TIM_CounterMode = (uint16_t)mode;
+	if(mode == TIM_EncoderMode_TI12 || mode == TIM_EncoderMode_TI1 || mode == TIM_EncoderMode_TI2){
+		TIM_EncoderInterfaceConfig(TIMx, (uint16_t)mode,
+			TIM_ICPolarity_Rising,
+			TIM_ICPolarity_Rising);
+		TIM_SetAutoreload(TIMx, 0xffff);
+		TIM_Cmd(TIMx, ENABLE);
 
-	uint32_t presc = 1;
-	uint32_t period = 0;
-	while((period = (base / presc / (freq * 2))) > 0xFFFFUL){
-		presc++;
+		encoder_device_init(&self->enc_dev, fdt, fdt_node, &_encoder_ops);
+		encoder_device_register(&self->enc_dev);
+
+		printk("%s: encoder mode\n", name);
+	} else {
+		TIM_TimeBaseInitTypeDef tim;
+		TIM_TimeBaseStructInit(&tim);
+		tim.TIM_CounterMode = (uint16_t)mode;
+
+		uint32_t presc = 1;
+		uint32_t period = 0;
+		while((period = (base / presc / (freq * 2))) > 0xFFFFUL){
+			presc++;
+		}
+
+		tim.TIM_Prescaler = (uint16_t)(presc - 1);
+		tim.TIM_Period = (uint16_t)period;
+		tim.TIM_ClockDivision = (uint16_t)clock_div;
+		tim.TIM_RepetitionCounter = (uint8_t)rep_count;
+		TIM_TimeBaseInit(TIMx, &tim);
+
+		printk("%s: counter mode base %d, presc %d, reload %d\n", name, base, presc, period);
 	}
-
-	tim.TIM_Prescaler = (uint16_t)(presc - 1);
-	tim.TIM_Period = (uint16_t)period;
-	tim.TIM_ClockDivision = (uint16_t)clock_div;
-	tim.TIM_RepetitionCounter = (uint8_t)rep_count;
-	TIM_TimeBaseInit(TIMx, &tim);
 
 	for(int c = 1; c <= 4; c++){
 		char chan_name[16];
@@ -363,22 +390,24 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 	}
 
 	TIM_Cmd(TIMx, ENABLE);
-	TIM_CtrlPWMOutputs(TIMx, ENABLE);
 
-	TIM_BDTRInitTypeDef dt;
-	dt.TIM_OSSRState = TIM_OSSRState_Enable;
-	dt.TIM_OSSIState = TIM_OSSIState_Enable;
-	dt.TIM_LOCKLevel = TIM_LOCKLevel_OFF;
-	dt.TIM_DeadTime = 80;
-	dt.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
-	dt.TIM_Break = TIM_Break_Disable;
-	TIM_BDTRConfig(TIMx, &dt);
+	if(TIMx == TIM1 || TIMx == TIM8){
+		TIM_CtrlPWMOutputs(TIMx, ENABLE);
 
-	// register timer as an anlog device for pwm
-	analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);
-	analog_device_register(&self->analog);
+		TIM_BDTRInitTypeDef dt;
+		dt.TIM_OSSRState = TIM_OSSRState_Enable;
+		dt.TIM_OSSIState = TIM_OSSIState_Enable;
+		dt.TIM_LOCKLevel = TIM_LOCKLevel_OFF;
+		dt.TIM_DeadTime = 80;
+		dt.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+		dt.TIM_Break = TIM_Break_Disable;
+		TIM_BDTRConfig(TIMx, &dt);
 
-	printk("%s: base %d, presc %d, reload %d\n", name, base, presc, period);
+		// register timer as an anlog device for pwm
+		analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);
+		analog_device_register(&self->analog);
+	}
+
 
     return 0;
 }

@@ -16,45 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 #pragma once
 
 #include <stdint.h>
 #include <stddef.h>
-#include "work.h"
-#include "mutex.h"
-#include "dx_tracker.h"
-#include "list.h"
 
-typedef const struct encoder_ops ** encoder_t;
+#include "driver.h"
 
-struct encoder_ops {
-	int32_t (*read)(encoder_t encoder);
+typedef const struct encoder_device_ops ** encoder_device_t;
+
+struct encoder_device_ops {
+	int32_t (*read)(encoder_device_t dev);
 };
 
 #define encoder_read(enc) (*(enc))->read(enc)
 
-struct encoder_device {
-	struct list_head list;
-	const struct encoder_ops *ops;
-	int fdt_node;
+DECLARE_DEVICE_CLASS(encoder)
 
-	struct mutex mx;
-	uint32_t counts_per_unit;
-	uint32_t unit_scale;
-	int32_t last_raw;
-	uint32_t last_update_micros;
-	uint32_t update_interval_ms;
-	float observer_gain;
-	struct dx_tracker dx_track;
-
-	struct work work;
-};
-
-void encoder_device_init(struct encoder_device *self, int fdt_node, const struct encoder_ops *ops);
-int encoder_device_register(struct encoder_device *self);
-encoder_t encoder_find(const char *dtb_path);
-
-//! returns encoder position in meters relative to position when encoder was started
-float encoder_get_position(encoder_t encoder);
-float encoder_get_velocity(encoder_t encoder);
