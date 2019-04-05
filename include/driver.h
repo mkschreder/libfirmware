@@ -95,6 +95,10 @@ void register_device_driver(struct device_driver *self);
 
 extern unsigned char _devicetree[];
 
+#define PRINT_INFO "\x1b[0m"
+#define PRINT_ERROR "\x1b[31m"
+#define PRINT_SUCCESS "\x1b[32m"
+
 // this is defined to use the default uart once it has been initialized
 // this function is defined in serial.c but placed here because it is very often used in device drivers
 int printk(const char *fmt, ...);

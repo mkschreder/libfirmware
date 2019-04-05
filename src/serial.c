@@ -59,6 +59,8 @@ int printk(const char *fmt, ...){
 
     thread_mutex_unlock(&_printk_lock);
 
+	int ret = serial_write(_default_serial_port, "\x1b[0m", 4, 10);
+	if(ret < 0) return ret;
 	return serial_write(_default_serial_port, buf, (size_t)len, 10);
 }
 

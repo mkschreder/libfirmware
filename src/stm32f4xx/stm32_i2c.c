@@ -22,45 +22,16 @@
 struct stm32_i2c {
 	struct i2c_device dev;
 	I2C_TypeDef *hw;
+	struct mutex lock;
 };
-#if 0
-int _stm32_i2c_read(i2c_device_t dev, uint8_t address, uint8_t reg, const void *data, size_t len) {
-	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
 
-	while(self->hw->SR2 & I2C_SR2_BUSY);		// Wait for BUSY line
-	self->hw->CR1 |= I2C_CR1_START;				// Generate START condition
-
-	while (!(self->hw->SR1 & I2C_SR1_SB)); 		// Wait for EV5
-	self->hw->DR = address<<1;					// Write device address (W)
-    (void)self->hw->SR2;						// Read SR2
-
-	while (!(self->hw->SR1 & I2C_SR1_TXE));		// Wait for EV8_1
-	self->hw->DR = registry;
-
-	self->hw->CR1 |= I2C_CR1_STOP;				// Generate STOP condition
-
-	self->hw->CR1 |= I2C_CR1_START;				// Generate START condition
-
-	while (!(self->hw->SR1 & I2C_SR1_SB)); 		// Wait for EV5
-	self->hw->DR = (address << 1 ) | 1;			// Write device address (R)
-
-	while (!(self->hw->SR1 & I2C_SR1_ADDR));	// Wait for EV6
-    self->hw->CR1 &= ~I2C_CR1_ACK;              // No ACK
-    (void)self->hw->SR2;						// Read SR2
-
-	while (!(self->hw->SR1 & I2C_SR1_RXNE));	// Wait for EV7_1
-    uint8_t value = (uint8_t)self->hw->DR;      // Read value
-
-    self->hw->CR1 |= I2C_CR1_STOP;			    // Generate STOP condition
-
-	return value;
-}
-#endif
 int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t wr_len, void *data, size_t len) {
 	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
 	I2C_TypeDef *I2Cx = self->hw;
 	uint8_t *result = (uint8_t*)data;
 	uint8_t *wr_buf = (uint8_t*)wr_data;
+
+	thread_mutex_lock(&self->lock);
 
 	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
 
@@ -101,6 +72,8 @@ int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t 
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
 	*result++ = I2C_ReceiveData(I2Cx);
 
+	thread_mutex_unlock(&self->lock);
+
 	return 0;
 }
 
@@ -109,6 +82,8 @@ static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, const void *wr_data,
 	I2C_TypeDef *I2Cx = self->hw;
 	const uint8_t *buf = (uint8_t*)data;
 	const uint8_t *wr_buf = (uint8_t*)wr_data;
+
+	thread_mutex_lock(&self->lock);
 
 	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
 
@@ -131,6 +106,8 @@ static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, const void *wr_data,
 	}
 
 	I2C_GenerateSTOP(I2Cx, ENABLE);
+
+	thread_mutex_unlock(&self->lock);
 
 	return 0;
 }
@@ -181,9 +158,11 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
 
 	struct stm32_i2c *self = kzmalloc(sizeof(struct stm32_i2c));
 	self->hw = I2Cx;
+	thread_mutex_init(&self->lock);
 	i2c_device_init(&self->dev, fdt, fdt_node, &_i2c_ops);
 	i2c_device_register(&self->dev);
-	printk("i2c%d: ready (speed %d)\n", idx, baud);
+
+	printk(PRINT_SUCCESS "i2c%d: ready (speed %d)\n", idx, baud);
 
 	thread_sleep_ms(50);
 

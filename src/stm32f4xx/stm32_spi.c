@@ -6,6 +6,7 @@
 #include "time.h"
 #include "spi.h"
 #include "driver.h"
+#include "mutex.h"
 
 #include <libfdt/libfdt.h>
 
@@ -19,6 +20,7 @@ struct stm32_spi {
 	char tx_dma[16];
 	char rx_dma[16];
 	struct semaphore rx_sem;
+	struct mutex lock;
 };
 
 struct stm32_spi _devices[3];
@@ -84,6 +86,8 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 	if(!self->hw) return -1;
 
 	if(self->hw == SPI1){
+		thread_mutex_lock(&self->lock);
+
 		_dma_set_data(DMA2_Stream0, (uint32_t)rx_data, size);
 		_dma_set_data(DMA2_Stream3, (uint32_t)tx_data, size);
 
@@ -91,15 +95,18 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 
 		if(thread_sem_take_wait(&self->rx_sem, timeout) != 0){
 			SPI_Cmd(self->hw, DISABLE);
+			thread_mutex_unlock(&self->lock);
 			return -ETIMEDOUT;
 		}
 		SPI_Cmd(self->hw, DISABLE);
+		thread_mutex_unlock(&self->lock);
 	} else {
 		// Currently DMA does not seem to work. Need to debug it.
 		//_dma_set_data(DMA1_Stream3, (uint32_t)rx_data, size);
 		//_dma_set_data(DMA1_Stream4, (uint32_t)tx_data, size);
 
 		// this is quick and dirty just to get it to work
+		thread_mutex_lock(&self->lock);
 		SPI_Cmd(self->hw, ENABLE);
 		for(size_t c = 0; c < size; c++){
 			uint8_t *tx = (uint8_t*)tx_data;
@@ -111,6 +118,7 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 			rx[c] = (uint8_t)self->hw->DR;
 		}
 		SPI_Cmd(self->hw, DISABLE);
+		thread_mutex_unlock(&self->lock);
 	}
 
 	return 0;
@@ -248,10 +256,11 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		return -EINVAL;
 	}
 
-	spi_device_init(&self->dev, fdt_node, &_ops);
 	thread_sem_init(&self->rx_sem);
 	self->hw = SPIx;
+	thread_mutex_init(&self->lock);
 
+	spi_device_init(&self->dev, fdt_node, &_ops);
 	spi_device_register(&self->dev);
 
 	return 0;

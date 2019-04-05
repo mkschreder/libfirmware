@@ -25,7 +25,6 @@
 #include "types.h"
 
 struct timeval;
-struct timeval;
 
 typedef unsigned long timestamp_t;
 typedef unsigned long usec_t;

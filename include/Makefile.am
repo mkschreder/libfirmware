@@ -7,6 +7,7 @@ nobase_pkginclude_HEADERS = \
 	dts/stm32f4xx_adc.h\
 	dts/stm32f4xx_gpio.h\
 	dts/stm32f4xx_tim.h\
+	dts/canopen.h\
 	atomic.h \
 	adc.h\
 	analog.h\
@@ -14,6 +15,7 @@ nobase_pkginclude_HEADERS = \
     avl.h\
 	baro.h\
     can.h\
+	canopen.h\
     chip.h\
     console.h\
 	display.h\

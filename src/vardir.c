@@ -24,6 +24,10 @@
 
 #include "thread.h"
 #include "vardir.h"
+#include "driver.h"
+
+#include <libfdt/libfdt.h>
+
 //#include "canopen.h"
 
 typedef union {
@@ -164,7 +168,7 @@ int vardir_set_value(struct vardir *self, const char *name, const char *value){
 }
 
 int vardir_entry_get_u32(struct vardir_entry *e, uint32_t *value){
-	if(!e) return -1;
+	if(!e) return -ENOENT;
 
 	if(e->type & VAR_REALTIME){
 		struct vardir_entry_ops *ops = *e->value.ops;
@@ -344,4 +348,6 @@ int vardir_add_string(struct vardir *self, uint32_t id, const char *name, const 
 	list_add(&entry->list, &self->directory);
 	return 0;
 }
+
+DEFINE_DEVICE_CLASS(vardir)
 

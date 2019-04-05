@@ -23,11 +23,12 @@
 #include "list.h"
 #include "work.h"
 #include "mutex.h"
+#include "driver.h"
 
 #include <stdint.h>
 #include <string.h>
 
-typedef const struct can_ops ** can_port_t;
+typedef const struct can_device_ops ** can_device_t;
 
 struct can_message {
 	uint32_t id;  /*!< Specifies the standard identifier. This parameter can be a value between 0 to 0x7FF. */
@@ -37,12 +38,8 @@ struct can_message {
 
 struct can_listener {
 	struct list_head list;
-	void (*handler)(struct can_listener *self, struct can_message *msg);
+	void (*process_message)(struct can_listener *self, can_device_t dev, struct can_message *msg);
 };
-
-typedef enum {
-	CAN_CMD_GET_STATUS = 1
-} can_control_cmd_t;
 
 struct can_counters {
 	// messages sent
@@ -69,53 +66,32 @@ struct can_counters {
 	uint8_t tec, rec;
 };
 
-struct can_status {
-	struct can_counters cnt;
-};
-
-struct can_control_param {
-	union {
-		struct can_status status;
-	} v;
-};
-
-void can_listener_init(struct can_listener *self, void (*handler)(struct can_listener *self, struct can_message *msg));
+void can_listener_init(struct can_listener *self, void (*handler)(struct can_listener *self, can_device_t can, struct can_message *msg));
 
 #define can_message_init(self) memset(self, 0, sizeof(*self))
 
-typedef enum {
-	CAN_LISTENER_ADD=1,
-	CAN_LISTENER_REMOVE=2
-} can_listen_cmd_t;
+struct can_dispatcher {
+	can_device_t dev;
+	struct list_head listeners;
+	struct mutex lock;
+	int (*next_message)(can_device_t dev, struct can_message *msg);
+};
 
-struct can_ops {
+void can_dispatcher_init(struct can_dispatcher *self, can_device_t dev, int (*)(can_device_t dev, struct can_message *msg));
+void can_dispatcher_add_listener(struct can_dispatcher *self, struct can_listener *listener);
+void can_dispatcher_process_message(struct can_dispatcher *self, struct can_message *msg);
+
+struct can_device_ops {
 	//! send a can packet
-	int (*send)(can_port_t can, const struct can_message *msg, uint32_t timeout_ms);
+	int (*send)(can_device_t can, const struct can_message *msg, uint32_t timeout_ms);
 	//! register a packet processor
-	int (*handler)(can_port_t can, can_listen_cmd_t cmd, struct can_listener *listener);
+	int (*subscribe)(can_device_t can, struct can_listener *listener);
 	//! get/set can port parameters
-	int (*control)(can_port_t can, can_control_cmd_t cmd, struct can_control_param *param);
+	//int (*control)(can_device_t can, can_control_cmd_t cmd, struct can_control_param *param);
 };
 
 #define can_send(can, msg, tout) ((*can)->send(can, msg, tout))
-#define can_register_listener(can, listener) ((*can)->handler(can, CAN_LISTENER_ADD, listener))
-#define can_unregister_listener(can, listener) ((*can)->handler(can, CAN_LISTENER_REMOVE, listener))
-#define can_get_status(can, param) ((*can)->control(can, CAN_CMD_GET_STATUS, param))
+#define can_subscribe(can, listener) ((*can)->subscribe(can, listener))
 
-//#define can_recv(can, msg, tout) ((*can)->recv(can, msg, tout))
+DECLARE_DEVICE_CLASS(can)
 
-struct can_device {
-	int fdt_node;
-	can_port_t port;
-	struct list_head list;
-
-	struct mutex lock;
-	struct list_head listeners;
-};
-
-int can_device_handler(struct can_device *self, can_listen_cmd_t cmd, struct can_listener *listener);
-void can_device_dispatch_message(struct can_device *self, struct can_message *msg);
-
-int can_register_device(void *fdt, int fdt_node, struct can_device *self, can_port_t port);
-int can_unregister_device(void *fdt, int fdt_node);
-can_port_t can_find(const char *dtb_path);

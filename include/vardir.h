@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include "list.h"
 #include "mutex.h"
+#include "driver.h"
 
 typedef enum {
     VAR_UINT8 = (0 << 0),
@@ -95,7 +96,7 @@ struct vardir_entry {
 	struct list_head list;
 	const uint32_t id;
 	const char *name;
-	const uint8_t type;
+	const vardir_value_type_t type;
 
 	const union {
 		struct vardir_lookup lookup;
@@ -109,6 +110,22 @@ struct vardir_entry {
 		struct vardir_entry_ops **ops;
 	} value;
 };
+
+typedef const struct vardir_device_ops ** vardir_device_t;
+
+struct vardir_device_ops {
+	int (*add_static)(vardir_device_t, uint32_t id, const char *name, vardir_value_type_t type, const void *init_value);
+	int (*add_dynamic)(vardir_device_t, uint32_t id, const char *name, vardir_value_type_t type, struct vardir_entry_ops **ops);
+	int (*get)(vardir_device_t, uint32_t id, const char *name, vardir_value_type_t get_as, void *value, size_t value_size);
+	int (*set)(vardir_device_t, uint32_t id, const char *name, vardir_value_type_t set_from, const void* value);
+};
+
+#define vardir_add_static(dev, id, name, type, def) (*(dev))->add_static(dev, id, name, type, def)
+#define vardir_add_dynamic(dev, id, name, type, def) (*(dev))->add_dynamic(dev, id, name, type, def)
+#define vardir_get(dev, id, name, type, val, size) (*(dev))->get(dev, id, name, type, val, size)
+#define vardir_set(dev, id, name, type, val) (*(dev))->set(dev, id, name, type, val)
+
+DECLARE_DEVICE_CLASS(vardir)
 
 struct vardir {
 	struct mutex lock;
