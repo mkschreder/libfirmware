@@ -222,7 +222,7 @@ libfirmware_a_LIBADD =
 am__libfirmware_a_SOURCES_DIST = adc.c analog.c avl-cmp.c avl.c baro.c \
 	can.c console.c display.c dx_tracker.c pointer.c driver.c \
 	encoder.c gpio.c i2c.c imu.c leds.c math.c memory.c serial.c \
-	spi.c time.c ulink.c usb.c vardir.c linux/chip.c \
+	spi.c time.c ulink.c usb.c vardir.c regmap.c linux/chip.c \
 	linux/linux_display.c linux/linux_uart.c linux/linux_udpcan.c \
 	linux/linux_vcan.c linux/linux_leds.c linux/thread.c \
 	linux/thread_mutex.c linux/thread_queue.c linux/thread_sem.c \
@@ -475,9 +475,9 @@ am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-memory.$(OBJEXT) libfirmware_a-serial.$(OBJEXT) \
 	libfirmware_a-spi.$(OBJEXT) libfirmware_a-time.$(OBJEXT) \
 	libfirmware_a-ulink.$(OBJEXT) libfirmware_a-usb.$(OBJEXT) \
-	libfirmware_a-vardir.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6)
+	libfirmware_a-vardir.$(OBJEXT) libfirmware_a-regmap.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2) $(am__objects_4) \
+	$(am__objects_5) $(am__objects_6)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -668,8 +668,9 @@ lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = adc.c analog.c avl-cmp.c avl.c baro.c can.c \
 	console.c display.c dx_tracker.c pointer.c driver.c encoder.c \
 	gpio.c i2c.c imu.c leds.c math.c memory.c serial.c spi.c \
-	time.c ulink.c usb.c vardir.c $(am__append_1) $(am__append_3) \
-	$(am__append_5) $(am__append_7) $(am__append_9)
+	time.c ulink.c usb.c vardir.c regmap.c $(am__append_1) \
+	$(am__append_3) $(am__append_5) $(am__append_7) \
+	$(am__append_9)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
 	$(am__append_2) $(am__append_4) $(am__append_6) \
 	$(am__append_8) $(am__append_10)
@@ -1249,6 +1250,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-math.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-pointer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-regmap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-serial.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-spi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-time.Po@am__quote@
@@ -1743,6 +1745,20 @@ libfirmware_a-vardir.obj: vardir.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='vardir.c' object='libfirmware_a-vardir.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-vardir.obj `if test -f 'vardir.c'; then $(CYGPATH_W) 'vardir.c'; else $(CYGPATH_W) '$(srcdir)/vardir.c'; fi`
+
+libfirmware_a-regmap.o: regmap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-regmap.o -MD -MP -MF $(DEPDIR)/libfirmware_a-regmap.Tpo -c -o libfirmware_a-regmap.o `test -f 'regmap.c' || echo '$(srcdir)/'`regmap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-regmap.Tpo $(DEPDIR)/libfirmware_a-regmap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='regmap.c' object='libfirmware_a-regmap.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-regmap.o `test -f 'regmap.c' || echo '$(srcdir)/'`regmap.c
+
+libfirmware_a-regmap.obj: regmap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-regmap.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-regmap.Tpo -c -o libfirmware_a-regmap.obj `if test -f 'regmap.c'; then $(CYGPATH_W) 'regmap.c'; else $(CYGPATH_W) '$(srcdir)/regmap.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-regmap.Tpo $(DEPDIR)/libfirmware_a-regmap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='regmap.c' object='libfirmware_a-regmap.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-regmap.obj `if test -f 'regmap.c'; then $(CYGPATH_W) 'regmap.c'; else $(CYGPATH_W) '$(srcdir)/regmap.c'; fi`
 
 linux/libfirmware_a-chip.o: linux/chip.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT linux/libfirmware_a-chip.o -MD -MP -MF linux/$(DEPDIR)/libfirmware_a-chip.Tpo -c -o linux/libfirmware_a-chip.o `test -f 'linux/chip.c' || echo '$(srcdir)/'`linux/chip.c

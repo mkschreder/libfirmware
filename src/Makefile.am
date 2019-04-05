@@ -23,7 +23,8 @@ libfirmware_a_SOURCES = \
     time.c\
     ulink.c\
 	usb.c\
-    vardir.c
+    vardir.c\
+	regmap.c
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99
 
 if WITH_TARGET_LINUX

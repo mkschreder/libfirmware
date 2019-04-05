@@ -37,6 +37,7 @@ nobase_pkginclude_HEADERS = \
 	pointer.h\
     pwm.h\
     queue.h\
+	regmap.h\
     rtc.h\
     sem.h\
     serial.h\
