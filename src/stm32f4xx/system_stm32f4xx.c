@@ -212,7 +212,10 @@
   * @{
   */
 
+#include <string.h>
+
 #include "stm32f4xx.h"
+#include "atomic.h"
 
 /**
   * @}
@@ -306,7 +309,7 @@
   uint32_t SystemCoreClock = 84000000;
 #endif /* STM32F401xx */
 #endif
-  __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
+//  __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**
   * @}
@@ -369,6 +372,46 @@ static void _enable_fpu( void ){
     );
 }     
 
+void delay_us(uint32_t us) {
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
+	volatile uint32_t cycles = (clocks.SYSCLK_Frequency/1000000L)*us;
+
+	uint32_t prim = __get_PRIMASK();
+	__disable_irq();
+
+	volatile uint32_t start = DWT->CYCCNT;
+	do  {
+	} while(DWT->CYCCNT - start < cycles);
+
+	if(!prim)
+		__enable_irq();
+}
+
+uint32_t nanos(){
+	return DWT->CYCCNT;
+}
+
+#define VECTOR_TABLE_ENTRIES (107)
+static uint32_t __isr_vector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+static uint32_t __isr_counts[VECTOR_TABLE_ENTRIES] = {0};
+static uint32_t __isr_time[VECTOR_TABLE_ENTRIES] = {0};
+#define portNVIC_INT_CTRL_REG  ( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
+
+void __profile_isr(){
+	int irq = portNVIC_INT_CTRL_REG & 0xff;
+	if(irq >= VECTOR_TABLE_ENTRIES) return;
+	uint32_t start = nanos();
+	((void (*)())__isr_vector[irq])();
+	__isr_time[irq] += nanos() - start;
+	__isr_counts[irq]++;
+}
+
+uint32_t irq_get_count(int c){
+	return __isr_counts[c];
+}
+
 /**
   * @brief  Setup the microcontroller system
   *         Initialize the Embedded Flash Interface, the PLL and update the 
@@ -408,12 +451,23 @@ void SystemInit(void)
   /* Configure the System clock source, PLL Multiplier and Divider factors, 
      AHB/APBx prescalers and Flash settings ----------------------------------*/
 
-  /* Configure the Vector Table location add offset address ------------------*/
 #ifdef VECT_TAB_SRAM
   SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
 #else
   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
 #endif
+
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CYCCNT = 0; // reset the counter
+	DWT->CTRL |= 1 ; // enable the counter
+/*
+	memcpy(__isr_vector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+	memset(__isr_counts, 0, sizeof(atomic_t) * VECTOR_TABLE_ENTRIES);
+	for(int c = 0; c < VECTOR_TABLE_ENTRIES; c++){
+		__isr_vector[c] = (uint32_t)__profile_isr;
+	}
+	SCB->VTOR = SRAM_BASE | (uint32_t)__isr_vector;
+*/
 	__libc_init_array();
 
     // OK, WHY is this skipped here if defined as NVIC_SetPriorityGroupConfig??

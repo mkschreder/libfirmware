@@ -45,7 +45,7 @@ void vPortSetupTimerInterrupt( void )
 
 	/* Configure SysTick to interrupt at the requested rate. */
 	portNVIC_SYSTICK_CTRL_REG &= ~( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
-	portNVIC_SYSTICK_LOAD_REG = ( clocks.HCLK_Frequency / configTICK_RATE_HZ ) - 1UL;
+	portNVIC_SYSTICK_LOAD_REG = ( clocks.SYSCLK_Frequency / configTICK_RATE_HZ ) - 1UL;
 	portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
 }
 

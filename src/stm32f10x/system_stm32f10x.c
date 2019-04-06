@@ -38,8 +38,6 @@ __libc_init_array (void)
     for (i = 0; i < count; i++)
         __init_array_start[i] ();
 }
-
-
 void SystemInit(void)
 {
     /* Reset the RCC clock configuration to the default reset state(for debug purpose) */

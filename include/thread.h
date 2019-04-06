@@ -38,7 +38,10 @@ int thread_join(thread_t handle);
 void thread_set_tag(thread_t thread, void *tag);
 void thread_start_scheduler(void);
 int thread_sleep_ms(uint32_t ms);
+int thread_sleep_ms_until(uint32_t *last, uint32_t ms);
+
 int thread_sleep_us(uint32_t us);
+uint32_t thread_ticks_count();
 
 /**
  * Used in interrupt handlers to signal operating system that a reschedule may be necessary

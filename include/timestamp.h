@@ -43,6 +43,9 @@ typedef unsigned long usec_t;
 	 ((long)((a) - (b)) >= 0))
 #define time_before_eq(a,b)	time_after_eq(b,a)
 
+void delay_us(uint32_t us);
+uint32_t nanos();
+
 /*
  * Calculate whether a is in the range of [b, c].
  */

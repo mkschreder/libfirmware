@@ -32,27 +32,19 @@ int thread_sleep_ms(uint32_t ms){
 	return 0;
 }
 
+int thread_sleep_ms_until(uint32_t *last, uint32_t ms){
+	vTaskDelayUntil(last, ms/portTICK_PERIOD_MS);
+	if(ucTaskDelayWasAborted()) return -EINTR;
+	return 0;
+}
+
+uint32_t thread_ticks_count(){
+	return xTaskGetTickCount();
+}
+
 int thread_sleep_us(uint32_t us){
-	// TODO: this needs to be fixed by making it portable!
-	return thread_sleep_ms(1);
-	/*
-	RCC_ClocksTypeDef clocks;
-	RCC_GetClocksFreq(&clocks);
-
-    uint32_t ms = us / 1000;
-    if(ms == 0){
-        uint32_t ticks = clocks.HCLK_Frequency / 1000000 / 5 * us;
-        asm volatile (  "MOV R0,%[loops]\n\t"\
-            "1: \n\t"\
-            "SUB R0, #1\n\t"\
-            "CMP R0, #0\n\t"\
-            "BNE 1b \n\t" : : [loops] "r" (ticks) : "memory"\
-              );\
-        return 0;
-    }
-
-    return thread_sleep_ms((ms == 0)?1:ms);
-	*/
+	delay_us(us);
+	return 0;
 }
 
 void thread_yield_from_isr(int32_t wake){
@@ -106,7 +98,7 @@ static int _compare_tasks(const void *a, const void *b){
 }
 
 void thread_meminfo(){
-    #define CONSOLE_MAX_PS_TASKS 8
+    #define CONSOLE_MAX_PS_TASKS 12
 	// realtime tasks
 	static TaskStatus_t status[CONSOLE_MAX_PS_TASKS];
 	static TaskStatus_t prev_status[CONSOLE_MAX_PS_TASKS];
