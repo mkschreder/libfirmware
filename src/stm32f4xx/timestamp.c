@@ -5,17 +5,18 @@
 
 #include "timestamp.h"
 
-// cycles per microsecond
-static uint32_t usTicks = 0;
 // current uptime for 1kHz systick timer. will rollover after 49 days. hopefully we won't care.
 static volatile uint32_t sysTickUptime = 0;
 
+/*
 void time_init(void){
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
 	usTicks = clocks.SYSCLK_Frequency / 1000000;
     SysTick_Config(SystemCoreClock / 1000);
 }
+
+*/
 
 void vApplicationTickHook(void){
 	__sync_fetch_and_add(&sysTickUptime, 1);
@@ -24,10 +25,14 @@ void vApplicationTickHook(void){
 
 // Return system uptime in microseconds (rollover in 70minutes)
 timestamp_t micros(void){
-    register uint32_t ms;
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+	uint32_t usTicks = clocks.SYSCLK_Frequency / 1000000;
+
+    register uint32_t ticks;
 	register uint32_t cycle_cnt;
     do {
-        ms = sysTickUptime;
+        ticks = sysTickUptime;
         cycle_cnt = SysTick->VAL;
 
         /*
@@ -35,8 +40,9 @@ timestamp_t micros(void){
          * interrupt to be delivered before we can recheck sysTickUptime:
          */
         asm volatile("\tnop\n");
-    } while (ms != sysTickUptime);
-    return (timestamp_t)((ms * 1000U) + (usTicks * 1000U - cycle_cnt) / usTicks);
+    } while (ticks != sysTickUptime);
+	// micros = tick_period_counts + count / counts_per_us;
+    return (timestamp_t)((ticks * SysTick->LOAD) + cycle_cnt / usTicks);
 }
 
 void time_gettime(struct timeval *ts){
