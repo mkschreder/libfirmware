@@ -123,7 +123,7 @@ int regmap_convert_u32(uint32_t value, regmap_value_type_t type, void *data, siz
 		case REG_STRING:
 			return snprintf(data, size, "%u", (unsigned int)value);
 	}
-	return -1;
+	return -EINVAL;
 }
 
 int regmap_mem_to_u32(regmap_value_type_t type, const void *data, size_t size, uint32_t *value){
@@ -210,16 +210,6 @@ struct regmap {
 	struct mutex lock;
 };
 
-static struct regmap_range *_regmap_find_range(struct regmap *self, uint32_t reg){
-	struct regmap_range *entry;
-	list_for_each_entry(entry, &self->ranges, list){
-		if(reg >= entry->start && reg <= entry->end){
-			return entry;
-		}
-	}
-	return NULL;
-}
-
 static int _regmap_add(regmap_device_t dev, struct regmap_range *range){
 	struct regmap *self = container_of(dev, struct regmap, dev.ops);
 	thread_mutex_lock(&self->lock);
@@ -228,33 +218,46 @@ static int _regmap_add(regmap_device_t dev, struct regmap_range *range){
 	return 0;
 }
 
-
 static int _regmap_read(regmap_device_t dev, uint32_t id, regmap_value_type_t get_as, void *value, size_t value_size){
 	struct regmap *self = container_of(dev, struct regmap, dev.ops);
-	int ret = -ENOENT;
 
 	thread_mutex_lock(&self->lock);
 
-	struct regmap_range *range = _regmap_find_range(self, id);
-	if(range) ret = range->ops->read(&range->ops, id, get_as, value, value_size);
+	struct regmap_range *entry;
+	list_for_each_entry(entry, &self->ranges, list){
+		if(id >= entry->start && id <= entry->end){
+			// try all ranges until one read succeeds. This allow overlapping regions
+			int ret = 0;
+			if((ret = entry->ops->read(&entry->ops, id, get_as, value, value_size)) >= 0){
+				thread_mutex_unlock(&self->lock);
+				return ret;
+			}
+		}
+	}
 
 	thread_mutex_unlock(&self->lock);
-
-	return ret;
+	return -ENOENT;
 }
 
 static int _regmap_write(regmap_device_t dev, uint32_t id, regmap_value_type_t set_from, const void* value, size_t size){
 	struct regmap *self = container_of(dev, struct regmap, dev.ops);
-	int ret = -ENOENT;
 
 	thread_mutex_lock(&self->lock);
 
-	struct regmap_range *range = _regmap_find_range(self, id);
-	if(range) ret = range->ops->write(&range->ops, id, set_from, value, size);
+	struct regmap_range *entry;
+	list_for_each_entry(entry, &self->ranges, list){
+		if(id >= entry->start && id <= entry->end){
+			// try all ranges until one write succeeds. This allow overlapping regions
+			int ret = 0;
+			if((ret = entry->ops->write(&entry->ops, id, set_from, value, size)) >= 0){
+				thread_mutex_unlock(&self->lock);
+				return ret;
+			}
+		}
+	}
 
 	thread_mutex_unlock(&self->lock);
-
-	return ret;
+	return -ENOENT;
 }
 
 struct regmap_device_ops _regmap_ops = {
