@@ -1050,6 +1050,15 @@ void SystemInit_ExtMemCtl(void)
 }
 #endif /* DATA_IN_ExtSDRAM */
 
+#define  SYST_CALIB			( * ( ( volatile uint32_t * ) 0xe000e01c ) )
+uint32_t time_get_clock_speed(){
+	// reg contains systicks per 10ms
+	return (SYST_CALIB & 0xffffff);
+}
+
+int time_cpu_clock_speed_exact(){
+	return !!((SYST_CALIB >> 30) & 1);
+}
 
 /**
   * @}

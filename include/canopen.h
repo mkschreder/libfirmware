@@ -304,6 +304,13 @@ struct canopen_pdo_config {
 #define CANOPEN_PDO_DISABLED 0x80000000
 #define CANOPEN_COB_DISABLED 0x80000000
 
+typedef const struct canopen_device_ops ** canopen_device_t;
+
+struct canopen_device_ops {
+	int (*sdo_read)(canopen_device_t dev, uint8_t node_id, uint32_t dict, void *data, size_t size);
+	int (*sdo_write)(canopen_device_t dev, uint8_t node_id, uint32_t dict, const uint8_t *data, size_t size);
+};
+
 struct canopen_counters {
 	atomic_t sync_in;
 };

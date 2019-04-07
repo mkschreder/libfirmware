@@ -22,6 +22,7 @@
 #define portNVIC_SYSTICK_CTRL_REG			( * ( ( volatile uint32_t * ) 0xe000e010 ) )
 #define portNVIC_SYSTICK_LOAD_REG			( * ( ( volatile uint32_t * ) 0xe000e014 ) )
 #define portNVIC_SYSTICK_CURRENT_VALUE_REG	( * ( ( volatile uint32_t * ) 0xe000e018 ) )
+#define portNVIC_SYSTICK_CAL_REG			( * ( ( volatile uint32_t * ) 0xe000e01c ) )
 #define portNVIC_SYSPRI2_REG				( * ( ( volatile uint32_t * ) 0xe000ed20 ) )
 #define portNVIC_SYSTICK_INT_BIT			( 1UL << 1UL )
 #define portNVIC_SYSTICK_ENABLE_BIT			( 1UL << 0UL )
@@ -34,6 +35,7 @@ void vPortSetupTimerInterrupt( void )
 	/* Calculate the constants required to configure the tick interrupt. */
 	#if configUSE_TICKLESS_IDLE == 1
 	{
+#error "Not supported"
 		ulTimerCountsForOneTick = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ );
 		xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick;
 		ulStoppedTimerCompensation = portMISSED_COUNTS_FACTOR / ( configCPU_CLOCK_HZ / configSYSTICK_CLOCK_HZ );
@@ -43,10 +45,13 @@ void vPortSetupTimerInterrupt( void )
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
 
-	/* Configure SysTick to interrupt at the requested rate. */
+	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
+	SysTick_Config(clocks.HCLK_Frequency / (configTICK_RATE_HZ));
+/*
 	portNVIC_SYSTICK_CTRL_REG &= ~( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
-	portNVIC_SYSTICK_LOAD_REG = ( clocks.SYSCLK_Frequency / configTICK_RATE_HZ ) - 1UL;
+	portNVIC_SYSTICK_LOAD_REG = ( clocks.SYSCLK_Frequency / (configTICK_RATE_HZ * 2)) - 1UL;
 	portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
+	*/
 }
 
 static int _stm32_cpu_probe(void *fdt, int fdt_node){
@@ -139,12 +144,17 @@ DEVICE_DRIVER(stm32_cpu, "st,stm32_cpu", _stm32_cpu_probe, _stm32_cpu_remove)
 static int _stm32_cmd_cpuinfo(console_t con, void *userptr, int argc, char **argv){
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
+	
+	console_printf(con, "CPU clock source: %s\n", (RCC->CR & RCC_CR_HSERDY)?"HSE":"HSI");
+	console_printf(con, "PLL clock source: %s\n", (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC)?"HSE":"HSI");
+	console_printf(con, "Processor clock speed: %d (%s)\n", time_get_clock_speed(), (time_cpu_clock_speed_exact())?"exact":"inexact");
 	console_printf(con, "SYSCLK: %d, HCLK: %d, PCLK1: %d, PCLK2: %d\n",
 			clocks.SYSCLK_Frequency,
 			clocks.HCLK_Frequency,
 			clocks.PCLK1_Frequency,
 			clocks.PCLK2_Frequency
 	);
+	console_printf(con, "SysTick reload value: %d\n", (SysTick->LOAD & 0xffffff) + 1);
 	return 0;
 }
 

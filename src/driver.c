@@ -31,7 +31,12 @@ static int _init_subnodes(void *fdt, int root){
         list_for_each_entry(driver, &_driver_list, list){
             if(!driver->compatible || !driver->probe) continue;
             if(fdt_node_check_compatible(fdt, node, driver->compatible) == 0){
-                driver->probe(fdt, node);
+				char path[32];
+				fdt_get_path(fdt, node, path, sizeof(path));
+				printk(PRINT_SYSTEM ">> %s\n", path);
+                if(driver->probe(fdt, node) < 0){
+					printk(PRINT_ERROR "failed to probe %s\n", path);
+				}
                 break;
             }
         }

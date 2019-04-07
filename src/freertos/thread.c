@@ -51,6 +51,10 @@ void thread_yield_from_isr(int32_t wake){
 	portYIELD_FROM_ISR(wake);
 }
 
+void thread_yield(){
+	taskYIELD();
+}
+
 void thread_sched_suspend(){
 	vTaskSuspendAll();
 }
@@ -94,7 +98,7 @@ void vApplicationMallocFailedHook(void){
 static int _compare_tasks(const void *a, const void *b){
 	TaskStatus_t *ta = (TaskStatus_t*)a;
 	TaskStatus_t *tb = (TaskStatus_t*)b;
-	return tb->xTaskNumber < ta->xTaskNumber;
+	return (int)ta->xTaskNumber - (int)tb->xTaskNumber;
 }
 
 void thread_meminfo(){
@@ -121,7 +125,7 @@ void thread_meminfo(){
 		printk("time elapsed: %u:%06u, micros: %u, time usr: %u\n", tval.tv_sec, tval.tv_usec, micros(), total_calculated);
 		printk("heap: %lu free of %lu bytes\n", xPortGetFreeHeapSize(), configTOTAL_HEAP_SIZE);
 		//printk("data: %d\n", chip_get_data_size());
-		printk("%5s%5s%8s%8s%10s%8s%8s\n", "id", "prio", "name", "stack", "cpu (us)", "cpu (%)", "load");
+		printk("%5s%5s%8s%8s%10s%8s%8s\n", "id", "prio", "name", "stack", "cpu (ms)", "cpu (%)", "load");
 		for(UBaseType_t c = 0; c < ret; c++){
 			TaskStatus_t *stat = &status[c];
 			TaskStatus_t *prev_stat = &prev_status[c];
@@ -137,14 +141,19 @@ void thread_meminfo(){
 				dcpu_percent = (uint32_t)(((uint64_t)drun_time * 10000) / dtotal);
 			}
 
-			uint32_t cpu_whole = cpu_percent / 100;
+			uint32_t cpu_whole = (cpu_percent / 100) % 100;
 			uint32_t cpu_frac = cpu_percent % 100;
 
-			uint32_t dcpu_whole = dcpu_percent / 100;
+			uint32_t dcpu_whole = (dcpu_percent / 100) % 100;
 			uint32_t dcpu_frac = dcpu_percent % 100;
 
 			printk("%5u%5u%8s%8u%10u%5u.%02u%5u.%02u\n",
-					stat->xTaskNumber, stat->uxBasePriority, stat->pcTaskName, stat->usStackHighWaterMark, stat->ulRunTimeCounter, cpu_whole, cpu_frac, dcpu_whole, dcpu_frac);
+					stat->xTaskNumber,
+					stat->uxBasePriority,
+					stat->pcTaskName,
+					stat->usStackHighWaterMark,
+					stat->ulRunTimeCounter / (portTICK_PERIOD_MS * 1000),
+					cpu_whole, cpu_frac, dcpu_whole, dcpu_frac);
 		}
 		memcpy(prev_status, status, sizeof(prev_status));
 	} else {

@@ -46,6 +46,10 @@ typedef unsigned long usec_t;
 void delay_us(uint32_t us);
 uint32_t nanos();
 
+// should return exact clock speed (platform specific)
+uint32_t time_get_clock_speed();
+int time_cpu_clock_speed_exact();
+
 /*
  * Calculate whether a is in the range of [b, c].
  */
