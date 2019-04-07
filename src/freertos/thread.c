@@ -6,6 +6,7 @@
 #include "kernel/include/task.h"
 #include "kernel/include/portable.h"
 #include "driver.h"
+#include "math.h"
 
 #include <errno.h>
 
@@ -40,6 +41,11 @@ int thread_sleep_ms_until(uint32_t *last, uint32_t ms){
 
 uint32_t thread_ticks_count(){
 	return xTaskGetTickCount();
+}
+
+uint32_t thread_ticks_from_us(uint32_t us){
+	uint32_t tick_period_us = (1000000 / configTICK_RATE_HZ);
+	return constrain_u32(us / tick_period_us, 1, 0xffffffff);
 }
 
 int thread_sleep_us(uint32_t us){

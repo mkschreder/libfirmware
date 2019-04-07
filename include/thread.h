@@ -43,6 +43,7 @@ void thread_yield();
 
 int thread_sleep_us(uint32_t us);
 uint32_t thread_ticks_count();
+uint32_t thread_ticks_from_us(uint32_t us);
 
 /**
  * Used in interrupt handlers to signal operating system that a reschedule may be necessary

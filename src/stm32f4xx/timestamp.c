@@ -42,7 +42,7 @@ timestamp_t micros(void){
         asm volatile("\tnop\n");
     } while (ticks != sysTickUptime);
 	// micros = tick_period_counts + count / counts_per_us;
-    return (timestamp_t)((ticks * SysTick->LOAD) + cycle_cnt / usTicks);
+    return (timestamp_t)(((uint64_t)ticks * SysTick->LOAD + cycle_cnt) / usTicks);
 }
 
 void time_gettime(struct timeval *ts){
