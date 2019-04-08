@@ -13,6 +13,7 @@
 #include "serial.h"
 #include "thread.h"
 #include "queue.h"
+#include "mutex.h"
 
 #include <libfdt/libfdt.h>
 
@@ -21,6 +22,7 @@ struct stm32_uart {
 	USART_TypeDef *hw;
 	struct thread_queue tx_queue;
 	struct thread_queue rx_queue;
+	struct mutex wr_lock, rd_lock;
     int crlf;
 };
 
@@ -32,6 +34,7 @@ static int _serial_write(serial_port_t serial, const void *data, size_t size, ui
 	if(!self) return -1;
 	uint8_t *buf = (uint8_t*)data;
 	int sent = 0;
+	thread_mutex_lock(&self->wr_lock);
 	for(size_t c = 0; c < size; c++){
 		if(self->crlf && buf[c] == '\n') {
             char ch = '\r';
@@ -47,6 +50,7 @@ static int _serial_write(serial_port_t serial, const void *data, size_t size, ui
 		USART_ITConfig(self->hw, USART_IT_TXE, ENABLE);
 		sent++;
 	}
+	thread_mutex_unlock(&self->wr_lock);
 	return sent;
 }
 
@@ -57,11 +61,13 @@ static int _serial_read(serial_port_t serial, void *data, size_t size, uint32_t 
 	char *buf = (char*)data;
 	int pos = 0;
 	// pop characters off the queue
+	thread_mutex_lock(&self->rd_lock);
 	while(size && thread_queue_recv(&self->rx_queue, &ch, (pos == 0)?(timeout):0) == 1){
 		*(buf + pos) = ch;
 		pos++;
 		size--;
 	}
+	thread_mutex_unlock(&self->rd_lock);
 	if(pos == 0) return -ETIMEDOUT;
 	return pos;
 }
@@ -193,6 +199,9 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
         thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char)) < 0);
 
     BUG_ON(uart_queue_alloc_fail);
+
+	thread_mutex_init(&self->wr_lock);
+	thread_mutex_init(&self->rd_lock);
 
 	self->hw = UARTx;
     self->crlf = crlf;

@@ -141,7 +141,7 @@ DEVICE_DRIVER(stm32_cpu, "st,stm32_cpu", _stm32_cpu_probe, _stm32_cpu_remove)
 
 /* add console command for showing cpu info */
 
-static int _stm32_cmd_cpuinfo(console_t con, void *userptr, int argc, char **argv){
+static int _stm32_cmd_cpuinfo(console_device_t con, void *userptr, int argc, char **argv){
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
 	
@@ -158,7 +158,7 @@ static int _stm32_cmd_cpuinfo(console_t con, void *userptr, int argc, char **arg
 	return 0;
 }
 
-static int _stm32_cmd_reboot(console_t con, void *userptr, int argc, char **argv){
+static int _stm32_cmd_reboot(console_device_t con, void *userptr, int argc, char **argv){
 	(void)argc;
 	(void)argv;
 
@@ -182,7 +182,7 @@ static int _stm32_cpuinfo_probe(void *fdt, int fdt_node){
 		printk("cpuinfo: no console device\n");
 		return -1;
 	}
-	console_t con = console_find_by_node(fdt, node);
+	console_device_t con = console_find_by_node(fdt, node);
 	if(!con){
 		printk("cpuinfo: console not found\n");
 		return -1;

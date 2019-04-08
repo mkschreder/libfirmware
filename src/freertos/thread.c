@@ -92,7 +92,8 @@ unsigned long thread_get_total_heap(){
     return configTOTAL_HEAP_SIZE;
 }
 
-void vApplicationStackOverflowHook(void){
+void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *name){
+	printk("stack overflow in %s\n", name);
 	panic("SOVF");
 }
 

@@ -25,44 +25,34 @@
 
 #include "serial.h"
 #include "list.h"
+#include "driver.h"
 
-typedef const struct console_ops ** console_t;
+typedef const struct console_device_ops ** console_device_t;
 
 struct console;
 struct console_command {
 	char *name;
-	int (*proc)(console_t dev, void *userptr, int argc, char **argv);
+	int (*proc)(console_device_t dev, void *userptr, int argc, char **argv);
 	char *options;
 	char *description;
 	void *userptr;
 	struct list_head list;
 };
 
-struct console_ops {
-	int (*add_command)(console_t dev, struct console_command *cmd);
-	int (*printf)(console_t dev, const char *fmt, ...);
+struct console_device_ops {
+	int (*add_command)(console_device_t dev, struct console_command *cmd);
+	int (*printf)(console_device_t dev, const char *fmt, ...);
 };
 
-int console_add_command(console_t con,
+int console_add_command(console_device_t con,
 		void *userptr,
 		const char *name,
 		const char *description,
 		const char *options,
-		int (*proc)(console_t con, void *userptr, int argc, char **argv)
+		int (*proc)(console_device_t con, void *userptr, int argc, char **argv)
 );
 
 #define console_printf(dev, ...) (*(dev))->printf(dev, ##__VA_ARGS__)
 
-struct console_device {
-	struct list_head list;
-	const struct console_ops *ops;
-	void *fdt;
-	int fdt_node;
-};
-
-void console_init(struct console_device *self, void *fdt, int fdt_node, const struct console_ops *ops);
-int console_register(struct console_device *self);
-console_t console_find(const char *dtb_path);
-console_t console_find_by_node(void *fdt, int node);
-console_t console_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
+DECLARE_DEVICE_CLASS(console)
 

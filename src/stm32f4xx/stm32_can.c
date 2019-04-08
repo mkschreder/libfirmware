@@ -158,23 +158,27 @@ static void _can_sce_isr(struct stm32_can *self, int32_t *wake){
 
 
 static void _can_tx_isr(struct stm32_can *self, int32_t *wake){
-	if(self->hw->TSR & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2)){
-		atomic_inc(&self->counters.tme);
-		CanTxMsg msg;
+	/*
+	if(CAN_GetITStatus(self->hw, CAN_IT_TME) != RESET){
+		CAN_ClearITPendingBit(self->hw, CAN_IT_TME);
+		*/
+		if(self->hw->TSR & (CAN_TSR_TME0 | CAN_TSR_TME1 | CAN_TSR_TME2)){
+			atomic_inc(&self->counters.tme);
+			CanTxMsg msg;
 
-		if(thread_queue_recv_from_isr(&self->tx_queue, &msg, wake) <= 0){
-			// disable interrupt if we don't have any other messages
-			CAN_ITConfig(self->hw, CAN_IT_TME, DISABLE);
-			goto done;
-		}
+			if(thread_queue_recv_from_isr(&self->tx_queue, &msg, wake) <= 0){
+				// disable interrupt if we don't have any other messages
+				CAN_ITConfig(self->hw, CAN_IT_TME, DISABLE);
+				goto done;
+			}
 
-		if(CAN_Transmit(self->hw, &msg) == CAN_NO_MB){
-			atomic_inc(&self->counters.txdrop);
-			// Log error?
-			goto done;
+			if(CAN_Transmit(self->hw, &msg) == CAN_NO_MB){
+				atomic_inc(&self->counters.txdrop);
+				// Log error?
+				goto done;
+			}
 		}
-	} else {
-	}
+//	}
 done:
 	return;
 }

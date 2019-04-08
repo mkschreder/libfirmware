@@ -30,63 +30,14 @@
 #include "mutex.h"
 #include "driver.h"
 
+DEFINE_DEVICE_CLASS(console)
 
-static LIST_HEAD(_console_devs);
-
-void console_init(struct console_device *self, void *fdt, int fdt_node, const struct console_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt = fdt;
-	self->fdt_node = fdt_node;
-	self->ops = ops;
-}
-
-int console_register(struct console_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->add_command);
-	list_add_tail(&self->list, &_console_devs);
-	return 0;
-}
-
-console_t console_find(const char *dtb_path){
-	struct console_device *console;
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-	list_for_each_entry(console, &_console_devs, list){
-		if(console->fdt_node == node) return &console->ops;
-	}
-	return NULL;
-}
-
-console_t console_find_by_node(void *fdt, int node){
-	struct console_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_console_devs, list){
-		if(dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
-}
-
-console_t console_find_by_ref(void *fdt, int fdt_node, const char *ref_name){
-	int node = fdt_find_node_by_ref(fdt, fdt_node, ref_name);
-	if(node < 0){
-		return 0;
-	}
-
-	console_t dev = console_find_by_node(fdt, node);
-	if(!dev){
-		return 0;
-	}
-	return dev;
-}
-
-int console_add_command(console_t con,
+int console_add_command(console_device_t con,
 		void *userptr,
 		const char *name,
 		const char *description,
 		const char *options,
-		int (*proc)(console_t con, void *userptr, int argc, char **argv)
+		int (*proc)(console_device_t con, void *userptr, int argc, char **argv)
 ){
 	struct console_command *self = kzmalloc(sizeof(struct console_command));
 	self->name = kzmalloc(strlen(name) + 1);

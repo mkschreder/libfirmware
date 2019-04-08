@@ -212,6 +212,7 @@ struct regmap {
 
 static int _regmap_add(regmap_device_t dev, struct regmap_range *range){
 	struct regmap *self = container_of(dev, struct regmap, dev.ops);
+	BUG_ON(!list_empty(&range->list));
 	thread_mutex_lock(&self->lock);
 	list_add(&range->list, &self->ranges);
 	thread_mutex_unlock(&self->lock);

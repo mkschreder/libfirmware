@@ -221,7 +221,7 @@ static int _stm32_gpio_write_pin(gpio_device_t dev, uint32_t pin, bool value){
 static int _stm32_gpio_read_pin(gpio_device_t dev, uint32_t pin, bool *value){
     struct stm32_gpio *self = container_of(dev, struct stm32_gpio, dev.ops);
     if(pin >= self->npins) return -EINVAL;
-    *value = !!GPIO_ReadInputDataBit(self->pins[pin].gpio, self->pins[pin].pin);
+    *value = (bool)GPIO_ReadInputDataBit(self->pins[pin].gpio, self->pins[pin].pin);
     return 0;
 }
 
@@ -279,7 +279,7 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
         uint16_t idx = (uint16_t)ffs(pin);
         if(gpio.GPIO_Mode == GPIO_Mode_AF && idx != 0){
             GPIO_PinAFConfig(GPIOx, (uint16_t)(idx - 1), (opts & 0xf));
-        } else if(defs){
+        } else if(gpio.GPIO_Mode == GPIO_Mode_OUT && defs){
         	uint16_t en = (uint16_t)fdt32_to_cpu(*(defs + c));
 			GPIO_WriteBit(GPIOx, pin, en);
 		}

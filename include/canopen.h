@@ -36,6 +36,7 @@
 #include "atomic.h"
 #include "work.h"
 #include "vardir.h"
+#include "memory.h"
 
 enum {
 	CANOPEN_COB_NMT = 0,
@@ -320,6 +321,11 @@ struct canopen_listener {
 	struct list_head list;
 	void (*callback)(struct canopen_listener *self, uint8_t node_id, struct can_message *msg);
 };
+
+int canopen_pdo_rx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);
+int canopen_pdo_tx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);
+
+
 /*
 void canopen_set_identity(struct canopen *self, uint32_t uuid[4]);
 void canopen_set_node_id(struct canopen *self, uint8_t id);
