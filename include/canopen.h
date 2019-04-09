@@ -52,6 +52,7 @@ enum {
 	CANOPEN_COB_RXPDO_3 = 0x500,
 	CANOPEN_COB_TXSDO	= 0x580,
 	CANOPEN_COB_RXSDO	= 0x600,
+	CANOPEN_COB_NMT_MON	= 0x700,
 	CANOPEN_COB_LSS		= 0x780,
 };
 
@@ -139,34 +140,6 @@ enum {
 #define CANOPEN_REG_DEVICE_CYCLE_PERIOD				0x100600
 #define CANOPEN_REG_RXPDO_BASE						0x140000
 #define CANOPEN_REG_TXPDO_BASE						0x180000
-
-#define CANOPEN_REG_MOTION_ERROR					0x200000
-#define CANOPEN_REG_MOTION_ERROR_CAN_ERROR_BIT		(1 << 0)
-#define CANOPEN_REG_MOTION_ERROR_SHORT_BIT			(1 << 1)
-#define CANOPEN_REG_MOTION_ERROR_INVALID_SETUP_BIT	(1 << 2)
-#define CANOPEN_REG_MOTION_ERROR_CONTROL_ERR_BIT	(1 << 3)
-#define CANOPEN_REG_MOTION_ERROR_COM_ERR_BIT		(1 << 4)
-#define CANOPEN_REG_MOTION_ERROR_POS_WRAP_BIT		(1 << 5)
-#define CANOPEN_REG_MOTION_ERROR_LIM_SW_POS_BIT		(1 << 6)
-#define CANOPEN_REG_MOTION_ERROR_LIM_SW_NEG_BIT		(1 << 7)
-#define CANOPEN_REG_MOTION_ERROR_OVCT_FAULT_BIT		(1 << 8)
-#define CANOPEN_REG_MOTION_ERROR_I2T_FAULT_BIT		(1 << 9)
-#define CANOPEN_REG_MOTION_ERROR_MOT_OVT_BIT		(1 << 10)
-#define CANOPEN_REG_MOTION_ERROR_DRV_OVT_BIT		(1 << 11)
-#define CANOPEN_REG_MOTION_ERROR_VHI_BIT			(1 << 12)
-#define CANOPEN_REG_MOTION_ERROR_VLO_BIT			(1 << 13)
-#define CANOPEN_REG_MOTION_ERROR_CMD_ERR_BIT		(1 << 14)
-#define CANOPEN_REG_MOTION_ERROR_NO_EN_BIT			(1 << 15)
-
-#define CANOPEN_REG_MOTION_ERROR_MASK				0x200100
-#define CANOPEN_REG_DETAILED_ERROR					0x200200
-#define CANOPEN_REG_DETAILED_ERROR2					0x200900
-#define CANOPEN_REG_EXT_REFERENCE					0x201C00
-#define CANOPEN_REG_EXT_REFERENCE_TYPE				0x201D00
-#define CANOPEN_REG_EXT_REFERENCE_TYPE_ONLINE		1
-#define CANOPEN_REG_EXT_REFERENCE_TYPE_ANALOG		2
-#define CANOPEN_REG_TML_RUN							0x207700
-#define CANOPEN_REG_TS_CURRENT_ACTUAL				0x207E00
 
 #define CANOPEN_REG_DRIVE_CONN_FAULT_ACTION			0x600700
 #define CANOPEN_REG_DRIVE_ERROR_CODE				0x603F00
@@ -280,6 +253,13 @@ typedef enum {
 } canopen_lss_state_t;
 
 typedef enum {
+	CANOPEN_EV_BOOTING = 0,
+	CANOPEN_EV_STOPPED = 0x04,
+	CANOPEN_EV_OPERATIONAL = 0x05,
+	CANOPEN_EV_PRE_OPERATIONAL = 0x7f,
+} canopen_node_event_t;
+
+typedef enum {
 	CANOPEN_MASTER,
 	CANOPEN_SLAVE
 } canopen_mode_t;
@@ -325,6 +305,7 @@ struct canopen_listener {
 int canopen_pdo_rx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);
 int canopen_pdo_tx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);
 
+int canopen_send_event(memory_device_t canopen_mem, canopen_node_event_t ev);
 
 /*
 void canopen_set_identity(struct canopen *self, uint32_t uuid[4]);

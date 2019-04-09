@@ -59,9 +59,13 @@ int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint3
 
 	if(thread_queue_send(&self->tx_queue, &msg, timeout) < 0){
 		atomic_inc(&self->counters.txto);
+		return -ETIMEDOUT;
 	}
 
 	CAN_ITConfig(self->hw, CAN_IT_TME, ENABLE);
+	CAN_ITConfig(self->hw, CAN_IT_BOF, ENABLE);
+	CAN_ITConfig(self->hw, CAN_IT_EPV, ENABLE);
+	CAN_ITConfig(self->hw, CAN_IT_EWG, ENABLE);
 
 	if(self->hw == CAN1){
 		NVIC->STIR = CAN1_TX_IRQn;
@@ -132,16 +136,19 @@ static void _can_sce_isr(struct stm32_can *self, int32_t *wake){
 		// bus off event has occurred
 		if(CAN_GetITStatus(self->hw, CAN_IT_BOF) != RESET){
 			CAN_ClearITPendingBit(self->hw, CAN_IT_BOF);
+			CAN_ITConfig(self->hw, CAN_IT_BOF, DISABLE);
 			atomic_inc(&self->counters.bof);
 		}
 		// error passive
 		if(CAN_GetITStatus(self->hw, CAN_IT_EPV) != RESET){
 			CAN_ClearITPendingBit(self->hw, CAN_IT_EPV);
+			CAN_ITConfig(self->hw, CAN_IT_EPV, DISABLE);
 			atomic_inc(&self->counters.epv);
 		}
 		// error warning
 		if(CAN_GetITStatus(self->hw, CAN_IT_EWG) != RESET){
 			CAN_ClearITPendingBit(self->hw, CAN_IT_EWG);
+			CAN_ITConfig(self->hw, CAN_IT_EWG, DISABLE);
 			atomic_inc(&self->counters.ewg);
 		}
 		// fifo 1 overrun
@@ -318,9 +325,9 @@ static int _can_next_message(can_device_t dev, struct can_message *msg){
 static int _memory_read(memory_device_t dev, size_t offset, void *data, size_t size){
 	struct stm32_can *self = container_of(dev, struct stm32_can, mem.ops);
 	if(size != sizeof(struct can_counters) || offset != 0) return -EINVAL;
-	thread_mutex_lock(&self->lock);
+	//thread_mutex_lock(&self->lock);
 	memcpy(data, &self->counters, sizeof(self->counters));
-	thread_mutex_unlock(&self->lock);
+	//thread_mutex_unlock(&self->lock);
 	return (int)size;
 }
 

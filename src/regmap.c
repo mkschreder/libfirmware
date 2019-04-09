@@ -126,6 +126,10 @@ int regmap_convert_u32(uint32_t value, regmap_value_type_t type, void *data, siz
 	return -EINVAL;
 }
 
+int regmap_convert_u16(uint16_t value, regmap_value_type_t type, void *data, size_t size){
+	return regmap_convert_u32(value, type, data, size);
+}
+
 int regmap_mem_to_u32(regmap_value_type_t type, const void *data, size_t size, uint32_t *value){
 	switch(type){
 		case REG_UINT8:

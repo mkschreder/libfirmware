@@ -80,6 +80,7 @@ int regmap_read_i8(regmap_device_t dev, uint32_t id, int8_t *value);
 int regmap_read_string(regmap_device_t dev, uint32_t id, char *value, size_t max_len);
 
 int regmap_convert_u32(uint32_t value, regmap_value_type_t type, void *data, size_t size);
+int regmap_convert_u16(uint16_t value, regmap_value_type_t type, void *data, size_t size);
 
 int regmap_mem_to_u32(regmap_value_type_t type, const void *data, size_t size, uint32_t *value);
 int regmap_mem_to_u16(regmap_value_type_t type, const void *data, size_t size, uint16_t *value);

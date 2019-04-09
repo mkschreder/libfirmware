@@ -42,6 +42,7 @@ struct console_command {
 struct console_device_ops {
 	int (*add_command)(console_device_t dev, struct console_command *cmd);
 	int (*printf)(console_device_t dev, const char *fmt, ...);
+	int (*read)(console_device_t dev, char *data, size_t max_size, uint32_t timeout_ms);
 };
 
 int console_add_command(console_device_t con,
@@ -53,6 +54,8 @@ int console_add_command(console_device_t con,
 );
 
 #define console_printf(dev, ...) (*(dev))->printf(dev, ##__VA_ARGS__)
+#define console_read(dev, data, size, tout) (*(dev))->read(dev, data, size, tout)
+//#define console_scanf(dev, ...) (*(dev))->scanf(dev, ##__VA_ARGS__)
 
 DECLARE_DEVICE_CLASS(console)
 
