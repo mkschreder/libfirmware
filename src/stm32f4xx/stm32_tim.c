@@ -373,7 +373,8 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 			oc.TIM_OCMode = (uint16_t)oc_mode;
 			oc.TIM_OutputState = (pout_en)?TIM_OutputState_Enable:TIM_OutputState_Disable;
 			oc.TIM_OutputNState = (nout_en)?TIM_OutputNState_Enable:TIM_OutputNState_Disable;
-			oc.TIM_Pulse = (uint16_t)pulse;
+			// pulse is now given in duty cycle between 0 and 1000 to make it agnostic to period
+			oc.TIM_Pulse = (uint16_t)((uint32_t)pulse * TIMx->ARR / 1000);
 			oc.TIM_OCPolarity = (ppol)?TIM_OCPolarity_High:TIM_OCPolarity_Low;
 			oc.TIM_OCNPolarity = (npol)?TIM_OCNPolarity_High:TIM_OCNPolarity_Low;
 			oc.TIM_OCIdleState = (pidle)?TIM_OCIdleState_Set:TIM_OCIdleState_Reset;
@@ -392,8 +393,6 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 	TIM_Cmd(TIMx, ENABLE);
 
 	if(TIMx == TIM1 || TIMx == TIM8){
-		TIM_CtrlPWMOutputs(TIMx, ENABLE);
-
 		TIM_BDTRInitTypeDef dt;
 		dt.TIM_OSSRState = TIM_OSSRState_Enable;
 		dt.TIM_OSSIState = TIM_OSSIState_Enable;
@@ -402,6 +401,8 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		dt.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
 		dt.TIM_Break = TIM_Break_Disable;
 		TIM_BDTRConfig(TIMx, &dt);
+
+		TIM_CtrlPWMOutputs(TIMx, ENABLE);
 
 		// register timer as an anlog device for pwm
 		analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);

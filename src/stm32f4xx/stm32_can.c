@@ -42,6 +42,11 @@ int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint3
 	(void)self;
 	CanTxMsg msg;
 
+	// if the bus is passive then we return right away
+	if(CAN_GetFlagStatus(self->hw, CAN_FLAG_EPV)){
+		return -EIO;
+	}
+
 	memset(&msg, 0, sizeof(msg));
 
 	if(in->id > 0x7ff){
@@ -62,6 +67,7 @@ int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint3
 		return -ETIMEDOUT;
 	}
 
+	// enable error interrupts
 	CAN_ITConfig(self->hw, CAN_IT_TME, ENABLE);
 	CAN_ITConfig(self->hw, CAN_IT_BOF, ENABLE);
 	CAN_ITConfig(self->hw, CAN_IT_EPV, ENABLE);

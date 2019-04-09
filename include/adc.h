@@ -26,7 +26,7 @@ typedef const struct adc_device_ops ** adc_device_t;
 
 struct adc_device_ops {
     int (*trigger)(adc_device_t dev);
-    int (*read)(adc_device_t dev, unsigned int channel, int16_t *value);
+    int (*read)(adc_device_t dev, unsigned int channel, uint16_t *value);
 };
 
 #define adc_read(dev, channel, value) (*(dev))->read(dev, channel, value)

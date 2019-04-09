@@ -29,10 +29,10 @@ static int _stm32_adc_trigger(adc_device_t adc){
     return 0;
 }
 
-static int _stm32_adc_read(adc_device_t adc, unsigned int channel, int16_t *value){
+static int _stm32_adc_read(adc_device_t adc, unsigned int channel, uint16_t *value){
     struct stm32_adc *self = container_of(adc, struct stm32_adc, dev.ops);
     if(channel >= self->n_channels) return -EINVAL;
-    *value = (volatile int16_t)(self->dma_buf[channel]);
+    *value = (volatile uint16_t)(self->dma_buf[channel]);
     return 0;
 }
 
