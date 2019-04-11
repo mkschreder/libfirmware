@@ -57,9 +57,9 @@ int printk(const char *fmt, ...){
 	int len = vsnprintf(buf, sizeof(buf), fmt, argptr);
 	va_end(argptr);
 
-	int ret = serial_write(_default_serial_port, "\x1b[0m", 4, 100);
-	if(ret < 0) return ret;
-	ret = serial_write(_default_serial_port, buf, (size_t)len, 100);
+	int ret = 0;
+	if(serial_write(_default_serial_port, buf, (size_t)len, 100) < 0) ret = -1;
+	if(serial_write(_default_serial_port, "\x1b[0m", 4, 100) < 0) ret = -1;
 
     thread_mutex_unlock(&_printk_lock);
 	return ret;

@@ -210,6 +210,13 @@ void TIM1_UP_TIM10_IRQHandler(void){
     }
 }
 
+void TIM8_UP_TIM13_IRQHandler(){
+	if(TIM_GetITStatus(TIM8, TIM_IT_Update) != RESET){
+		TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
+		//ADC_SoftwareStartConv(ADC1);
+	}
+}
+
 static int _tim_analog_read(analog_device_t dev, unsigned int chan, float *value){
 	return -EINVAL;
 }
@@ -249,6 +256,12 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 	int clock_div = fdt_get_int_or_default(fdt, (int)fdt_node, "clock_div", 0);
 	int rep_count = fdt_get_int_or_default(fdt, (int)fdt_node, "rep_count", 0);
 	uint32_t freq = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "freq", 1);
+	uint16_t master_mode = (uint16_t)fdt_get_int_or_default(fdt, (int)fdt_node, "master_mode", 0);
+	uint16_t slave_mode = (uint16_t)fdt_get_int_or_default(fdt, (int)fdt_node, "slave_mode", 0);
+	int output_trigger = fdt_get_int_or_default(fdt, (int)fdt_node, "output_trigger", -1);
+	int input_trigger = fdt_get_int_or_default(fdt, (int)fdt_node, "input_trigger", -1);
+	int enable = fdt_get_int_or_default(fdt, (int)fdt_node, "enable", 1);
+
     int idx = -1;
     if(TIMx == TIM1) idx = 0;
     else if(TIMx == TIM2) idx = 1;
@@ -328,7 +341,6 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 			TIM_ICPolarity_Rising,
 			TIM_ICPolarity_Rising);
 		TIM_SetAutoreload(TIMx, 0xffff);
-		TIM_Cmd(TIMx, ENABLE);
 
 		encoder_device_init(&self->enc_dev, fdt, fdt_node, &_encoder_ops);
 		encoder_device_register(&self->enc_dev);
@@ -350,6 +362,22 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		tim.TIM_ClockDivision = (uint16_t)clock_div;
 		tim.TIM_RepetitionCounter = (uint8_t)rep_count;
 		TIM_TimeBaseInit(TIMx, &tim);
+
+		if(master_mode){
+			TIM_SelectMasterSlaveMode(TIMx, master_mode);
+			if(output_trigger >= 0){
+				TIM_SelectOutputTrigger(TIMx, (uint16_t)output_trigger);
+				printk("tim: selecting output trigger %04x\n", output_trigger);
+			}
+		}
+
+		if(slave_mode){
+			TIM_SelectSlaveMode(TIMx, slave_mode);
+			if(input_trigger >= 0){
+				TIM_SelectInputTrigger(TIMx, (uint16_t)input_trigger);
+				printk("tim: selecting input trigger %04x\n", input_trigger);
+			}
+		}
 
 		printk("%s: counter mode base %d, presc %d, reload %d\n", name, base, presc, period);
 	}
@@ -390,8 +418,6 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		}
 	}
 
-	TIM_Cmd(TIMx, ENABLE);
-
 	if(TIMx == TIM1 || TIMx == TIM8){
 		TIM_BDTRInitTypeDef dt;
 		dt.TIM_OSSRState = TIM_OSSRState_Enable;
@@ -402,13 +428,25 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		dt.TIM_Break = TIM_Break_Disable;
 		TIM_BDTRConfig(TIMx, &dt);
 
-		TIM_CtrlPWMOutputs(TIMx, ENABLE);
-
 		// register timer as an anlog device for pwm
 		analog_device_init(&self->analog, fdt, fdt_node, &_tim_analog_ops);
 		analog_device_register(&self->analog);
+
+		NVIC_InitTypeDef nvic;
+		nvic.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;
+		nvic.NVIC_IRQChannelPreemptionPriority = 1;
+		nvic.NVIC_IRQChannelSubPriority = 1;
+		nvic.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&nvic);
+
+		TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
 	}
 
+	if(enable){
+		TIM_Cmd(TIMx, ENABLE);
+	}
+
+	TIM_CtrlPWMOutputs(TIMx, ENABLE);
 
     return 0;
 }

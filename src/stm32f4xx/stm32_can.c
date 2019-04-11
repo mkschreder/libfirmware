@@ -38,16 +38,33 @@ struct stm32_can {
 
 static struct stm32_can *_interface[3] = {0};
 
+static void _stm32_can_tx_start(struct stm32_can *self){
+	CAN_ITConfig(self->hw, CAN_IT_TME, ENABLE);
+
+	if(self->hw == CAN1){
+		NVIC->STIR = CAN1_TX_IRQn;
+	} else if(self->hw == CAN2){
+		NVIC->STIR = CAN2_TX_IRQn;
+	}
+}
+
 int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint32_t timeout){
 	(void)self;
 	CanTxMsg msg;
+	memset(&msg, 0, sizeof(msg));
 
-	// if the bus is passive then we return right away
+	// if the bus is passive then try sending a zero message until the bus is available again
 	if(CAN_GetFlagStatus(self->hw, CAN_FLAG_EPV)){
+		msg.StdId = 0;
+		msg.IDE=CAN_ID_STD;
+		msg.RTR=CAN_RTR_DATA;
+		msg.DLC = 0;
+
+		thread_queue_send(&self->tx_queue, &msg, 0);
+		_stm32_can_tx_start(self);
+
 		return -EIO;
 	}
-
-	memset(&msg, 0, sizeof(msg));
 
 	if(in->id > 0x7ff){
 		msg.ExtId = in->id;
@@ -62,22 +79,17 @@ int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint3
 
 	memcpy(msg.Data, in->data, sizeof(msg.Data));
 
-	if(thread_queue_send(&self->tx_queue, &msg, timeout) < 0){
+	if(thread_queue_send(&self->tx_queue, &msg, timeout) <= 0){
 		atomic_inc(&self->counters.txto);
 		return -ETIMEDOUT;
 	}
 
 	// enable error interrupts
-	CAN_ITConfig(self->hw, CAN_IT_TME, ENABLE);
 	CAN_ITConfig(self->hw, CAN_IT_BOF, ENABLE);
 	CAN_ITConfig(self->hw, CAN_IT_EPV, ENABLE);
 	CAN_ITConfig(self->hw, CAN_IT_EWG, ENABLE);
 
-	if(self->hw == CAN1){
-		NVIC->STIR = CAN1_TX_IRQn;
-	} else if(self->hw == CAN2){
-		NVIC->STIR = CAN2_TX_IRQn;
-	}
+	_stm32_can_tx_start(self);
 
 	return 1;
 }

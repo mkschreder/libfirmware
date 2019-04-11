@@ -10,6 +10,7 @@
 #include "queue.h"
 #include "sem.h"
 #include "work.h"
+#include "console.h"
 
 #include "adc.h"
 #include "mutex.h"
@@ -19,9 +20,51 @@
 
 struct stm32_adc {
     struct adc_device dev;
-    volatile uint32_t *dma_buf;
+    uint32_t *dma_buf;
+    uint32_t *samples;
     uint8_t n_channels;
+	struct {
+		atomic_t eoc;
+	} cnt;
 };
+
+static struct stm32_adc *adc1 = NULL;
+
+void _adc_dma_configure(struct stm32_adc *self){
+	DMA_InitTypeDef  dma;
+	DMA_StructInit(&dma);
+
+	dma.DMA_Channel = DMA_Channel_0;
+	dma.DMA_Mode = DMA_Mode_Circular;
+	dma.DMA_Priority = DMA_Priority_High;
+	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
+	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
+	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	dma.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	dma.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	dma.DMA_BufferSize = (uint32_t)self->n_channels;
+	dma.DMA_FIFOMode = DMA_FIFOMode_Disable;
+	dma.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+	dma.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+	dma.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	dma.DMA_PeripheralBaseAddr = (uint32_t)&ADC->CDR;
+	dma.DMA_Memory0BaseAddr = (uint32_t)self->dma_buf;
+
+	DMA_DeInit(DMA2_Stream4);
+	DMA_Init(DMA2_Stream4, &dma);
+	DMA_Cmd(DMA2_Stream4, ENABLE);
+#if 0
+	DMA_ITConfig(DMA2_Stream4, DMA_IT_TC, ENABLE);
+
+	NVIC_InitTypeDef nvic;
+	nvic.NVIC_IRQChannel = DMA2_Stream4_IRQn;
+	nvic.NVIC_IRQChannelPreemptionPriority = 1;
+	nvic.NVIC_IRQChannelSubPriority = 1;
+	nvic.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&nvic);
+#endif
+}
+
 
 static int _stm32_adc_trigger(adc_device_t adc){
     // ADC 2 & 3 are triggered as slaves by ADC1
@@ -32,7 +75,13 @@ static int _stm32_adc_trigger(adc_device_t adc){
 static int _stm32_adc_read(adc_device_t adc, unsigned int channel, uint16_t *value){
     struct stm32_adc *self = container_of(adc, struct stm32_adc, dev.ops);
     if(channel >= self->n_channels) return -EINVAL;
-    *value = (volatile uint16_t)(self->dma_buf[channel]);
+	if(ADC_GetFlagStatus(ADC1, ADC_FLAG_OVR)){
+		// can this even happen?
+		printk(PRINT_ERROR "adc overrun\n");
+		ADC_ClearFlag(ADC1, ADC_FLAG_OVR);
+		_adc_dma_configure(self);
+	}
+    *value = (volatile uint16_t)(self->samples[channel]);
     return 0;
 }
 
@@ -41,6 +90,28 @@ static const struct adc_device_ops _adc_ops = {
     .read = _stm32_adc_read
 };
 
+static int _adc_cmd(console_device_t dev, void *ptr, int argc, char *argv[]){
+	struct stm32_adc *self = (struct stm32_adc *)ptr;
+	if(argc == 2 && strcmp(argv[1], "status") == 0){
+		printk("Conversions: %d\n", self->cnt.eoc);
+		printk("AWD: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_AWD));
+		printk("EOC: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
+		printk("JEOC: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_JEOC));
+		printk("JSTRT: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_JSTRT));
+		printk("STRT: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_STRT));
+		printk("OVR: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_OVR));
+	}
+	return 0;
+}
+
+void ADC_IRQHandler(void){
+	struct stm32_adc *self = adc1;
+	atomic_inc(&self->cnt.eoc);
+	memcpy(self->samples, self->dma_buf, sizeof(self->samples[0]) * self->n_channels);
+	ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
+}
+
+#if 0
 void DMA2_Stream4_IRQHandler(void){
 	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_FEIF4);
 	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_DMEIF4);
@@ -48,7 +119,7 @@ void DMA2_Stream4_IRQHandler(void){
 	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_HTIF4);
 	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_TCIF4);
 }
-
+#endif
 static int _stm32_adc_probe(void *fdt, int fdt_node){
     int ch_count = 0;
 
@@ -59,6 +130,35 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
         // <Device>, <Channel>, <Order>, <SampleTime>
 		ch_count = (uint8_t)(len / 4 / 4);
     }
+	uint32_t trigger = (uint32_t)fdt_get_int_or_default(fdt, fdt_node, "trigger", 0);
+	int trigger_edge = fdt_get_int_or_default(fdt, fdt_node, "trigger_edge", -1);
+	uint32_t prescaler = (uint32_t)fdt_get_int_or_default(fdt, fdt_node, "prescaler", ADC_Prescaler_Div2);
+	console_device_t console = console_find_by_ref(fdt, fdt_node, "console");
+	
+	if(trigger > 0 && trigger_edge == -1){
+		trigger_edge = ADC_ExternalTrigConvEdge_Rising;
+	}
+
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
+	uint32_t adc_freq = clocks.PCLK2_Frequency;
+	switch(prescaler){
+		case ADC_Prescaler_Div2: adc_freq = adc_freq / 2; break;
+		case ADC_Prescaler_Div4: adc_freq = adc_freq / 4; break;
+		case ADC_Prescaler_Div6: adc_freq = adc_freq / 6; break;
+		case ADC_Prescaler_Div8: adc_freq = adc_freq / 8; break;
+		default: {
+			printk(PRINT_ERROR "Invalid prescaler value\n");
+			return -EINVAL;
+		}
+	}
+
+	// TODO: make this dependent on chip type
+	if(adc_freq > 36000000){
+		printk(PRINT_ERROR "adc clock frequency too high (%d)\n", adc_freq);
+		return -EINVAL;
+	}
 
     //RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div6);
 	//RCC_ADCCLKConfig(RCC_ADC34PLLCLK_Div6);
@@ -72,7 +172,7 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	ADC_CommonStructInit(&acom);
 	acom.ADC_Mode = ADC_TripleMode_RegSimult;
 	acom.ADC_DMAAccessMode = ADC_DMAAccessMode_1;
-	acom.ADC_Prescaler = ADC_Prescaler_Div2;
+	acom.ADC_Prescaler = prescaler;
 
 	ADC_CommonInit(&acom);
 
@@ -80,21 +180,23 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	ADC_StructInit(&adc);
 	adc.ADC_Resolution = ADC_Resolution_12b;
 	adc.ADC_DataAlign = ADC_DataAlign_Right;
-	adc.ADC_ExternalTrigConv = 0;
-	adc.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+	//adc.ADC_ExternalTrigConv = 0;
+	//adc.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+
+	adc.ADC_ExternalTrigConv = trigger;
+	adc.ADC_ExternalTrigConvEdge = (uint32_t)trigger_edge;
+
+
 	adc.ADC_ContinuousConvMode = DISABLE;
 	adc.ADC_ScanConvMode = ENABLE;
 	adc.ADC_NbrOfConversion = (uint8_t)(ch_count / 3);
 	ADC_Init(ADC2, &adc);
 	ADC_Init(ADC3, &adc);
-
-	adc.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
-	adc.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
 	ADC_Init(ADC1, &adc);
 
 	ADC_MultiModeDMARequestAfterLastTransferCmd(ENABLE);
+	ADC_EOCOnEachRegularChannelCmd(ADC1, DISABLE);
 
-	
     // load channel config
     for(int c = 0; c < ch_count; c++){
         const fdt32_t *base = channels + (4 * c);
@@ -109,47 +211,38 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	//initialize adc dma
 	DMA_DeInit(DMA2_Stream4);
 
-    uint32_t *dma_buf = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
+	struct stm32_adc *self = kzmalloc(sizeof(struct stm32_adc));
+    adc_device_init(&self->dev, fdt, fdt_node, &_adc_ops);
+    self->dma_buf = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
+    self->samples = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
+    self->n_channels = (uint8_t)ch_count;
+	adc1 = self;
 
-	DMA_InitTypeDef  dma;
-	dma.DMA_Channel = DMA_Channel_0;
-	dma.DMA_Mode = DMA_Mode_Circular;
-	dma.DMA_Priority = DMA_Priority_High;
-	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
-	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	dma.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	dma.DMA_DIR = DMA_DIR_PeripheralToMemory;
-	dma.DMA_BufferSize = (uint32_t)ch_count;
-	dma.DMA_FIFOMode = DMA_FIFOMode_Disable;
-	dma.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
-	dma.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-	dma.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-	dma.DMA_PeripheralBaseAddr = (uint32_t)&ADC->CDR;
-	dma.DMA_Memory0BaseAddr = (uint32_t)dma_buf;
+    adc_device_register(&self->dev);
 
-	DMA_Init(DMA2_Stream4, &dma);
-	//DMA_ITConfig(DMA2_Stream4, DMA_IT_TC, ENABLE);
-	DMA_Cmd(DMA2_Stream4, ENABLE);
-/*
 	NVIC_InitTypeDef nvic;
-	nvic.NVIC_IRQChannel = DMA2_Stream4_IRQn;
-	nvic.NVIC_IRQChannelPreemptionPriority = 1;
-	nvic.NVIC_IRQChannelSubPriority = 1;
+	nvic.NVIC_IRQChannel = ADC_IRQn;
+	nvic.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic.NVIC_IRQChannelSubPriority = 0;
 	nvic.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic);
-*/
-    struct stm32_adc *self = kzmalloc(sizeof(struct stm32_adc));
-    adc_device_init(&self->dev, fdt, fdt_node, &_adc_ops);
-    self->dma_buf = dma_buf;
-    self->n_channels = (uint8_t)ch_count;
-    adc_device_register(&self->dev);
+
+	_adc_dma_configure(self);
+
+	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
+
+	ADC_DMACmd(ADC1, ENABLE);
 
 	ADC_Cmd(ADC3, ENABLE);
 	ADC_Cmd(ADC2, ENABLE);
 	ADC_Cmd(ADC1, ENABLE);
 
-	printk("adc: ready %d channels\n", ch_count);
+	if(console){
+		console_add_command(console, self, "adc", "adc utilities", "", _adc_cmd);
+	}
+
+
+	printk("adc: ready %d channels, clock %dkHz\n", ch_count, adc_freq / 1000);
 
     return 0;
 }

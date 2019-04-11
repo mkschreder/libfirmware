@@ -79,7 +79,7 @@ static inline float constrain_float(float x, float a, float b){
 	return _CONSTRAIN(x, a, b);
 }
 
-
+#define normalize_angle(angle) atan2f(sinf(angle), cosf(angle))
 
 #define scale_range32(x, a, b, c, d) ((int32_t)(x) * ((d) - (c)) / ((b) - (a)))
 
