@@ -265,7 +265,7 @@ static int _regmap_write(regmap_device_t dev, uint32_t id, regmap_value_type_t s
 	return -ENOENT;
 }
 
-struct regmap_device_ops _regmap_ops = {
+static struct regmap_device_ops _regmap_ops = {
 	.add = _regmap_add,
 	.read = _regmap_read,
 	.write = _regmap_write

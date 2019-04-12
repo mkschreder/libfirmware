@@ -30,6 +30,8 @@
 #include "mutex.h"
 #include "driver.h"
 
+#define PRINTK_WRITE_TIMEOUT 100
+
 static serial_port_t _default_serial_port = 0;
 
 DEFINE_DEVICE_CLASS(serial)
@@ -58,10 +60,11 @@ int printk(const char *fmt, ...){
 	va_end(argptr);
 
 	int ret = 0;
-	if(serial_write(_default_serial_port, buf, (size_t)len, 100) < 0) ret = -1;
-	if(serial_write(_default_serial_port, "\x1b[0m", 4, 100) < 0) ret = -1;
+	if(serial_write(_default_serial_port, buf, (size_t)len, PRINTK_WRITE_TIMEOUT) < 0) ret = -1;
+	if(serial_write(_default_serial_port, "\x1b[0m", 4, PRINTK_WRITE_TIMEOUT) < 0) ret = -1;
 
     thread_mutex_unlock(&_printk_lock);
+
 	return ret;
 }
 

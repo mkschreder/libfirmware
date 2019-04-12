@@ -61,6 +61,10 @@ void thread_yield(){
 	taskYIELD();
 }
 
+void thread_suspend(){
+	vTaskSuspend(NULL);
+}
+
 void thread_sched_suspend(){
 	vTaskSuspendAll();
 }

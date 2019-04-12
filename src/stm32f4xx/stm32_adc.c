@@ -28,7 +28,7 @@ struct stm32_adc {
 	} cnt;
 };
 
-static struct stm32_adc *adc1 = NULL;
+static struct stm32_adc *_adc1 = NULL;
 
 void _adc_dma_configure(struct stm32_adc *self){
 	DMA_InitTypeDef  dma;
@@ -53,23 +53,12 @@ void _adc_dma_configure(struct stm32_adc *self){
 	DMA_DeInit(DMA2_Stream4);
 	DMA_Init(DMA2_Stream4, &dma);
 	DMA_Cmd(DMA2_Stream4, ENABLE);
-#if 0
-	DMA_ITConfig(DMA2_Stream4, DMA_IT_TC, ENABLE);
-
-	NVIC_InitTypeDef nvic;
-	nvic.NVIC_IRQChannel = DMA2_Stream4_IRQn;
-	nvic.NVIC_IRQChannelPreemptionPriority = 1;
-	nvic.NVIC_IRQChannelSubPriority = 1;
-	nvic.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&nvic);
-#endif
 }
-
 
 static int _stm32_adc_trigger(adc_device_t adc){
     // ADC 2 & 3 are triggered as slaves by ADC1
-	ADC_SoftwareStartConv(ADC1);
-    return 0;
+	//ADC_SoftwareStartConv(ADC1);
+    return -EINVAL;
 }
 
 static int _stm32_adc_read(adc_device_t adc, unsigned int channel, uint16_t *value){
@@ -81,7 +70,10 @@ static int _stm32_adc_read(adc_device_t adc, unsigned int channel, uint16_t *val
 		ADC_ClearFlag(ADC1, ADC_FLAG_OVR);
 		_adc_dma_configure(self);
 	}
+	NVIC_DisableIRQ(ADC_IRQn);
     *value = (volatile uint16_t)(self->samples[channel]);
+	NVIC_EnableIRQ(ADC_IRQn);
+
     return 0;
 }
 
@@ -90,36 +82,30 @@ static const struct adc_device_ops _adc_ops = {
     .read = _stm32_adc_read
 };
 
-static int _adc_cmd(console_device_t dev, void *ptr, int argc, char *argv[]){
+static int _stm32_adc_cmd(console_device_t con, void *ptr, int argc, char *argv[]){
+	#define flag_str(f, name) (f)?"\033[30;47m" name "\0330m":name
 	struct stm32_adc *self = (struct stm32_adc *)ptr;
 	if(argc == 2 && strcmp(argv[1], "status") == 0){
-		printk("Conversions: %d\n", self->cnt.eoc);
-		printk("AWD: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_AWD));
-		printk("EOC: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC));
-		printk("JEOC: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_JEOC));
-		printk("JSTRT: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_JSTRT));
-		printk("STRT: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_STRT));
-		printk("OVR: %d\n", ADC_GetFlagStatus(ADC1, ADC_FLAG_OVR));
+		console_printf(con, "No. conv: %d\n", self->cnt.eoc);
+		console_printf(con, "Status: ");
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_AWD), "AWD"));
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC), "EOC"));
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_JEOC), "JEOC"));
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_JSTRT), "JSTRT"));
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_STRT), "STRT"));
+		console_printf(con, "%s ", flag_str(ADC_GetFlagStatus(ADC1, ADC_FLAG_OVR), "OVR"));
+		console_printf(con, "\n");
 	}
 	return 0;
 }
 
 void ADC_IRQHandler(void){
-	struct stm32_adc *self = adc1;
+	struct stm32_adc *self = _adc1;
 	atomic_inc(&self->cnt.eoc);
 	memcpy(self->samples, self->dma_buf, sizeof(self->samples[0]) * self->n_channels);
 	ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
 }
 
-#if 0
-void DMA2_Stream4_IRQHandler(void){
-	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_FEIF4);
-	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_DMEIF4);
-	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_TEIF4);
-	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_HTIF4);
-	DMA_ClearITPendingBit(DMA2_Stream4, DMA_IT_TCIF4);
-}
-#endif
 static int _stm32_adc_probe(void *fdt, int fdt_node){
     int ch_count = 0;
 
@@ -160,12 +146,9 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 		return -EINVAL;
 	}
 
-    //RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div6);
-	//RCC_ADCCLKConfig(RCC_ADC34PLLCLK_Div6);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC3, ENABLE);
-	//RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 
 	ADC_CommonInitTypeDef acom;
@@ -173,20 +156,14 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	acom.ADC_Mode = ADC_TripleMode_RegSimult;
 	acom.ADC_DMAAccessMode = ADC_DMAAccessMode_1;
 	acom.ADC_Prescaler = prescaler;
-
 	ADC_CommonInit(&acom);
 
 	ADC_InitTypeDef adc;
 	ADC_StructInit(&adc);
 	adc.ADC_Resolution = ADC_Resolution_12b;
 	adc.ADC_DataAlign = ADC_DataAlign_Right;
-	//adc.ADC_ExternalTrigConv = 0;
-	//adc.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-
 	adc.ADC_ExternalTrigConv = trigger;
 	adc.ADC_ExternalTrigConvEdge = (uint32_t)trigger_edge;
-
-
 	adc.ADC_ContinuousConvMode = DISABLE;
 	adc.ADC_ScanConvMode = ENABLE;
 	adc.ADC_NbrOfConversion = (uint8_t)(ch_count / 3);
@@ -209,16 +186,14 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
     }
 
 	//initialize adc dma
-	DMA_DeInit(DMA2_Stream4);
 
 	struct stm32_adc *self = kzmalloc(sizeof(struct stm32_adc));
-    adc_device_init(&self->dev, fdt, fdt_node, &_adc_ops);
     self->dma_buf = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
     self->samples = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
     self->n_channels = (uint8_t)ch_count;
-	adc1 = self;
+	_adc1 = self;
 
-    adc_device_register(&self->dev);
+	_adc_dma_configure(self);
 
 	NVIC_InitTypeDef nvic;
 	nvic.NVIC_IRQChannel = ADC_IRQn;
@@ -227,7 +202,6 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	nvic.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic);
 
-	_adc_dma_configure(self);
 
 	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
 
@@ -238,9 +212,11 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 	ADC_Cmd(ADC1, ENABLE);
 
 	if(console){
-		console_add_command(console, self, "adc", "adc utilities", "", _adc_cmd);
+		console_add_command(console, self, "adc", "adc utilities", "", _stm32_adc_cmd);
 	}
 
+    adc_device_init(&self->dev, fdt, fdt_node, &_adc_ops);
+    adc_device_register(&self->dev);
 
 	printk("adc: ready %d channels, clock %dkHz\n", ch_count, adc_freq / 1000);
 

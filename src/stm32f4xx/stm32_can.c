@@ -16,6 +16,7 @@
 #include "can.h"
 #include "mutex.h"
 #include "atomic.h"
+#include "console.h"
 
 #include <errno.h>
 
@@ -110,35 +111,7 @@ static int _can_subscribe(can_device_t can, struct can_listener *listener){
 	return 0;
 }
 
-/*
-static int _can_control(can_device_t can, can_control_cmd_t cmd, struct can_control_param *p){
-	struct stm32_can *self = container_of(can, struct stm32_can, can_ops);
-	CAN_TypeDef *CANx = self->hw;
-	switch(cmd){
-		case CAN_CMD_GET_STATUS: {
-			uint32_t esr = CANx->ESR;
-			memset(p, 0, sizeof(*p));
-			p->v.status.cnt.tec = (uint8_t)((esr >> 16) & 0xff);
-			p->v.status.cnt.rec = (uint8_t)((esr >> 24) & 0xff);
-			p->v.status.cnt.tme = atomic_get(&self->counters.tme);
-			p->v.status.cnt.lec = atomic_get(&self->counters.lec);
-			p->v.status.cnt.bof = atomic_get(&self->counters.bof);
-			p->v.status.cnt.epv = atomic_get(&self->counters.epv);
-			p->v.status.cnt.ewg = atomic_get(&self->counters.ewg);
-			p->v.status.cnt.fov = atomic_get(&self->counters.fov);
-			p->v.status.cnt.fmp0 = atomic_get(&self->counters.fmp0);
-			p->v.status.cnt.fmp1 = atomic_get(&self->counters.fmp1);
-			p->v.status.cnt.txto = atomic_get(&self->counters.txto);
-			p->v.status.cnt.rxp = atomic_get(&self->counters.rxp);
-			p->v.status.cnt.rxdrop = atomic_get(&self->counters.rxdrop);
-			p->v.status.cnt.txdrop = atomic_get(&self->counters.txdrop);
-			return 0;
-		} break;
-	}
-	return -EINVAL;
-}*/
-
-static const struct can_device_ops _can_ops = {
+static const struct can_device_ops _stm32_can_ops = {
 	.send = _can_send,
 	.subscribe = _can_subscribe
 };
@@ -219,8 +192,6 @@ static void _can_process_message_isr(struct stm32_can *self, CanRxMsg *msg, int3
 	memcpy(cm.data, msg->Data, sizeof(cm.data));
 	if(thread_queue_send_from_isr(&self->rx_queue, &cm, wake) < 0){
 		atomic_inc(&self->counters.rxdrop);
-	} else {
-		//queue_work_from_isr(&interface[0]->bh, 1, wake);
 	}
 }
 
@@ -358,6 +329,27 @@ static struct memory_device_ops _mem_ops = {
 	.write = _memory_write
 };
 
+static int _stm32_can_cmd(console_device_t con, void *userptr, int argc, char **argv){
+	struct stm32_can *self = (struct stm32_can*)userptr;
+
+	if(argc == 2 && strcmp(argv[1], "info") == 0){
+		struct can_counters *cnt = &self->counters;
+		console_printf(con, "\tTX count: %d\n", cnt->tme); 
+		console_printf(con, "\tTX dropped: %d\n", cnt->txdrop);
+		console_printf(con, "\tRX count: %d\n", cnt->rxp); 
+		console_printf(con, "\tRX dropped: %d\n", cnt->rxdrop);
+		console_printf(con, "\tTX timeout: %d\n", cnt->txto);
+		console_printf(con, "\tRX on FIFO0: %d\n", cnt->fmp0);
+		console_printf(con, "\tRX on FIFO1: %d\n", cnt->fmp1);
+		console_printf(con, "\tTotal errors: %d\n", cnt->lec);
+		console_printf(con, "\tBus off errors: %d\n", cnt->bof);
+		console_printf(con, "\tBus passive errors: %d\n", cnt->epv);
+		console_printf(con, "\tBus errors warnings: %d\n", cnt->ewg);
+		console_printf(con, "\tFIFO Overflow errors: %d\n", cnt->fov);
+	}
+	return 0;
+}
+
 static int _stm32_can_probe(void *fdt, int fdt_node){
 	//int baud = fdt_get_int_or_default(fdt, (int)fdt_node, "baud", 1000000);
 	CAN_TypeDef *CANx = (CAN_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
@@ -369,6 +361,7 @@ static int _stm32_can_probe(void *fdt, int fdt_node){
 	int tx_queue = fdt_get_int_or_default(fdt, (int)fdt_node, "tx_queue", 8);
 	int irq_pre_prio = fdt_get_int_or_default(fdt, (int)fdt_node, "irq_preempt_prio", 1);
 	int irq_sub_prio = fdt_get_int_or_default(fdt, (int)fdt_node, "irq_sub_prio", 1);
+	console_device_t console = console_find_by_ref(fdt, fdt_node, "console");
 
 	if(sjw < 1 || sjw > 4){
 		printk(PRINT_ERROR "can: sjw must be 1-4\n");
@@ -481,11 +474,15 @@ static int _stm32_can_probe(void *fdt, int fdt_node){
 		CAN_IT_FOV0,
 	ENABLE);
 
-	can_device_init(&self->dev, fdt, fdt_node, &_can_ops);
+	can_device_init(&self->dev, fdt, fdt_node, &_stm32_can_ops);
 	can_device_register(&self->dev);
 
 	memory_device_init(&self->mem, fdt, fdt_node, &_mem_ops);
 	memory_device_register(&self->mem);
+
+	if(console){
+		console_add_command(console, self, fdt_get_name(fdt, fdt_node, NULL), "STM32 CAN interface", "", _stm32_can_cmd);
+	}
 
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);

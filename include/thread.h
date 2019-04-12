@@ -40,6 +40,7 @@ void thread_start_scheduler(void);
 int thread_sleep_ms(uint32_t ms);
 int thread_sleep_ms_until(uint32_t *last, uint32_t ms);
 void thread_yield();
+void thread_suspend();
 
 int thread_sleep_us(uint32_t us);
 uint32_t thread_ticks_count();

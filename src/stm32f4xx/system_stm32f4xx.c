@@ -346,18 +346,18 @@ extern void _init (void);
 void
 __libc_init_array (void)
 {
-  size_t count;
-  size_t i;
+	size_t count = (size_t)(__preinit_array_end - __preinit_array_start);
+	for (size_t i = 0; i < count; i++){
+	  if(__preinit_array_start[i])
+		__preinit_array_start[i] ();
+	}
+	//_init ();
 
-  count = (size_t)(__preinit_array_end - __preinit_array_start);
-  for (i = 0; i < count; i++)
-    __preinit_array_start[i] ();
-
-  //_init ();
-
-  count = (size_t)(__init_array_end - __init_array_start);
-  for (i = 0; i < count; i++)
-    __init_array_start[i] ();
+	count = (size_t)(__init_array_end - __init_array_start);
+	for (size_t i = 0; i < count; i++) {
+	  if(__init_array_start[i])
+		  __init_array_start[i] ();
+	}
 }
 
 static void _enable_fpu( void ){
