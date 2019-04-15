@@ -13,7 +13,6 @@
 #include "sem.h"
 #include "work.h"
 
-//#include "timer.h"
 #include "mutex.h"
 #include "atomic.h"
 
@@ -22,123 +21,179 @@
 struct stm32_i2c {
 	struct i2c_device dev;
 	I2C_TypeDef *hw;
+	volatile uint8_t addr;
+	volatile bool error;
+	volatile size_t writing;
+	volatile size_t reading;
+	volatile const uint8_t *write_p;
+	volatile uint8_t *read_p;
 	struct mutex lock;
+	struct semaphore complete;
 };
 
-int _stm32_i2c_read(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t wr_len, void *data, size_t len) {
+static struct stm32_i2c *_i2c_devices[3] = {NULL};
+
+static int _stm32_i2c_transfer(i2c_device_t dev, uint8_t addr, const void *tx_data, size_t tx_len, void *rx_data, size_t rx_len, uint32_t timeout_ms){
 	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
-	I2C_TypeDef *I2Cx = self->hw;
-	uint8_t *result = (uint8_t*)data;
-	uint8_t *wr_buf = (uint8_t*)wr_data;
+    int result = 0;
 
-	thread_mutex_lock(&self->lock);
+	if (thread_mutex_lock(&self->lock) != 0)
+		return -ETIMEDOUT;
 
-	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
+	self->addr    = addr;
+	self->writing = tx_len;
+	self->write_p = (uint8_t *)tx_data;
+	self->reading = rx_len;
+	self->read_p  = rx_data;
 
-	I2C_GenerateSTART(I2Cx, ENABLE);
+	I2C_GenerateSTART(self->hw, ENABLE);
 
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT));
-
-	I2C_Send7bitAddress(I2Cx, (uint8_t)(addr << 1), I2C_Direction_Transmitter);
-
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
-
-	// write header with secondary address and any other command bytes
-	for(size_t c = 0; c < wr_len; c++){
-		I2C_SendData(I2Cx, *wr_buf++);
-
-		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	if (thread_sem_take_wait(&self->complete, timeout_ms) != 0) {
+		result = -ETIMEDOUT;
 	}
 
-	I2C_GenerateSTOP(I2Cx, ENABLE);
-
-	I2C_GenerateSTART(I2Cx, ENABLE);
-
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT));
-
-	I2C_Send7bitAddress(I2Cx, (uint8_t)(addr << 1), I2C_Direction_Receiver);
-
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
-
-	for(size_t c = 0; c < len - 1; c++){
-		I2C_AcknowledgeConfig(I2Cx, ENABLE);
-		I2C_GenerateSTOP(I2Cx, DISABLE);
-		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
-		*result++ = I2C_ReceiveData(I2Cx);
+	if (self->error) {
+		self->error = false;
+		result = -EIO;
 	}
-
-	I2C_AcknowledgeConfig(I2Cx, DISABLE);
-	I2C_GenerateSTOP(I2Cx, ENABLE);
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
-	*result++ = I2C_ReceiveData(I2Cx);
 
 	thread_mutex_unlock(&self->lock);
 
-	return 0;
+    return result;
 }
 
-static int _stm32_i2c_write(i2c_device_t dev, uint8_t addr, const void *wr_data, size_t wr_len, const void *data, size_t len){
-	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
-	I2C_TypeDef *I2Cx = self->hw;
-	const uint8_t *buf = (uint8_t*)data;
-	const uint8_t *wr_buf = (uint8_t*)wr_data;
+static void _i2c_event_irq_handler(struct stm32_i2c *self) {
+    int32_t should_yield = 0;
 
-	thread_mutex_lock(&self->lock);
+    /* Read both status registers*/
+	uint32_t events = I2C_GetLastEvent(self->hw);
 
-	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY) != RESET);		// Wait for BUSY line
+    /* Start bit sent. */
+	if(events & I2C_SR1_SB){
+		I2C_Send7bitAddress(self->hw,
+				(uint8_t)(self->addr << 1),
+				(self->writing)?I2C_Direction_Transmitter:I2C_Direction_Receiver);
+    }
 
-	I2C_GenerateSTART(I2Cx, ENABLE);
+    /* Address sent. */
+	if(events & I2C_SR1_ADDR){
+		if(self->writing){
+			/* Send a byte off the write buffer. */
+			self->hw->DR = *(self->write_p);
+			self->write_p++;
+			self->writing--;
+		} else {
+			if (self->reading > 1) {
+				I2C_AcknowledgeConfig(self->hw, ENABLE);
+			} else {
+				I2C_GenerateSTOP(self->hw, ENABLE);
+			}
+		}
+    }
 
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT));
+    /* RX Not empty (got new byte) */
+	if(events & I2C_SR1_RXNE){
+        /* Read into read buffer. */
+        *(self->read_p) = (uint8_t)I2C_ReceiveData(self->hw);
+        self->read_p++;
+        self->reading--;
 
-	I2C_Send7bitAddress(I2Cx, (uint8_t)(addr << 1), I2C_Direction_Transmitter);
+        if (self->reading == 1) {
+			I2C_AcknowledgeConfig(self->hw, DISABLE);
+			I2C_GenerateSTOP(self->hw, ENABLE);
+        } else if (self->reading == 0) {
+            thread_sem_give_from_isr(&self->complete, &should_yield);
+        }
+    }
 
-	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+	if(events & I2C_SR1_TXE && !(events & I2C_SR1_BTF)){
+        if (self->writing) {
+            /* send next byte from write buffer. */
+			I2C_SendData(self->hw, *(self->write_p));
+            self->write_p++;
+            self->writing--;
+        } else {
+            if (self->reading) {
+                /* done writing, now reading: send repeated start */
+				I2C_GenerateSTART(self->hw, ENABLE);
+            } else {
+                /* done reading: send stop */
+				I2C_GenerateSTOP(self->hw, ENABLE);
+                thread_sem_give_from_isr(&self->complete, &should_yield);
+            }
+        }
+    }
 
-	for(size_t c = 0; c < wr_len; c++){
-		I2C_SendData(I2Cx, *wr_buf++);
-		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-	}
+	thread_yield_from_isr(should_yield);
+}
 
-	for(size_t c = 0; c < len; c++){
-		I2C_SendData(I2Cx, *buf++);
-		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-	}
+static void _i2c_error_irq_handler(struct stm32_i2c *self) {
+    int32_t should_yield = 0;
 
-	I2C_GenerateSTOP(I2Cx, ENABLE);
+    /* Read SRs to clear them */
+    self->hw->SR1;
+    self->hw->SR2;
 
-	thread_mutex_unlock(&self->lock);
+    /* Write 0 to SR1 ?? XXX why  */
+    self->hw->SR1 = 0;
 
-	return 0;
+    /* Send stop */
+	I2C_GenerateSTOP(self->hw, ENABLE);
+
+    self->error = 1;
+
+    thread_sem_give_from_isr(&self->complete, &should_yield);
+
+	thread_yield_from_isr(should_yield);
+}
+
+void I2C1_EV_IRQHandler (void) {
+    _i2c_event_irq_handler(_i2c_devices[0]);
+}
+
+void I2C2_EV_IRQHandler (void) {
+    _i2c_event_irq_handler(_i2c_devices[1]);
+}
+
+void I2C1_ER_IRQHandler (void) {
+    _i2c_error_irq_handler(_i2c_devices[0]);
+}
+
+void I2C2_ER_IRQHandler (void) {
+    _i2c_error_irq_handler(_i2c_devices[1]);
 }
 
 static struct i2c_device_ops _i2c_ops = {
-	.read = _stm32_i2c_read,
-	.write = _stm32_i2c_write
+	.transfer = _stm32_i2c_transfer
 };
 
 static int _stm32_i2c_probe(void *fdt, int fdt_node) {
 	I2C_TypeDef *I2Cx = (I2C_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 	uint32_t baud = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "baud", 100000);
 	int idx = 0;
+	uint8_t irq_er = 0, irq_ev = 0;
 	if(I2Cx == I2C1){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
+		irq_er = I2C1_ER_IRQn;
+		irq_ev = I2C1_EV_IRQn;
 		idx = 1;
 	} else if(I2Cx == I2C2){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
 		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, ENABLE);
+		irq_er = I2C2_ER_IRQn;
+		irq_ev = I2C2_EV_IRQn;
 		idx = 2;
 	} else if(I2Cx == I2C3){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C3, ENABLE);
 		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C3, ENABLE);
+		irq_er = I2C3_ER_IRQn;
+		irq_ev = I2C3_EV_IRQn;
 		idx = 3;
 	} else {
 		printk("i2c: unsupported device\n");
 		return -1;
 	}
-
-	thread_sleep_ms(50);
 
 	I2C_DeInit(I2Cx);
 	I2C_InitTypeDef i2c;
@@ -150,21 +205,32 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
     i2c.I2C_ClockSpeed = (uint32_t)baud;
 	i2c.I2C_OwnAddress1 = 0;
 
-    I2C_Cmd(I2Cx, ENABLE);
     I2C_Init(I2Cx, &i2c);
 
-	I2C_GenerateSTART(I2Cx, ENABLE);
-	I2C_GenerateSTOP(I2Cx, ENABLE);
+    I2C_Cmd(I2Cx, ENABLE);
 
 	struct stm32_i2c *self = kzmalloc(sizeof(struct stm32_i2c));
 	self->hw = I2Cx;
 	thread_mutex_init(&self->lock);
+	thread_sem_init(&self->complete);
+
+	_i2c_devices[idx - 1] = self;
+
 	i2c_device_init(&self->dev, fdt, fdt_node, &_i2c_ops);
 	i2c_device_register(&self->dev);
 
-	printk(PRINT_SUCCESS "i2c%d: ready (speed %d)\n", idx, baud);
+	NVIC_InitTypeDef nvic;
+	nvic.NVIC_IRQChannel = irq_ev;
+	nvic.NVIC_IRQChannelPreemptionPriority = 1;
+	nvic.NVIC_IRQChannelSubPriority = 1;
+	nvic.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&nvic);
+	nvic.NVIC_IRQChannel = irq_er;
+	NVIC_Init(&nvic);
 
-	thread_sleep_ms(50);
+	I2C_ITConfig(I2Cx, I2C_IT_ERR | I2C_IT_BUF | I2C_IT_EVT, ENABLE);
+
+	printk(PRINT_SUCCESS "i2c%d: ready (speed %d)\n", idx, baud);
 
 	return 0;
 }

@@ -85,8 +85,8 @@ CLASS ## _device_t CLASS ## _find_by_ref(void *fdt, int fdt_node, const char *re
 }
 
 #define DEVICE_DRIVER(_name, _compatible, _probe, _remove) void __attribute__((__constructor__,used)) _name ## _ko(){ \
-    static struct device_driver __attribute__((used,aligned(4))) _driver = { .name = #_name, .compatible = _compatible, .probe = _probe, .remove = _remove };\
-    register_device_driver(&_driver);\
+    static struct device_driver __attribute__((used,aligned(4))) _driver_ ## _name = { .name = #_name, .compatible = _compatible, .probe = _probe, .remove = _remove };\
+    register_device_driver(&_driver_ ## _name);\
 }
 
 int probe_device_drivers(void *fdt);

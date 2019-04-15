@@ -26,15 +26,13 @@
 typedef const struct i2c_device_ops ** i2c_device_t;
 
 struct i2c_device_ops {
-    int (*write)(i2c_device_t dev, uint8_t addr_, const void *wr_data, size_t wr_len, const void *data, size_t len);
-    int (*read)(i2c_device_t dev, uint8_t addr_, const void *wr_data, size_t wr_len, void *data, size_t len);
+    int (*transfer)(i2c_device_t dev, uint8_t addr_, const void *tx_data, size_t tx_len, void *rx_data, size_t rx_len, uint32_t timeout_ms);
 };
 
-#define i2c_write_xfer(dev, addr, wr_buf, wr_len, buf, len) (*(dev))->write(dev, addr, wr_buf, wr_len, buf, len)
-#define i2c_read_xfer(dev, addr, wr_buf, wr_len, buf, len) (*(dev))->read(dev, addr, wr_buf, wr_len, buf, len)
+#define i2c_transfer(dev, addr, wr_buf, wr_len, buf, len, timeout) (*(dev))->transfer(dev, addr, wr_buf, wr_len, buf, len, timeout)
 
 DECLARE_DEVICE_CLASS(i2c)
-
+/*
 int i2c_write8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *data, size_t len);
 int i2c_read8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, size_t len);
 
@@ -46,3 +44,4 @@ int i2c_read8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data);
 
 int i2c_write16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, const uint8_t data);
 int i2c_read16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, uint8_t *data);
+*/

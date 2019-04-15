@@ -20,8 +20,7 @@
 
 struct stm32_adc {
     struct adc_device dev;
-    uint32_t *dma_buf;
-    uint32_t *samples;
+    volatile uint32_t *dma_buf;
     uint8_t n_channels;
 	struct {
 		atomic_t eoc;
@@ -70,9 +69,7 @@ static int _stm32_adc_read(adc_device_t adc, unsigned int channel, uint16_t *val
 		ADC_ClearFlag(ADC1, ADC_FLAG_OVR);
 		_adc_dma_configure(self);
 	}
-	NVIC_DisableIRQ(ADC_IRQn);
-    *value = (volatile uint16_t)(self->samples[channel]);
-	NVIC_EnableIRQ(ADC_IRQn);
+    *value = (volatile uint16_t)(self->dma_buf[channel]);
 
     return 0;
 }
@@ -83,7 +80,7 @@ static const struct adc_device_ops _adc_ops = {
 };
 
 static int _stm32_adc_cmd(console_device_t con, void *ptr, int argc, char *argv[]){
-	#define flag_str(f, name) (f)?"\033[30;47m" name "\0330m":name
+	#define flag_str(f, name) (f)?"\033[30;47m" name "\033[0m":name
 	struct stm32_adc *self = (struct stm32_adc *)ptr;
 	if(argc == 2 && strcmp(argv[1], "status") == 0){
 		console_printf(con, "No. conv: %d\n", self->cnt.eoc);
@@ -102,7 +99,6 @@ static int _stm32_adc_cmd(console_device_t con, void *ptr, int argc, char *argv[
 void ADC_IRQHandler(void){
 	struct stm32_adc *self = _adc1;
 	atomic_inc(&self->cnt.eoc);
-	memcpy(self->samples, self->dma_buf, sizeof(self->samples[0]) * self->n_channels);
 	ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
 }
 
@@ -189,7 +185,6 @@ static int _stm32_adc_probe(void *fdt, int fdt_node){
 
 	struct stm32_adc *self = kzmalloc(sizeof(struct stm32_adc));
     self->dma_buf = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
-    self->samples = kzmalloc(sizeof(uint32_t) * (unsigned)ch_count);
     self->n_channels = (uint8_t)ch_count;
 	_adc1 = self;
 
