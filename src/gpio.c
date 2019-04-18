@@ -27,9 +27,9 @@
 
 DEFINE_DEVICE_CLASS(gpio)
 
-bool gpio_read(gpio_device_t gpio, uint32_t pin) {
+uint32_t gpio_read(gpio_device_t gpio, uint32_t pin) {
 	bool __val; 
 	(*(gpio))->read_pin(gpio, pin, &__val);
-	return __val;
+	return (uint32_t)__val;
 }
 

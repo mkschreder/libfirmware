@@ -23,11 +23,12 @@ struct stm32_spi {
 	struct mutex lock;
 };
 
-struct stm32_spi _devices[3];
+struct stm32_spi *_devices[3] = {NULL};
 
 // RX
 void DMA2_Stream0_IRQHandler(void){
-	struct stm32_spi *self = &_devices[0];
+	struct stm32_spi *self = _devices[0];
+	BUG_ON(!self);
     int32_t wake = 0;
 	if(DMA_GetITStatus(DMA2_Stream0, DMA_IT_TCIF0) != RESET){
 		DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0);
@@ -47,7 +48,8 @@ void DMA2_Stream3_IRQHandler(void){
 
 // RX
 void DMA1_Stream3_IRQHandler(void){
-	struct stm32_spi *self = &_devices[1];
+	struct stm32_spi *self = _devices[1];
+	BUG_ON(!self);
     int32_t wake = 0;
 	if(DMA_GetITStatus(DMA1_Stream3, DMA_IT_TCIF3) != RESET){
 		DMA_ClearITPendingBit(DMA1_Stream3, DMA_IT_TCIF3);
@@ -81,13 +83,14 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 	while (DMA_GetCmdStatus(dma) != ENABLE);
 }
 
-int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
 	if(!self->hw) return -1;
 
 	if(self->hw == SPI1){
 		thread_mutex_lock(&self->lock);
 
+		gpio_reset(gpio, cs_pin);
 		_dma_set_data(DMA2_Stream0, (uint32_t)rx_data, size);
 		_dma_set_data(DMA2_Stream3, (uint32_t)tx_data, size);
 
@@ -95,10 +98,12 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 
 		if(thread_sem_take_wait(&self->rx_sem, timeout) != 0){
 			SPI_Cmd(self->hw, DISABLE);
+			gpio_set(gpio, cs_pin);
 			thread_mutex_unlock(&self->lock);
 			return -ETIMEDOUT;
 		}
 		SPI_Cmd(self->hw, DISABLE);
+		gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
 	} else {
 		// Currently DMA does not seem to work. Need to debug it.
@@ -107,17 +112,18 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
 
 		// this is quick and dirty just to get it to work
 		thread_mutex_lock(&self->lock);
-		SPI_Cmd(self->hw, ENABLE);
+		gpio_reset(gpio, cs_pin);
+		const uint8_t *tx = (const uint8_t*)tx_data;
+		uint8_t *rx = (uint8_t*)rx_data;
 		for(size_t c = 0; c < size; c++){
-			uint8_t *tx = (uint8_t*)tx_data;
-			uint8_t *rx = (uint8_t*)rx_data;
-			SPI_I2S_SendData(self->hw, tx[c]);
 			while(!SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_TXE));
+			SPI_I2S_SendData(self->hw, *tx++);
 			while(!SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_RXNE));
+			uint8_t dr = (uint8_t)SPI_I2S_ReceiveData(self->hw);
+			*rx++ = dr;
 			while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY));
-			rx[c] = (uint8_t)self->hw->DR;
 		}
-		SPI_Cmd(self->hw, DISABLE);
+		gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
 	}
 
@@ -131,14 +137,14 @@ const struct spi_device_ops _ops = {
 static int _stm32_spi_probe(void *fdt, int fdt_node){
 	SPI_TypeDef *SPIx = (SPI_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 
-	struct stm32_spi *self = NULL;
-
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 
-	SPI_Cmd(SPIx, DISABLE);
+	struct stm32_spi *self = kzmalloc(sizeof(struct stm32_spi));
+
+	SPI_I2S_DeInit(SPIx);
 
 	SPI_InitTypeDef spi;
 	SPI_StructInit(&spi);
@@ -196,8 +202,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Rx, ENABLE);
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 
-		self = &_devices[0];
-
+		_devices[0] = self;
 		printk("spi1: ready\n");
 	} else if(SPIx == SPI2){
 		#if 0
@@ -245,11 +250,11 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 
 		#endif
 
-		self = &_devices[1];
+		_devices[1] = self;
 
 		printk("spi2: ready\n");
 	} else if(SPIx == SPI3){
-		self = &_devices[2];
+		_devices[2] = self;
 
 		printk("spi3: ready\n");
 	} else {
@@ -260,7 +265,9 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 	self->hw = SPIx;
 	thread_mutex_init(&self->lock);
 
-	spi_device_init(&self->dev, fdt_node, &_ops);
+	SPI_Cmd(self->hw, ENABLE);
+
+	spi_device_init(&self->dev, fdt, fdt_node, &_ops);
 	spi_device_register(&self->dev);
 
 	return 0;

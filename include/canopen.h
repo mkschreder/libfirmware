@@ -131,7 +131,6 @@ enum {
 #define CANOPEN_REG_DEVICE_MFR_STATUS_DRIVE_I2T_BIT		(1 << 27)
 #define CANOPEN_REG_DEVICE_MFR_STATUS_FAULT_BIT			(uint32_t)(1 << 31)
 
-
 #define CANOPEN_REG_DEVICE_NAME						0x100800
 #define CANOPEN_REG_DEVICE_HW_VER					0x100900
 #define CANOPEN_REG_DEVICE_SW_VER					0x100A00
@@ -301,6 +300,9 @@ struct canopen_listener {
 	struct list_head list;
 	void (*callback)(struct canopen_listener *self, uint8_t node_id, struct can_message *msg);
 };
+
+int canopen_set_mode(memory_device_t canopen_mem, canopen_mode_t mode);
+int canopen_set_address(memory_device_t canopen_mem, uint8_t address);
 
 int canopen_pdo_rx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);
 int canopen_pdo_tx(memory_device_t canopen_mem, uint8_t node_id, const struct canopen_pdo_config *conf);

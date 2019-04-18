@@ -21,6 +21,7 @@
 
 #include "timestamp.h"
 #include "list.h"
+#include "gpio.h"
 
 typedef const struct spi_device_ops ** spi_device_t;
 
@@ -33,23 +34,12 @@ struct spi_transfer {
 };
 
 struct spi_device_ops {
-	int (*transfer)(spi_device_t spi, const void *tx_buf, void *rx_buf, size_t len, uint32_t to);
+	int (*transfer)(spi_device_t spi, gpio_device_t gpio, uint32_t cs_pin, const void *tx_buf, void *rx_buf, size_t len, uint32_t to);
 };
 
-#define spi_transfer(spi, tx, rx, sz, to) (*(spi))->transfer(spi, tx, rx, sz, to)
-//#define spi_sync(spi, ts) (*(spi))->transfer(spi, ts)
+#define spi_transfer(spi, gpio, cs_pin, tx, rx, sz, to) (*(spi))->transfer(spi, gpio, cs_pin, tx, rx, sz, to)
 
-struct spi_device {
-	struct list_head list;
-	const struct spi_device_ops *ops;
-	int fdt_node;
-};
-
-void spi_device_init(struct spi_device *self, int fdt_node, const struct spi_device_ops *ops);
-int spi_device_register(struct spi_device *self);
-spi_device_t spi_find(const char *dtb_path);
-spi_device_t spi_find_by_node(void *fdt, int node);
-spi_device_t spi_find_by_ref(void *fdt, int fdt_node, const char *ref_name);
+DECLARE_DEVICE_CLASS(spi)
 
 void spi_transfer_init(struct spi_transfer *self);
 

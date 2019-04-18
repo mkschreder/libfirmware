@@ -32,16 +32,4 @@ struct i2c_device_ops {
 #define i2c_transfer(dev, addr, wr_buf, wr_len, buf, len, timeout) (*(dev))->transfer(dev, addr, wr_buf, wr_len, buf, len, timeout)
 
 DECLARE_DEVICE_CLASS(i2c)
-/*
-int i2c_write8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, const void *data, size_t len);
-int i2c_read8_buf(i2c_device_t dev, uint8_t addr, uint8_t reg, void *data, size_t len);
 
-int i2c_write16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, const void *data, size_t len);
-int i2c_read16_buf(i2c_device_t dev, uint8_t addr, uint16_t reg, void *data, size_t len);
-
-int i2c_write8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, const uint8_t data);
-int i2c_read8_reg8(i2c_device_t dev, uint8_t addr, uint8_t reg, uint8_t *data);
-
-int i2c_write16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, const uint8_t data);
-int i2c_read16_reg8(i2c_device_t dev, uint8_t addr, uint16_t reg, uint8_t *data);
-*/

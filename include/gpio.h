@@ -36,6 +36,6 @@ struct gpio_device_ops {
 #define gpio_reset(gpio, pin) (*(gpio))->write_pin(gpio, pin, false)
 #define gpio_write(gpio, pin, val) (*(gpio))->write_pin(gpio, pin, val)
 
-bool gpio_read(gpio_device_t gpio, uint32_t pin);
+uint32_t gpio_read(gpio_device_t gpio, uint32_t pin);
 
 DECLARE_DEVICE_CLASS(gpio)

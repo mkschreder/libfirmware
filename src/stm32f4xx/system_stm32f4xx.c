@@ -378,15 +378,14 @@ void delay_us(uint32_t us) {
 
 	volatile uint32_t cycles = (clocks.SYSCLK_Frequency/1000000L)*us;
 
-	uint32_t prim = __get_PRIMASK();
-	__disable_irq();
+	//uint32_t prim = __get_PRIMASK();
+	//__disable_irq();
 
 	volatile uint32_t start = DWT->CYCCNT;
 	do  {
 	} while(DWT->CYCCNT - start < cycles);
 
-	if(!prim)
-		__enable_irq();
+	//if(!prim) __enable_irq();
 }
 
 uint32_t nanos(){
