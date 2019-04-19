@@ -17,6 +17,7 @@
 //#include "timer.h"
 #include "mutex.h"
 #include "atomic.h"
+#include "events.h"
 
 #include <errno.h>
 
@@ -24,6 +25,8 @@ struct stm32_tim {
     TIM_TypeDef *hw;
 	struct analog_device analog;
 	struct encoder_device enc_dev;
+	events_device_t publisher;
+	uint32_t update_event;
 };
 
 static struct stm32_tim *_timers[8] = {0};
@@ -203,18 +206,27 @@ void TIM4_IRQHandler(void){
 }
 
 void TIM1_UP_TIM10_IRQHandler(void){
-	//struct stm32_bldc *self = _timers[0];
-
+	struct stm32_tim *self = _timers[0];
+	int32_t wake = 0;
 	if(TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET){
+		GPIO_WriteBit(GPIOE, GPIO_Pin_0, 1);
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+		events_publish_from_isr(self->publisher, self->update_event, &wake);
+		GPIO_WriteBit(GPIOE, GPIO_Pin_0, 0);
     }
+	thread_yield_from_isr(wake);
 }
 
 void TIM8_UP_TIM13_IRQHandler(){
+	struct stm32_tim *self = _timers[7];
+	int32_t wake = 0;
 	if(TIM_GetITStatus(TIM8, TIM_IT_Update) != RESET){
+		GPIO_WriteBit(GPIOE, GPIO_Pin_1, 1);
 		TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
-		//ADC_SoftwareStartConv(ADC1);
+		events_publish_from_isr(self->publisher, self->update_event, &wake);
+		GPIO_WriteBit(GPIOE, GPIO_Pin_1, 0);
 	}
+	thread_yield_from_isr(wake);
 }
 
 static int _tim_analog_read(analog_device_t dev, unsigned int chan, float *value){
@@ -261,6 +273,19 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 	int output_trigger = fdt_get_int_or_default(fdt, (int)fdt_node, "output_trigger", -1);
 	int input_trigger = fdt_get_int_or_default(fdt, (int)fdt_node, "input_trigger", -1);
 	int enable = fdt_get_int_or_default(fdt, (int)fdt_node, "enable", 1);
+	int events = fdt_subnode_offset(fdt, fdt_node, "events");
+
+	events_device_t publisher = NULL;
+	uint32_t update_event = 0;
+
+	if(events > 0){
+		publisher = events_find_by_ref(fdt, events, "publisher");
+		if(!publisher){
+			printk(PRINT_ERROR "tim: events node specified but no publisher\n");
+			return -EINVAL;
+		}
+		update_event = (uint32_t)fdt_get_int_or_default(fdt, events, "update", 0);
+	}
 
     int idx = -1;
     if(TIMx == TIM1) idx = 0;
@@ -290,6 +315,8 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 
     struct stm32_tim *self = kzmalloc(sizeof(struct stm32_tim));
     self->hw = TIMx;
+	self->publisher = publisher;
+	self->update_event = update_event;
     _timers[idx] = self;
 
 	RCC_ClocksTypeDef clocks;
@@ -433,7 +460,11 @@ static int _stm32_tim_probe(void *fdt, int fdt_node){
 		analog_device_register(&self->analog);
 
 		NVIC_InitTypeDef nvic;
-		nvic.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;
+		if(TIMx == TIM8){
+			nvic.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;
+		} else if(TIMx == TIM1){
+			nvic.NVIC_IRQChannel = TIM1_UP_TIM10_IRQn;
+		}
 		nvic.NVIC_IRQChannelPreemptionPriority = 1;
 		nvic.NVIC_IRQChannelSubPriority = 1;
 		nvic.NVIC_IRQChannelCmd = ENABLE;

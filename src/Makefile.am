@@ -12,6 +12,7 @@ libfirmware_a_SOURCES = \
     pointer.c\
     driver.c\
     encoder.c\
+	events.c\
 	gpio.c\
 	i2c.c\
 	imu.c\

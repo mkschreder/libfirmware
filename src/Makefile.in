@@ -221,13 +221,13 @@ libfirmware_a_AR = $(AR) $(ARFLAGS)
 libfirmware_a_LIBADD =
 am__libfirmware_a_SOURCES_DIST = adc.c analog.c avl-cmp.c avl.c baro.c \
 	can.c console.c display.c dx_tracker.c pointer.c driver.c \
-	encoder.c gpio.c i2c.c imu.c leds.c math.c memory.c serial.c \
-	spi.c time.c ulink.c usb.c vardir.c regmap.c linux/chip.c \
-	linux/linux_display.c linux/linux_uart.c linux/linux_udpcan.c \
-	linux/linux_vcan.c linux/linux_leds.c linux/thread.c \
-	linux/thread_mutex.c linux/thread_queue.c linux/thread_sem.c \
-	linux/thread_work.c linux/time.c stm32f10x/stdperiph/misc.c \
-	stm32f10x/stdperiph/stm32f10x_adc.c \
+	encoder.c events.c gpio.c i2c.c imu.c leds.c math.c memory.c \
+	serial.c spi.c time.c ulink.c usb.c vardir.c regmap.c \
+	linux/chip.c linux/linux_display.c linux/linux_uart.c \
+	linux/linux_udpcan.c linux/linux_vcan.c linux/linux_leds.c \
+	linux/thread.c linux/thread_mutex.c linux/thread_queue.c \
+	linux/thread_sem.c linux/thread_work.c linux/time.c \
+	stm32f10x/stdperiph/misc.c stm32f10x/stdperiph/stm32f10x_adc.c \
 	stm32f10x/stdperiph/stm32f10x_bkp.c \
 	stm32f10x/stdperiph/stm32f10x_can.c \
 	stm32f10x/stdperiph/stm32f10x_cec.c \
@@ -469,15 +469,16 @@ am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-display.$(OBJEXT) \
 	libfirmware_a-dx_tracker.$(OBJEXT) \
 	libfirmware_a-pointer.$(OBJEXT) libfirmware_a-driver.$(OBJEXT) \
-	libfirmware_a-encoder.$(OBJEXT) libfirmware_a-gpio.$(OBJEXT) \
-	libfirmware_a-i2c.$(OBJEXT) libfirmware_a-imu.$(OBJEXT) \
-	libfirmware_a-leds.$(OBJEXT) libfirmware_a-math.$(OBJEXT) \
-	libfirmware_a-memory.$(OBJEXT) libfirmware_a-serial.$(OBJEXT) \
-	libfirmware_a-spi.$(OBJEXT) libfirmware_a-time.$(OBJEXT) \
-	libfirmware_a-ulink.$(OBJEXT) libfirmware_a-usb.$(OBJEXT) \
-	libfirmware_a-vardir.$(OBJEXT) libfirmware_a-regmap.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_2) $(am__objects_4) \
-	$(am__objects_5) $(am__objects_6)
+	libfirmware_a-encoder.$(OBJEXT) libfirmware_a-events.$(OBJEXT) \
+	libfirmware_a-gpio.$(OBJEXT) libfirmware_a-i2c.$(OBJEXT) \
+	libfirmware_a-imu.$(OBJEXT) libfirmware_a-leds.$(OBJEXT) \
+	libfirmware_a-math.$(OBJEXT) libfirmware_a-memory.$(OBJEXT) \
+	libfirmware_a-serial.$(OBJEXT) libfirmware_a-spi.$(OBJEXT) \
+	libfirmware_a-time.$(OBJEXT) libfirmware_a-ulink.$(OBJEXT) \
+	libfirmware_a-usb.$(OBJEXT) libfirmware_a-vardir.$(OBJEXT) \
+	libfirmware_a-regmap.$(OBJEXT) $(am__objects_1) \
+	$(am__objects_2) $(am__objects_4) $(am__objects_5) \
+	$(am__objects_6)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -667,8 +668,8 @@ top_srcdir = @top_srcdir@
 lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = adc.c analog.c avl-cmp.c avl.c baro.c can.c \
 	console.c display.c dx_tracker.c pointer.c driver.c encoder.c \
-	gpio.c i2c.c imu.c leds.c math.c memory.c serial.c spi.c \
-	time.c ulink.c usb.c vardir.c regmap.c $(am__append_1) \
+	events.c gpio.c i2c.c imu.c leds.c math.c memory.c serial.c \
+	spi.c time.c ulink.c usb.c vardir.c regmap.c $(am__append_1) \
 	$(am__append_3) $(am__append_5) $(am__append_7) \
 	$(am__append_9)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
@@ -1243,6 +1244,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-dx_tracker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-encoder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-events.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-gpio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-i2c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-imu.Po@am__quote@
@@ -1577,6 +1579,20 @@ libfirmware_a-encoder.obj: encoder.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='encoder.c' object='libfirmware_a-encoder.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-encoder.obj `if test -f 'encoder.c'; then $(CYGPATH_W) 'encoder.c'; else $(CYGPATH_W) '$(srcdir)/encoder.c'; fi`
+
+libfirmware_a-events.o: events.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-events.o -MD -MP -MF $(DEPDIR)/libfirmware_a-events.Tpo -c -o libfirmware_a-events.o `test -f 'events.c' || echo '$(srcdir)/'`events.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-events.Tpo $(DEPDIR)/libfirmware_a-events.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='events.c' object='libfirmware_a-events.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-events.o `test -f 'events.c' || echo '$(srcdir)/'`events.c
+
+libfirmware_a-events.obj: events.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-events.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-events.Tpo -c -o libfirmware_a-events.obj `if test -f 'events.c'; then $(CYGPATH_W) 'events.c'; else $(CYGPATH_W) '$(srcdir)/events.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-events.Tpo $(DEPDIR)/libfirmware_a-events.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='events.c' object='libfirmware_a-events.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-events.obj `if test -f 'events.c'; then $(CYGPATH_W) 'events.c'; else $(CYGPATH_W) '$(srcdir)/events.c'; fi`
 
 libfirmware_a-gpio.o: gpio.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-gpio.o -MD -MP -MF $(DEPDIR)/libfirmware_a-gpio.Tpo -c -o libfirmware_a-gpio.o `test -f 'gpio.c' || echo '$(srcdir)/'`gpio.c

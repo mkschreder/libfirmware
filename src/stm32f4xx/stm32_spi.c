@@ -83,7 +83,7 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 	while (DMA_GetCmdStatus(dma) != ENABLE);
 }
 
-int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
 	if(!self->hw) return -1;
 
@@ -130,7 +130,7 @@ int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, c
 	return 0;
 }
 
-const struct spi_device_ops _ops = {
+static const struct spi_device_ops _ops = {
 	.transfer = _stm32_spi_transfer
 };
 

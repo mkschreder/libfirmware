@@ -60,7 +60,7 @@ void can_dispatcher_init(struct can_dispatcher *self,
 	self->dev = dev;
 	self->next_message = next_message;
 	thread_mutex_init(&self->lock);
-	thread_create(_can_dispatcher_loop, "can_disp", 230, self, 2, NULL);
+	thread_create(_can_dispatcher_loop, "can_disp", 400, self, 2, NULL);
 }
 
 void can_dispatcher_add_listener(struct can_dispatcher *self, struct can_listener *listener){

@@ -46,9 +46,10 @@ timestamp_t micros(void){
 }
 
 void time_gettime(struct timeval *ts){
-	// TODO: this is just dummy. Need to use rtc.
-	ts->tv_sec = 0;
-	ts->tv_usec = (suseconds_t)micros();
+	// this is a dummy
+	timestamp_t t = micros();
+	ts->tv_sec = (time_t)(t / 1000000);
+	ts->tv_usec = (time_t)(t % 1000000);
 }
 
 int time_init_rtc(){

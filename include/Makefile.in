@@ -313,6 +313,7 @@ nobase_pkginclude_HEADERS = \
     driver.h\
     eeprom.h\
     encoder.h\
+	events.h\
 	dx_tracker.h\
     gpio.h\
 	i2c.h\

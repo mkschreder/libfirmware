@@ -21,6 +21,7 @@
 
 
 #include "list.h"
+#include <libfdt/libfdt.h>
 
 struct device_driver {
 	const char *name;

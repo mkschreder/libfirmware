@@ -44,6 +44,7 @@ uint32_t thread_ticks_count(){
 }
 
 uint32_t thread_ticks_from_us(uint32_t us){
+	if(us == 0) return 0;
 	uint32_t tick_period_us = (1000000 / configTICK_RATE_HZ);
 	return constrain_u32(us / tick_period_us, 1, 0xffffffff);
 }
