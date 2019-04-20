@@ -34,13 +34,13 @@ typedef unsigned long usec_t;
 #define time_after(a,b)		\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
-	 ((long)((b) - (a)) < 0))
+	 (((long)(b) - (long)(a)) < 0))
 #define time_before(a,b)	time_after(b,a)
 
 #define time_after_eq(a,b)	\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
-	 ((long)((a) - (b)) >= 0))
+	 ((long)((unsigned long)(a) - (unsigned long)(b)) >= 0))
 #define time_before_eq(a,b)	time_after_eq(b,a)
 
 void delay_us(uint32_t us);

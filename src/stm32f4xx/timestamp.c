@@ -6,7 +6,7 @@
 #include "timestamp.h"
 
 // current uptime for 1kHz systick timer. will rollover after 49 days. hopefully we won't care.
-static volatile uint32_t sysTickUptime = 0;
+static volatile uint32_t sysTickUptime = (uint32_t)(-20000);
 
 /*
 void time_init(void){
