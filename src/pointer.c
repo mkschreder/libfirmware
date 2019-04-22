@@ -25,35 +25,5 @@
 
 #include <errno.h>
 
-static LIST_HEAD(_pointer_devices);
-
-void pointer_device_init(struct pointer_device *self, int fdt_node, const struct pointer_device_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt_node = fdt_node;
-	self->ops = ops;
-}
-
-int pointer_device_register(struct pointer_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_pointer_devices);
-	return 0;
-}
-
-pointer_device_t pointer_find_by_node(void *fdt, int node){
-	struct pointer_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_pointer_devices, list){
-		if(dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
-}
-
-pointer_device_t pointer_find(const char *dtb_path){
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-    return pointer_find_by_node(_devicetree, node);
-}
+DEFINE_DEVICE_CLASS(pointer)
 

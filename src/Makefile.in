@@ -222,7 +222,7 @@ libfirmware_a_LIBADD =
 am__libfirmware_a_SOURCES_DIST = adc.c analog.c avl-cmp.c avl.c baro.c \
 	can.c console.c display.c dx_tracker.c pointer.c driver.c \
 	encoder.c events.c gpio.c i2c.c imu.c leds.c math.c memory.c \
-	serial.c spi.c time.c ulink.c usb.c vardir.c regmap.c \
+	serial.c spi.c termui.c time.c ulink.c usb.c vardir.c regmap.c \
 	linux/chip.c linux/linux_display.c linux/linux_uart.c \
 	linux/linux_udpcan.c linux/linux_vcan.c linux/linux_leds.c \
 	linux/thread.c linux/thread_mutex.c linux/thread_queue.c \
@@ -474,11 +474,11 @@ am_libfirmware_a_OBJECTS = libfirmware_a-adc.$(OBJEXT) \
 	libfirmware_a-imu.$(OBJEXT) libfirmware_a-leds.$(OBJEXT) \
 	libfirmware_a-math.$(OBJEXT) libfirmware_a-memory.$(OBJEXT) \
 	libfirmware_a-serial.$(OBJEXT) libfirmware_a-spi.$(OBJEXT) \
-	libfirmware_a-time.$(OBJEXT) libfirmware_a-ulink.$(OBJEXT) \
-	libfirmware_a-usb.$(OBJEXT) libfirmware_a-vardir.$(OBJEXT) \
-	libfirmware_a-regmap.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_2) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6)
+	libfirmware_a-termui.$(OBJEXT) libfirmware_a-time.$(OBJEXT) \
+	libfirmware_a-ulink.$(OBJEXT) libfirmware_a-usb.$(OBJEXT) \
+	libfirmware_a-vardir.$(OBJEXT) libfirmware_a-regmap.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2) $(am__objects_4) \
+	$(am__objects_5) $(am__objects_6)
 libfirmware_a_OBJECTS = $(am_libfirmware_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -669,9 +669,9 @@ lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = adc.c analog.c avl-cmp.c avl.c baro.c can.c \
 	console.c display.c dx_tracker.c pointer.c driver.c encoder.c \
 	events.c gpio.c i2c.c imu.c leds.c math.c memory.c serial.c \
-	spi.c time.c ulink.c usb.c vardir.c regmap.c $(am__append_1) \
-	$(am__append_3) $(am__append_5) $(am__append_7) \
-	$(am__append_9)
+	spi.c termui.c time.c ulink.c usb.c vardir.c regmap.c \
+	$(am__append_1) $(am__append_3) $(am__append_5) \
+	$(am__append_7) $(am__append_9)
 libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99 \
 	$(am__append_2) $(am__append_4) $(am__append_6) \
 	$(am__append_8) $(am__append_10)
@@ -1255,6 +1255,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-regmap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-serial.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-spi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-termui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-ulink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfirmware_a-usb.Po@am__quote@
@@ -1705,6 +1706,20 @@ libfirmware_a-spi.obj: spi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='spi.c' object='libfirmware_a-spi.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-spi.obj `if test -f 'spi.c'; then $(CYGPATH_W) 'spi.c'; else $(CYGPATH_W) '$(srcdir)/spi.c'; fi`
+
+libfirmware_a-termui.o: termui.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-termui.o -MD -MP -MF $(DEPDIR)/libfirmware_a-termui.Tpo -c -o libfirmware_a-termui.o `test -f 'termui.c' || echo '$(srcdir)/'`termui.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-termui.Tpo $(DEPDIR)/libfirmware_a-termui.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='termui.c' object='libfirmware_a-termui.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-termui.o `test -f 'termui.c' || echo '$(srcdir)/'`termui.c
+
+libfirmware_a-termui.obj: termui.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-termui.obj -MD -MP -MF $(DEPDIR)/libfirmware_a-termui.Tpo -c -o libfirmware_a-termui.obj `if test -f 'termui.c'; then $(CYGPATH_W) 'termui.c'; else $(CYGPATH_W) '$(srcdir)/termui.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfirmware_a-termui.Tpo $(DEPDIR)/libfirmware_a-termui.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='termui.c' object='libfirmware_a-termui.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o libfirmware_a-termui.obj `if test -f 'termui.c'; then $(CYGPATH_W) 'termui.c'; else $(CYGPATH_W) '$(srcdir)/termui.c'; fi`
 
 libfirmware_a-time.o: time.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT libfirmware_a-time.o -MD -MP -MF $(DEPDIR)/libfirmware_a-time.Tpo -c -o libfirmware_a-time.o `test -f 'time.c' || echo '$(srcdir)/'`time.c

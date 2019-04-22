@@ -17,7 +17,6 @@
  * along with this file.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,12 +36,7 @@
 #define i2c_debug(...) do {} while(0)
 //#define i2c_debug dbg_printk
 
-// I2C2
-// SCL  PB10
-// SDA  PB11
-// I2C1
-// SCL  PB6
-// SDA  PB7
+#if 0
 
 enum {
     I2C_ERR_NONE,
@@ -700,8 +694,7 @@ void I2C2_EV_IRQHandler(void){
 }
 
 static const struct i2c_device_ops _stm32_i2c_ops = {
-    .write = _stm32_i2c_write_buf,
-    .read = _stm32_i2c_read_buf
+	.transfer = _stm32_i2c_transfer
 };
 
 int _stm32_i2c_probe(void *fdt, int fdt_node){
@@ -816,3 +809,4 @@ static int _stm32_i2c_remove(void *fdt, int fdt_node){
 }
 
 DEVICE_DRIVER(stm32_i2c, "st,stm32_i2c", _stm32_i2c_probe, _stm32_i2c_remove)
+#endif

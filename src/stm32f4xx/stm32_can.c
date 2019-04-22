@@ -487,10 +487,10 @@ static int _stm32_can_probe(void *fdt, int fdt_node){
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
 
-	printk(PRINT_INFO "can: sysclk %d, pclk1 %d, pclk2 %d, hclk %d\n",
+	printk(PRINT_DEFAULT "can: sysclk %d, pclk1 %d, pclk2 %d, hclk %d\n",
 			clocks.SYSCLK_Frequency, clocks.PCLK1_Frequency, clocks.PCLK2_Frequency, clocks.HCLK_Frequency);
 
-	printk(PRINT_INFO "can: BTR: %08x\n", self->hw->BTR);
+	printk(PRINT_DEFAULT "can: BTR: %08x\n", self->hw->BTR);
 
 	printk(PRINT_SUCCESS "can%d: ready\n", idx + 1);
 

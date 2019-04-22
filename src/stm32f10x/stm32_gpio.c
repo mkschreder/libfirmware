@@ -55,7 +55,7 @@ static int _stm32_gpio_setup_subnode(void *fdt, int fdt_node){
 
     struct stm32_gpio *self = kzmalloc(sizeof(struct stm32_gpio));
     self->pins = kzmalloc(sizeof(struct stm32_gpio_pin) * pin_count);
-    gpio_device_init(&self->dev, fdt_node, &_gpio_ops);
+    gpio_device_init(&self->dev, fdt, fdt_node, &_gpio_ops);
     self->npins = pin_count;
 
     for(uint8_t c = 0; c < pin_count; c++){

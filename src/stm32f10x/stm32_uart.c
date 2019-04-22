@@ -128,7 +128,7 @@ void USART3_IRQHandler(void){
 	thread_yield_from_isr(wake);
 }
 
-static const struct serial_ops _serial_ops = {
+static const struct serial_device_ops _serial_ops = {
 	.read = _serial_read,
 	.write = _serial_write
 };
@@ -184,7 +184,7 @@ static int _stm32_uart_probe(void *fdt, int fdt_node){
 	struct stm32_uart *self = kzmalloc(sizeof(struct stm32_uart));
 	if(!self) return -ENOMEM;
 
-	serial_device_init(&self->dev, fdt_node, &_serial_ops);
+	serial_device_init(&self->dev, fdt, fdt_node, &_serial_ops);
 
     thread_queue_init(&self->tx_queue, (size_t)tx_queue, sizeof(char));
     thread_queue_init(&self->rx_queue, (size_t)rx_queue, sizeof(char));

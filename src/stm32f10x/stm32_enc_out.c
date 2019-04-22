@@ -43,7 +43,7 @@ static int _serial_read(serial_port_t serial, void *data, size_t size, uint32_t 
     return -1;
 }
 
-static const struct serial_ops _serial_ops = {
+static const struct serial_device_ops _serial_ops = {
 	.read = _serial_read,
 	.write = _serial_write
 };
@@ -133,7 +133,7 @@ static int _stm32_encoder_out_probe(void *fdt, int fdt_node){
 
 	TIM_Cmd(hw, ENABLE);
 
-    serial_device_init(&self->dev, fdt_node, &_serial_ops);
+    serial_device_init(&self->dev, fdt, fdt_node, &_serial_ops);
     serial_device_register(&self->dev);
 
     return 0;

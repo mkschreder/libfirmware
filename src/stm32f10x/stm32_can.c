@@ -19,9 +19,12 @@
 #include "mutex.h"
 #include "atomic.h"
 
+#define STM32_CAN_RX_WAKE_INTERVAL_MS THREAD_WAIT_FOREVER
+
 struct stm32_can {
 	struct mutex lock;
 	struct can_device dev;
+	struct can_dispatcher dispatcher;
 	/*
 	struct {
 		struct mutex lock;
@@ -33,7 +36,6 @@ struct stm32_can {
 	struct thread_queue rx_queue;
 	struct thread_queue tx_queue;
 	//struct semaphore tx_sem;
-	const struct can_ops *can_ops;
 };
 
 static struct stm32_can *interface[1] = {0};
@@ -88,21 +90,25 @@ int _stm32_can_write(struct stm32_can *self, const struct can_message *in, uint3
 	return 1;
 }
 
-static int _can_send(can_port_t port, const struct can_message *msg, uint32_t timeout_ms){
-	struct stm32_can *self = container_of(port, struct stm32_can, can_ops);
+static int _can_send(can_device_t port, const struct can_message *msg, uint32_t timeout_ms){
+	struct stm32_can *self = container_of(port, struct stm32_can, dev.ops);
 	thread_mutex_lock(&self->lock);
 	int r = _stm32_can_write(self, msg, timeout_ms);
 	thread_mutex_unlock(&self->lock);
 	return r;
 }
 
-static int _can_handler(can_port_t can, can_listen_cmd_t cmd, struct can_listener *listener){
-	struct stm32_can *self = container_of(can, struct stm32_can, can_ops);
-	return can_device_handler(&self->dev, cmd, listener);
+static int _can_subscribe(can_device_t can, struct can_listener *listener){
+	struct stm32_can *self = container_of(can, struct stm32_can, dev.ops);
+	thread_mutex_lock(&self->lock);
+	can_dispatcher_add_listener(&self->dispatcher, listener);
+	thread_mutex_unlock(&self->lock);
+	return 0;
 }
 
-static int _can_control(can_port_t can, can_control_cmd_t cmd, struct can_control_param *p){
-	struct stm32_can *self = container_of(can, struct stm32_can, can_ops);
+/*
+static int _can_control(can_device_t can, can_control_cmd_t cmd, struct can_control_param *p){
+	struct stm32_can *self = container_of(can, struct stm32_can, dev.ops);
 	CAN_TypeDef *CANx = CAN1;
 	switch(cmd){
 		case CAN_CMD_GET_STATUS: {
@@ -127,11 +133,10 @@ static int _can_control(can_port_t can, can_control_cmd_t cmd, struct can_contro
 	}
 	return -EINVAL;
 }
-
-static const struct can_ops _can_ops = {
+*/
+static const struct can_device_ops _can_ops = {
 	.send = _can_send,
-	.handler = _can_handler,
-	.control = _can_control
+	.subscribe = _can_subscribe,
 };
 
 // subscribe to error interrupt and record error counts
@@ -222,20 +227,12 @@ give:
 	*/
 }
 
-/** message dispatcher
- * This one is called in the context of the work processing thread.
- * It currently assumes that listener list is never modified after the interface has been set up
- */
-void _dispatcher(void *ptr){
-	struct stm32_can *self = (struct stm32_can*)ptr; //container_of(work, struct stm32_can, bh);
-	while(1){
-		// dispatch the recieved messages through driver callbacks. Now with interrupts enabled and in kernel context.
-		struct can_message cm;
-		if(thread_queue_recv(&self->rx_queue, &cm, 100) > 0){
-			can_device_dispatch_message(&self->dev, &cm);
-			atomic_inc(&self->counters.rxp);
-		}
-	}
+static int _can_next_message(can_device_t dev, struct can_message *msg){
+	struct stm32_can *self = container_of(dev, struct stm32_can, dev.ops);
+	int r = thread_queue_recv(&self->rx_queue, msg, STM32_CAN_RX_WAKE_INTERVAL_MS);
+	if(r > 0)
+		atomic_inc(&self->counters.rxp);
+	return r;
 }
 
 static void _can1_process_message_isr(struct stm32_can *self, CanRxMsg *msg, int32_t *wake){
@@ -325,10 +322,10 @@ static int _stm32_can_probe(void *fdt, int fdt_node){
 
 	thread_mutex_init(&self->lock);
 
-	thread_create(_dispatcher, "can0_rx", 230, self, 2, NULL);
+	can_dispatcher_init(&self->dispatcher, &self->dev.ops, _can_next_message);
+
 	//work_init(&self->bh, _dispatcher);
 
-	self->can_ops = &_can_ops;
 	interface[reg] = self;
 
 	RCC_ClocksTypeDef clocks;
@@ -396,7 +393,8 @@ static int _stm32_can_probe(void *fdt, int fdt_node){
 		CAN_IT_FOV0,
 	ENABLE);
 
-	can_register_device(fdt, fdt_node, &self->dev, &self->can_ops);
+	can_device_init(&self->dev, fdt, fdt_node, &_can_ops);
+	can_device_register(&self->dev);
 
 	return 0;
 }
@@ -447,7 +445,7 @@ static int _stm32_can_write(struct stm32_can *self, const struct can_message *in
 	return 1;
 }
 
-static int _can_send(can_port_t port, const struct can_message *msg, uint32_t timeout_ms){
+static int _can_send(can_device_t port, const struct can_message *msg, uint32_t timeout_ms){
 	struct stm32_can *self = container_of(port, struct stm32_can, can_ops);
 	thread_mutex_lock(&self->lock);
 	int r = _stm32_can_write(self, msg, timeout_ms);
@@ -455,7 +453,7 @@ static int _can_send(can_port_t port, const struct can_message *msg, uint32_t ti
 	return r;
 }
 
-static int _can_recv(can_port_t port, struct can_message *msg, uint32_t timeout_ms){
+static int _can_recv(can_device_t port, struct can_message *msg, uint32_t timeout_ms){
 	if(thread_queue_recv(&can1.rx_queue, msg, timeout_ms) < 0)
 		return -1;
 	return 1;
@@ -583,7 +581,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void){
 	portYIELD_FROM_ISR(wake);
 }
 
-can_port_t stm32_can_get_interface(struct stm32_can *self){
+can_device_t stm32_can_get_interface(struct stm32_can *self){
 	return &self->can_ops;
 }
 #endif

@@ -2,11 +2,13 @@
 
 #include "timestamp.h"
 #include "list.h"
+#include "driver.h"
 
 typedef const struct pointer_device_ops ** pointer_device_t;
 
 struct pointer_reading {
     uint8_t caps;
+	uint8_t quality;
     int16_t delta_x;
     int16_t delta_y;
 };
@@ -17,12 +19,5 @@ struct pointer_device_ops {
 
 #define pointer_read(pointer, data) (*(pointer))->read(pointer, data)
 
-struct pointer_device {
-	struct list_head list;
-	const struct pointer_device_ops *ops;
-	int fdt_node;
-};
+DECLARE_DEVICE_CLASS(pointer)
 
-void pointer_device_init(struct pointer_device *self, int fdt_node, const struct pointer_device_ops *ops);
-int pointer_device_register(struct pointer_device *self);
-pointer_device_t pointer_find(const char *dtb_path);

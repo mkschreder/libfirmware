@@ -21,6 +21,7 @@ libfirmware_a_SOURCES = \
 	memory.c\
     serial.c\
     spi.c\
+	termui.c\
     time.c\
     ulink.c\
 	usb.c\

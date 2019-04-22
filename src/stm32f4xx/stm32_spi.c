@@ -19,6 +19,7 @@ struct stm32_spi {
 	struct spi_device dev;
 	char tx_dma[16];
 	char rx_dma[16];
+	bool cs_control;
 	struct semaphore rx_sem;
 	struct mutex lock;
 };
@@ -90,7 +91,8 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 	if(self->hw == SPI1){
 		thread_mutex_lock(&self->lock);
 
-		gpio_reset(gpio, cs_pin);
+		if(self->cs_control) gpio_reset(gpio, cs_pin);
+
 		_dma_set_data(DMA2_Stream0, (uint32_t)rx_data, size);
 		_dma_set_data(DMA2_Stream3, (uint32_t)tx_data, size);
 
@@ -103,7 +105,7 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 			return -ETIMEDOUT;
 		}
 		SPI_Cmd(self->hw, DISABLE);
-		gpio_set(gpio, cs_pin);
+		if(self->cs_control) gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
 	} else {
 		// Currently DMA does not seem to work. Need to debug it.
@@ -112,7 +114,7 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 
 		// this is quick and dirty just to get it to work
 		thread_mutex_lock(&self->lock);
-		gpio_reset(gpio, cs_pin);
+		if(self->cs_control) gpio_reset(gpio, cs_pin);
 		const uint8_t *tx = (const uint8_t*)tx_data;
 		uint8_t *rx = (uint8_t*)rx_data;
 		for(size_t c = 0; c < size; c++){
@@ -123,7 +125,7 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 			*rx++ = dr;
 			while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY));
 		}
-		gpio_set(gpio, cs_pin);
+		if(self->cs_control) gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
 	}
 
@@ -136,6 +138,7 @@ static const struct spi_device_ops _ops = {
 
 static int _stm32_spi_probe(void *fdt, int fdt_node){
 	SPI_TypeDef *SPIx = (SPI_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
+	int cs_control = fdt_get_int_or_default(fdt, fdt_node, "cs_control", 1);
 
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
@@ -143,6 +146,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI3, ENABLE);
 
 	struct stm32_spi *self = kzmalloc(sizeof(struct stm32_spi));
+	self->cs_control = (bool)cs_control;
 
 	SPI_I2S_DeInit(SPIx);
 

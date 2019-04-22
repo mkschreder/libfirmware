@@ -335,6 +335,7 @@ nobase_pkginclude_HEADERS = \
     serial.h\
     spi.h\
     spinlock.h\
+	termui.h\
     thread.h\
     timestamp.h\
     types.h\

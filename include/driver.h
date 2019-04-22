@@ -96,10 +96,10 @@ void register_device_driver(struct device_driver *self);
 
 extern unsigned char _devicetree[];
 
-#define PRINT_INFO "\x1b[0m"
-#define PRINT_ERROR "\x1b[31m"
-#define PRINT_SUCCESS "\x1b[32m"
-#define PRINT_SYSTEM "\x1b[33m"
+#define PRINT_DEFAULT "\033[0m"
+#define PRINT_ERROR "\033[31m"
+#define PRINT_SUCCESS "\033[32m"
+#define PRINT_SYSTEM "\033[33m"
 
 // this is defined to use the default uart once it has been initialized
 // this function is defined in serial.c but placed here because it is very often used in device drivers

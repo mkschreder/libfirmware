@@ -88,13 +88,14 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 
 #define SPI_TRANSFER_TIMEOUT 20000
 
-int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
 	if(!self->hw) return -1;
 
     //SPI_Cmd(self->hw, ENABLE);
 
     //gpio_reset(self->gpio, cs);
+	gpio_reset(gpio, cs_pin);
     for(size_t c = 0; c < size; c++){
 		SPI_I2S_SendData(self->hw, ((const uint8_t*)tx_data)[c]);
         int tout = SPI_TRANSFER_TIMEOUT;
@@ -119,10 +120,12 @@ int _stm32_spi_transfer(spi_device_t dev, const void *tx_data, void *rx_data, si
             goto timedout;
         }
     }
+	gpio_set(gpio, cs_pin);
     //gpio_set(self->gpio, cs);
     //SPI_Cmd(self->hw, DISABLE);
     return 0;
 timedout:
+	gpio_set(gpio, cs_pin);
     //gpio_set(self->gpio, cs);
     //SPI_Cmd(self->hw, DISABLE);
     return -ETIMEDOUT;
@@ -180,7 +183,6 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
     }
 
 	struct stm32_spi *self = kzmalloc(sizeof(struct stm32_spi));
-	spi_device_init(&self->dev, fdt_node, &_ops);
 	self->hw = SPIx;
     _devices[idx] = self;
 
@@ -203,7 +205,9 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 
 	SPI_Cmd(SPIx, ENABLE);
 
+	spi_device_init(&self->dev, fdt, fdt_node, &_ops);
 	spi_device_register(&self->dev);
+
     dbg_printk("spi%d: ok\n", idx + 1);
 #if 0
 
