@@ -11,16 +11,15 @@ int thread_mutex_init(struct mutex *self){
     return 0;
 }
 
-int thread_mutex_lock_wait(struct mutex *self, int block_time_ms){
+int thread_mutex_lock_wait(struct mutex *self, uint32_t block_time_ms){
 	if(!self->sem) return -EINVAL;
-	TickType_t time = ((block_time_ms == -1)?portMAX_DELAY:(portTICK_PERIOD_MS * (long unsigned int)block_time_ms));
-	if(xSemaphoreTake(self->sem, time) == pdTRUE) return 0;
+	if(xSemaphoreTake(self->sem, (block_time_ms == THREAD_SLEEP_MAX_DELAY)?(portMAX_DELAY):(block_time_ms / portTICK_PERIOD_MS)) == pdTRUE) return 0;
 	return -EAGAIN;
 }
 
 int thread_mutex_lock(struct mutex *self){
 	if(!self->sem) return -EINVAL;
-	return thread_mutex_lock_wait(self, -1);
+	return thread_mutex_lock_wait(self, THREAD_SLEEP_MAX_DELAY);
 }
 
 int thread_mutex_unlock(struct mutex *self){

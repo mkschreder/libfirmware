@@ -19,7 +19,7 @@
 
 #pragma once
 
-#define THREAD_QUEUE_MAX_DELAY 0xffffffff
+#include <stdint.h>
 
 struct thread_queue {
 	void* handle;

@@ -17,6 +17,7 @@
 */
 
 #pragma once
+#include <stdint.h>
 
 struct mutex {
 	void* sem;
@@ -25,6 +26,6 @@ struct mutex {
 int thread_mutex_init(struct mutex *self);
 int thread_mutex_destroy(struct mutex *self);
 
-int thread_mutex_lock_wait(struct mutex *self, int block_time_ms);
+int thread_mutex_lock_wait(struct mutex *self, uint32_t block_time_ms);
 int thread_mutex_lock(struct mutex *self);
 int thread_mutex_unlock(struct mutex *self);

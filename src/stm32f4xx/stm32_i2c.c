@@ -11,7 +11,7 @@
 #include "thread.h"
 #include "queue.h"
 #include "sem.h"
-#include "work.h"
+#include "console.h"
 
 #include "mutex.h"
 #include "atomic.h"
@@ -29,6 +29,18 @@ struct stm32_i2c {
 	volatile uint8_t *read_p;
 	struct mutex lock;
 	struct semaphore complete;
+	struct {
+		atomic_t tcn, tcn_failed;
+		atomic_t tout;
+		atomic_t sent_bytes, recv_bytes;
+		atomic_t err_berr;
+		atomic_t err_arlo;
+		atomic_t err_af;
+		atomic_t err_ovr;
+		atomic_t err_pec;
+		atomic_t err_timeout;
+		atomic_t err_smbalert;
+	} cnt;
 };
 
 static struct stm32_i2c *_i2c_devices[3] = {NULL};
@@ -37,8 +49,10 @@ static int _stm32_i2c_transfer(i2c_device_t dev, uint8_t addr, const void *tx_da
 	struct stm32_i2c *self = container_of(dev, struct stm32_i2c, dev.ops);
     int result = 0;
 
-	if (thread_mutex_lock(&self->lock) != 0)
+	if (thread_mutex_lock_wait(&self->lock, timeout_ms) != 0){
+		atomic_inc(&self->cnt.tout);
 		return -ETIMEDOUT;
+	}
 
 	self->addr    = addr;
 	self->writing = tx_len;
@@ -49,12 +63,16 @@ static int _stm32_i2c_transfer(i2c_device_t dev, uint8_t addr, const void *tx_da
 	I2C_GenerateSTART(self->hw, ENABLE);
 
 	if (thread_sem_take_wait(&self->complete, timeout_ms) != 0) {
+		atomic_inc(&self->cnt.tout);
 		result = -ETIMEDOUT;
 	}
 
 	if (self->error) {
 		self->error = false;
+		atomic_inc(&self->cnt.tcn_failed);
 		result = -EIO;
+	} else {
+		atomic_inc(&self->cnt.tcn);
 	}
 
 	thread_mutex_unlock(&self->lock);
@@ -95,6 +113,7 @@ static void _i2c_event_irq_handler(struct stm32_i2c *self) {
 	if(events & I2C_SR1_RXNE){
         /* Read into read buffer. */
         *(self->read_p) = (uint8_t)I2C_ReceiveData(self->hw);
+		atomic_inc(&self->cnt.recv_bytes);
         self->read_p++;
         self->reading--;
 
@@ -110,6 +129,7 @@ static void _i2c_event_irq_handler(struct stm32_i2c *self) {
         if (self->writing) {
             /* send next byte from write buffer. */
 			I2C_SendData(self->hw, *(self->write_p));
+			atomic_inc(&self->cnt.sent_bytes);
             self->write_p++;
             self->writing--;
         } else {
@@ -130,11 +150,39 @@ static void _i2c_event_irq_handler(struct stm32_i2c *self) {
 static void _i2c_error_irq_handler(struct stm32_i2c *self) {
     int32_t should_yield = 0;
 
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_BERR)){
+        atomic_inc(&self->cnt.err_berr);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_ARLO)){
+        atomic_inc(&self->cnt.err_arlo);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_AF)){
+        atomic_inc(&self->cnt.err_af);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_OVR)){
+        atomic_inc(&self->cnt.err_ovr);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_PECERR)){
+        atomic_inc(&self->cnt.err_pec);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_SMBALERT)){
+        atomic_inc(&self->cnt.err_smbalert);
+    }
+
+	if(I2C_GetFlagStatus(self->hw, I2C_FLAG_TIMEOUT)){
+        atomic_inc(&self->cnt.err_timeout);
+    }
+
     /* Read SRs to clear them */
     self->hw->SR1;
     self->hw->SR2;
 
-    /* Write 0 to SR1 ?? XXX why  */
+	// reset all writable bits (errors)
     self->hw->SR1 = 0;
 
     /* Send stop */
@@ -155,6 +203,10 @@ void I2C2_EV_IRQHandler (void) {
     _i2c_event_irq_handler(_i2c_devices[1]);
 }
 
+void I2C3_EV_IRQHandler (void) {
+    _i2c_event_irq_handler(_i2c_devices[2]);
+}
+
 void I2C1_ER_IRQHandler (void) {
     _i2c_error_irq_handler(_i2c_devices[0]);
 }
@@ -163,30 +215,52 @@ void I2C2_ER_IRQHandler (void) {
     _i2c_error_irq_handler(_i2c_devices[1]);
 }
 
+void I2C3_ER_IRQHandler (void) {
+    _i2c_error_irq_handler(_i2c_devices[2]);
+}
+
 static struct i2c_device_ops _i2c_ops = {
 	.transfer = _stm32_i2c_transfer
 };
 
+static int _stm32_i2c_cmd(console_device_t con, void *ptr, int argc, char **argv){
+	struct stm32_i2c *self = (struct stm32_i2c*)ptr;
+	if(argc == 2 && strcmp(argv[1], "info") == 0){
+		console_printf(con, "%-16s%d\n", "TCN Complete:", self->cnt.tcn);
+		console_printf(con, "%-16s%d\n", "TCN Failed:", self->cnt.tcn_failed);
+		console_printf(con, "%-16s%d\n", "Timeouts:", self->cnt.tout);
+		console_printf(con, "%-16s%d bytes\n", "Sent:", self->cnt.sent_bytes);
+		console_printf(con, "%-16s%d bytes\n", "Received:", self->cnt.recv_bytes);
+		console_printf(con, "%-16s%d\n", "BERR Errors:", self->cnt.err_berr);
+		console_printf(con, "%-16s%d\n", "ARLO Errors:", self->cnt.err_arlo);
+		console_printf(con, "%-16s%d\n", "AF Errors:", self->cnt.err_af);
+		console_printf(con, "%-16s%d\n", "OVR Errors:", self->cnt.err_ovr);
+		console_printf(con, "%-16s%d\n", "PEC Errors:", self->cnt.err_pec);
+		console_printf(con, "%-16s%d\n", "TOUT Errors:", self->cnt.err_timeout);
+		console_printf(con, "%-16s%d\n", "SMBALERT Errors:", self->cnt.err_smbalert);
+	}
+	return 0;
+}
+
 static int _stm32_i2c_probe(void *fdt, int fdt_node) {
 	I2C_TypeDef *I2Cx = (I2C_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 	uint32_t baud = (uint32_t)fdt_get_int_or_default(fdt, (int)fdt_node, "baud", 100000);
+	console_device_t console = console_find_by_ref(fdt, fdt_node, "console");
+
 	int idx = 0;
 	uint8_t irq_er = 0, irq_ev = 0;
 	if(I2Cx == I2C1){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
 		irq_er = I2C1_ER_IRQn;
 		irq_ev = I2C1_EV_IRQn;
 		idx = 1;
 	} else if(I2Cx == I2C2){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
-		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, ENABLE);
 		irq_er = I2C2_ER_IRQn;
 		irq_ev = I2C2_EV_IRQn;
 		idx = 2;
 	} else if(I2Cx == I2C3){
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C3, ENABLE);
-		RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C3, ENABLE);
 		irq_er = I2C3_ER_IRQn;
 		irq_ev = I2C3_EV_IRQn;
 		idx = 3;
@@ -200,14 +274,11 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
     I2C_StructInit(&i2c);
 
     i2c.I2C_Mode = I2C_Mode_I2C;
-    i2c.I2C_DutyCycle = I2C_DutyCycle_2;
+    i2c.I2C_DutyCycle = I2C_DutyCycle_16_9;
     i2c.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
     i2c.I2C_ClockSpeed = (uint32_t)baud;
-	i2c.I2C_OwnAddress1 = 0;
 
     I2C_Init(I2Cx, &i2c);
-
-    I2C_Cmd(I2Cx, ENABLE);
 
 	struct stm32_i2c *self = kzmalloc(sizeof(struct stm32_i2c));
 	self->hw = I2Cx;
@@ -229,6 +300,12 @@ static int _stm32_i2c_probe(void *fdt, int fdt_node) {
 	NVIC_Init(&nvic);
 
 	I2C_ITConfig(I2Cx, I2C_IT_ERR | I2C_IT_BUF | I2C_IT_EVT, ENABLE);
+
+    I2C_Cmd(I2Cx, ENABLE);
+
+	if(console){
+		console_add_command(console, self, fdt_get_name(fdt, fdt_node, NULL), "i2c low level interface", "", _stm32_i2c_cmd);
+	}
 
 	printk(PRINT_SUCCESS "i2c%d: ready (speed %d)\n", idx, baud);
 

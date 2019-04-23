@@ -21,6 +21,8 @@
 
 #include <stddef.h>
 
+#define THREAD_SLEEP_MAX_DELAY 0xffffffff
+
 #define typecheck(type,x) \
 (__extension__({  type __dummy; \
     typeof(x) __dummy2; \
