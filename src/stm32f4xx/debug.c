@@ -47,8 +47,11 @@ void swo_init()
 	// enable core debug trace
 	CoreDebug->DEMCR = CoreDebug_DEMCR_TRCENA_Msk;
 
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
 	// set tpi baud rate
-	TPI->ACPR = (SystemCoreClock / baud) - 1;
+	TPI->ACPR = (clocks.SYSCLK_Frequency / baud) - 1;
     TPI->SPPR = 2; // Pin protocol = NRZ/USART
     TPI->FFCR = 0x100; // TPIU packet framing enabled when bit 2 is set.
                        // You can use 0x100 if you only need DWT/ITM and not ETM.

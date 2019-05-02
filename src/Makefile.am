@@ -145,6 +145,21 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stdperiph/stm32f4xx_tim.c\
     stm32f4xx/stdperiph/stm32f4xx_usart.c\
     stm32f4xx/stdperiph/stm32f4xx_wwdg.c\
+    stm32f4xx/usb_core/usbd_cdc_core.c\
+    stm32f4xx/usb_core/usbd_core.c\
+    stm32f4xx/usb_core/usbd_ioreq.c\
+    stm32f4xx/usb_core/usbd_req.c\
+    stm32f4xx/usb_otg/usb_core.c\
+    stm32f4xx/usb_otg/usb_dcd.c\
+    stm32f4xx/usb_otg/usb_dcd_int.c\
+    stm32f4xx/usb_otg/usb_hcd.c\
+    stm32f4xx/usb_otg/usb_hcd_int.c\
+    stm32f4xx/usb_otg/usb_otg.c\
+    stm32f4xx/usb_vcp/stm32f4xx_it.c\
+    stm32f4xx/usb_vcp/usb_bsp.c\
+    stm32f4xx/usb_vcp/usbd_cdc_vcp.c\
+    stm32f4xx/usb_vcp/usbd_desc.c\
+    stm32f4xx/usb_vcp/usbd_usr.c\
     stm32f4xx/chip.c\
     stm32f4xx/dac.c\
     stm32f4xx/debug.c\
@@ -163,6 +178,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stm32_uart.c\
     stm32f4xx/system_stm32f4xx.c\
     stm32f4xx/timestamp.c\
+    stm32f4xx/usb_serial.c\
     stm32f4xx/watchdog.c \
 	freertos/atomic.c\
 	freertos/thread.c\

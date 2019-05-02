@@ -144,16 +144,29 @@ DEVICE_DRIVER(stm32_cpu, "st,stm32_cpu", _stm32_cpu_probe, _stm32_cpu_remove)
 static int _stm32_cmd_cpuinfo(console_device_t con, void *userptr, int argc, char **argv){
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
-	
+
+	int pllm = (RCC->PLLCFGR) & 0x1f;
+	int plln = (RCC->PLLCFGR >> 6) & 0x1ff;
+	int pllp = (RCC->PLLCFGR >> 16) & 0x3;
+	int pllsrc = (RCC->PLLCFGR >> 22) & 0x1;
+	int pllq = (RCC->PLLCFGR >> 24) & 0xf;
+	int pllr = (RCC->PLLCFGR >> 28) & 0x7;
+	switch(pllp){
+		case 0: pllp = 2; break;
+		case 1: pllp = 4; break;
+		case 2: pllp = 6; break;
+		case 3: pllp = 8; break;
+	}
+	console_printf(con, "RCC: pllm: %d, plln: %d, pllp: %d, pllsrc = %d, pllq = %d, pllr = %d\n", pllm, plln, pllp, pllsrc, pllq, pllr);
 	console_printf(con, "CPU clock source: %s\n", (RCC->CR & RCC_CR_HSERDY)?"HSE":"HSI");
 	console_printf(con, "PLL clock source: %s\n", (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC)?"HSE":"HSI");
 	console_printf(con, "Processor clock speed: %d (%s)\n", time_get_clock_speed(), (time_cpu_clock_speed_exact())?"exact":"inexact");
-	console_printf(con, "SYSCLK: %d, HCLK: %d, PCLK1: %d, PCLK2: %d\n",
+	console_printf(con, "SYSCLK: %d, HCLK: %d, PCLK1: %d, PCLK2: %d, ",
 			clocks.SYSCLK_Frequency,
 			clocks.HCLK_Frequency,
 			clocks.PCLK1_Frequency,
-			clocks.PCLK2_Frequency
-	);
+			clocks.PCLK2_Frequency);
+	console_printf(con, "USB: %d\n", (int)((int)clocks.SYSCLK_Frequency * pllp / pllq));
 	console_printf(con, "SysTick reload value: %d\n", (SysTick->LOAD & 0xffffff) + 1);
 	return 0;
 }
@@ -199,3 +212,4 @@ static int _stm32_cpuinfo_remove(void *fdt, int fdt_node){
 }
 
 DEVICE_DRIVER(stm32_cpuinfo, "st,stm32_cpuinfo", _stm32_cpuinfo_probe, _stm32_cpuinfo_remove)
+

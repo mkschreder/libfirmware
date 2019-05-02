@@ -28,19 +28,34 @@ static int _init_subnodes(void *fdt, int root){
 	fdt_for_each_subnode(node, fdt, root){
         struct device_driver *driver;
 
+		char path[32];
+		fdt_get_path(fdt, node, path, sizeof(path));
+
+		printk(PRINT_SYSTEM ">> %s\n", path);
+
+		bool found_driver = false;
+
         list_for_each_entry(driver, &_driver_list, list){
             if(!driver->compatible || !driver->probe) continue;
-            if(fdt_node_check_compatible(fdt, node, driver->compatible) == 0){
-				char path[32];
-				fdt_get_path(fdt, node, path, sizeof(path));
-				printk(PRINT_SYSTEM ">> %s\n", path);
-                if(driver->probe(fdt, node) < 0){
-					printk(PRINT_ERROR "failed to probe %s\n", path);
+			int r = 0;
+			r = fdt_node_check_compatible(fdt, node, driver->compatible);
+			if(r == 1){
+			} else if(fdt_first_property_offset(fdt, root) >= 0 && r == -FDT_ERR_NOTFOUND){
+				// the node has properties but no compatible string (nodes without properties are allowed not to have it)
+				found_driver = true;
+				break;
+			} else if(r == 0){
+				found_driver = true;
+                if((r = driver->probe(fdt, node)) < 0){
+					printk(PRINT_ERROR "devicetree: failed to probe %s (error: %d)\n", path, r);
 				}
                 break;
             }
         }
 
+		if(!found_driver){
+			printk(PRINT_ERROR "devicetree: driver for %s was not included in the firmware\n", path);
+		}
 		// initialize children recursively
 		_init_subnodes(fdt, node);
 	}

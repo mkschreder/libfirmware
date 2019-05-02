@@ -295,20 +295,6 @@
   * @{
   */
 
-#if 0
-#if defined (STM32F40_41xxx)
-  //uint32_t SystemCoreClock = 168000000;
-  uint32_t SystemCoreClock = 100000000;
-#endif /* STM32F40_41xxx */
-
-#if defined (STM32F427_437xx) || defined (STM32F429_439xx)
-  uint32_t SystemCoreClock = 180000000;
-#endif /* STM32F427_437x || STM32F429_439xx */
-
-#if defined (STM32F401xx)
-  uint32_t SystemCoreClock = 84000000;
-#endif /* STM32F401xx */
-#endif
 //  __I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**

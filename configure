@@ -12083,6 +12083,20 @@ $as_echo "#define WITH_TARGET_STM32F429_439XX 1" >>confdefs.h
 )
 fi
 
+ if test x$with_target = xstm32f429zet6; then
+  WITH_TARGET_STM32F429_439XX_TRUE=
+  WITH_TARGET_STM32F429_439XX_FALSE='#'
+else
+  WITH_TARGET_STM32F429_439XX_TRUE='#'
+  WITH_TARGET_STM32F429_439XX_FALSE=
+fi
+
+if test -z "$WITH_TARGET_STM32F429_439XX_TRUE"; then :
+  (
+$as_echo "#define WITH_TARGET_STM32F429_439XX 1" >>confdefs.h
+)
+fi
+
  if test x$with_target = xstm32f427; then
   WITH_TARGET_STM32F427_TRUE=
   WITH_TARGET_STM32F427_FALSE='#'
@@ -12299,6 +12313,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_LINUX_TRUE}" && test -z "${WITH_TARGET_LINUX_FALSE}"; then
   as_fn_error $? "conditional \"WITH_TARGET_LINUX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WITH_TARGET_STM32F429_439XX_TRUE}" && test -z "${WITH_TARGET_STM32F429_439XX_FALSE}"; then
+  as_fn_error $? "conditional \"WITH_TARGET_STM32F429_439XX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_TARGET_STM32F429_439XX_TRUE}" && test -z "${WITH_TARGET_STM32F429_439XX_FALSE}"; then
