@@ -31,16 +31,16 @@ typedef unsigned long usec_t;
 
 // time_after(a,b) returns true if the time a is after time b.
 
-#define time_after(a,b)		\
-	(typecheck(unsigned long, a) && \
-	 typecheck(unsigned long, b) && \
-	 (((long)(b) - (long)(a)) < 0))
-#define time_before(a,b)	time_after(b,a)
+#define time_before(a,b)		\
+	(typecheck(uint32_t, a) && \
+	 typecheck(uint32_t, b) && \
+	 ((signed long)((a) - (b)) < 0))
+#define time_after(a,b)	time_before(b,a)
 
 #define time_after_eq(a,b)	\
 	(typecheck(unsigned long, a) && \
 	 typecheck(unsigned long, b) && \
-	 ((long)((unsigned long)(a) - (unsigned long)(b)) >= 0))
+	 (((long)(a) - (long)(b)) >= 0))
 #define time_before_eq(a,b)	time_after_eq(b,a)
 
 void delay_us(uint32_t us);

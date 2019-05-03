@@ -68,3 +68,20 @@ int printk(const char *fmt, ...){
 	return ret;
 }
 
+int serial_write_string(serial_port_t dev, const char *str, timeout_t to){
+	return serial_write(dev, str, strlen(str), to);
+}
+
+int serial_write_u32(serial_port_t dev, uint32_t value, timeout_t to){
+	char buf[12];
+	int len = snprintf(buf, sizeof(buf), "%lu", value);
+	if(len < 0) return -EINVAL;
+	return serial_write(dev, buf, (size_t)len, to);
+}
+
+int serial_write_i32(serial_port_t dev, int32_t value, timeout_t to){
+	char buf[12];
+	int len = snprintf(buf, sizeof(buf), "%ld", value);
+	if(len < 0) return -EINVAL;
+	return serial_write(dev, buf, (size_t)len, to);
+}

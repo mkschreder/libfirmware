@@ -332,7 +332,7 @@ static struct memory_device_ops _mem_ops = {
 static int _stm32_can_cmd(console_device_t con, void *userptr, int argc, char **argv){
 	struct stm32_can *self = (struct stm32_can*)userptr;
 
-	if(argc == 2 && strcmp(argv[1], "info") == 0){
+	if(argc == 2 && strcmp(argv[1], "status") == 0){
 		struct can_counters *cnt = &self->counters;
 		console_printf(con, "\tTX count: %d\n", cnt->tme); 
 		console_printf(con, "\tTX dropped: %d\n", cnt->txdrop);
