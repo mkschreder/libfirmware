@@ -29,8 +29,8 @@ struct analog_device_ops {
     int (*read)(analog_device_t dev, unsigned int channel, float *value);
 };
 
-#define analog_read(dev, channel, value) (*(dev))->read(dev, channel, value)
-#define analog_write(dev, channel, value) (*(dev))->write(dev, channel, value)
+#define analog_read(dev, channel, value) ((dev)?(*(dev))->read(dev, channel, value):-EINVAL)
+#define analog_write(dev, channel, value) ((dev)?(*(dev))->write(dev, channel, value):-EINVAL)
 
 DECLARE_DEVICE_CLASS(analog)
 

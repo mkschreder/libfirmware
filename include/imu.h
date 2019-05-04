@@ -21,6 +21,7 @@
 
 #include "timestamp.h"
 #include "list.h"
+#include "driver.h"
 
 typedef const struct imu_device_ops ** imu_device_t;
 
@@ -34,16 +35,7 @@ struct imu_device_ops {
     int (*read)(imu_device_t dev, struct imu_reading *data);
 };
 
-struct imu_device {
-	struct list_head list;
-	const struct imu_device_ops *ops;
-	int fdt_node;
-};
+#define imu_read(dev, rd) ((dev)?(*(dev))->read(dev, rd):-EINVAL)
 
-void imu_device_init(struct imu_device *self, int fdt_node, const struct imu_device_ops *ops);
-int imu_device_register(struct imu_device *self);
-imu_device_t imu_find(const char *dtb_path);
-imu_device_t imu_find_by_node(void *fdt, int node);
-
-#define imu_read(imu, data) (*(imu))->read(imu, data)
+DECLARE_DEVICE_CLASS(imu)
 
