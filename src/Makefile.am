@@ -169,6 +169,7 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stm32_can.c\
     stm32f4xx/stm32_cpu.c\
     stm32f4xx/stm32_encoder.c\
+    stm32f4xx/stm32_enc_out.c\
     stm32f4xx/stm32_gpio.c\
     stm32f4xx/stm32_i2c.c\
     stm32f4xx/stm32_leds.c\

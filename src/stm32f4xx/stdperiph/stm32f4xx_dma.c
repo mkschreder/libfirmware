@@ -490,6 +490,8 @@ void DMA_Cmd(DMA_Stream_TypeDef* DMAy_Streamx, FunctionalState NewState)
   {
     /* Disable the selected DMAy Streamx by clearing EN bit */
     DMAy_Streamx->CR &= ~(uint32_t)DMA_SxCR_EN;
+    // wait for the dma to actually become disabled
+    while(DMAy_Streamx->CR & (uint32_t)DMA_SxCR_EN);
   }
 }
 
