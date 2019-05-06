@@ -41,7 +41,10 @@ void termui_setattr(struct termui *self, termui_attr_t attr);
 void termui_resetattr(struct termui *self);
 void termui_draw_float(struct termui *self, unsigned width, float value);
 void termui_draw_int(struct termui *self, unsigned width, int value);
+void termui_draw_hex(struct termui *self, unsigned width, int value, int len);
 void termui_draw_text(struct termui *self, unsigned width, const char *text);
+void termui_draw_label(struct termui *self, unsigned width, const char *str);
+void termui_draw_frame(struct termui *self, unsigned x, unsigned y, unsigned w, unsigned h, const char *title);
 void termui_draw_ind_float(struct termui *self, unsigned x, unsigned y, unsigned width, const char *name, float value);
 void termui_draw_ind_int(struct termui *self, unsigned x, unsigned y, unsigned width, const char *name, int value);
 

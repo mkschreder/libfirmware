@@ -22,7 +22,7 @@ libfirmware_a_SOURCES = \
     serial.c\
     spi.c\
 	termui.c\
-    time.c\
+    timestamp.c\
     ulink.c\
 	usb.c\
     vardir.c\

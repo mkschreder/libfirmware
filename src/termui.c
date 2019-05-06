@@ -55,7 +55,37 @@ void termui_draw_float(struct termui *self, unsigned width, float value){
 }
 
 void termui_draw_int(struct termui *self, unsigned width, int value){
-	termui_draw_float(self, width, (float)value);
+	char str[12];
+	snprintf(str, sizeof(str), "%d", (int)(value));
+
+	termui_setattr(self, ATTR_BG_BLUE);
+	termui_setattr(self, ATTR_FG_WHITE);
+	size_t len = strlen(str);
+	size_t half = (width - len) / 2;
+	for(size_t c = 0; c < half; c++) console_printf(self->console, " ");
+	console_printf(self->console, "%s", str);
+	for(size_t c = 0; c < width - (half + len); c++) console_printf(self->console, " ");
+	termui_resetattr(self);
+}
+
+void termui_draw_text_centered(struct termui *self, unsigned width, const char *str){
+	size_t len = strlen(str);
+	size_t half = (width - len) / 2;
+	for(size_t c = 0; c < half; c++) console_printf(self->console, " ");
+	console_printf(self->console, "%s", str);
+	for(size_t c = 0; c < width - (half + len); c++) console_printf(self->console, " ");
+}
+
+void termui_draw_hex(struct termui *self, unsigned width, int value, int len){
+	char str[8];
+	snprintf(str, sizeof(str), "%0*x", len, value);
+
+	termui_setattr(self, ATTR_BG_BLUE);
+	termui_setattr(self, ATTR_FG_WHITE);
+
+	termui_draw_text_centered(self, width, str);
+
+	termui_resetattr(self);
 }
 
 void termui_draw_text(struct termui *self, unsigned width, const char *str){
@@ -64,6 +94,45 @@ void termui_draw_text(struct termui *self, unsigned width, const char *str){
 	for(size_t c = 0; c < half; c++) console_printf(self->console, " ");
 	console_printf(self->console, "%s", str);
 	for(size_t c = 0; c < width - (half + len); c++) console_printf(self->console, " ");
+}
+
+void termui_draw_label(struct termui *self, unsigned w, const char *text){
+	char fmt[8];
+	snprintf(fmt, sizeof(fmt), "%%-%ds", w);
+	console_printf(self->console, fmt, text);
+}
+
+void termui_draw_frame(struct termui *self, unsigned x, unsigned y, unsigned w, unsigned h, const char *title){
+	// draw the border
+	termui_setattr(self, ATTR_DIM);
+	termui_setattr(self, ATTR_FG_WHITE);
+
+	termui_move_cursor(self, x - 1, y - 1);
+	console_printf(self->console, "\033(0\x6c\033(B"); // corner
+	console_printf(self->console, "\033(0\x71\033(B %s ", title);
+	for(unsigned c = 0; c < w - 3 - strlen(title); c++){
+		console_printf(self->console, "\033(0\x71\033(B");
+	}
+	console_printf(self->console, "\033(0\x6b\033(B"); // corner
+	termui_move_cursor(self, x - 1, y + h);
+	console_printf(self->console, "\033(0\x6d\033(B");
+	for(unsigned c = 0; c < w; c++){
+		console_printf(self->console, "\033(0\x71\033(B");
+	}
+	console_printf(self->console, "\033(0\x6a\033(B");
+
+	// draw left and right border
+	termui_move_cursor(self, x - 1, y);
+	for(unsigned c = 0; c < h; c++){
+		console_printf(self->console, "\033(0\x78\033(B\033[D\033[B");
+	}
+	termui_move_cursor(self, x + w, y);
+	for(unsigned c = 0; c < h; c++){
+		console_printf(self->console, "\033(0\x78\033(B\033[D\033[B");
+	}
+
+	// reset to default text format
+	termui_setattr(self, ATTR_RESET);
 }
 
 void termui_draw_ind_float(struct termui *self, unsigned x, unsigned y, unsigned width, const char *name, float value){
