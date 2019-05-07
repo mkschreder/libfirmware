@@ -47,7 +47,7 @@ static int _init_subnodes(void *fdt, int root){
 			} else if(r == 0){
 				found_driver = true;
                 if((r = driver->probe(fdt, node)) < 0){
-					printk(PRINT_ERROR "devicetree: failed to probe %s (error: %d)\n", path, r);
+					printk(PRINT_ERROR "devicetree: failed to probe %s (error(%d): %s)\n", path, r, strerror(-r));
 				}
                 break;
             }

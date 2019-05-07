@@ -225,7 +225,7 @@ static struct i2c_device_ops _i2c_ops = {
 
 static int _stm32_i2c_cmd(console_device_t con, void *ptr, int argc, char **argv){
 	struct stm32_i2c *self = (struct stm32_i2c*)ptr;
-	if(argc == 2 && strcmp(argv[1], "info") == 0){
+	if(argc == 2 && strcmp(argv[1], "status") == 0){
 		console_printf(con, "%-16s%d\n", "TCN Complete:", self->cnt.tcn);
 		console_printf(con, "%-16s%d\n", "TCN Failed:", self->cnt.tcn_failed);
 		console_printf(con, "%-16s%d\n", "Timeouts:", self->cnt.tout);

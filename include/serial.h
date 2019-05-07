@@ -39,3 +39,7 @@ int serial_set_printk_port(serial_port_t port);
 
 DECLARE_DEVICE_CLASS(serial)
 
+
+int serial_write_string(serial_port_t dev, const char *str, timeout_t to);
+int serial_write_u32(serial_port_t dev, uint32_t value, timeout_t to);
+int serial_write_i32(serial_port_t dev, int32_t value, timeout_t to);

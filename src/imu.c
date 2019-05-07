@@ -25,35 +25,4 @@
 
 #include <errno.h>
 
-static LIST_HEAD(_imu_ports);
-
-void imu_device_init(struct imu_device *self, int fdt_node, const struct imu_device_ops *ops){
-	memset(self, 0, sizeof(*self));
-	INIT_LIST_HEAD(&self->list);
-	self->fdt_node = fdt_node;
-	self->ops = ops;
-}
-
-int imu_device_register(struct imu_device *self){
-	BUG_ON(!self);
-	BUG_ON(!self->ops);
-	BUG_ON(!self->ops->read);
-	list_add_tail(&self->list, &_imu_ports);
-	return 0;
-}
-
-imu_device_t imu_find_by_node(void *fdt, int node){
-	struct imu_device *dev;
-    if(node < 0) return NULL;
-    list_for_each_entry(dev, &_imu_ports, list){
-		if(dev->fdt_node == node) return &dev->ops;
-	}
-	return NULL;
-}
-
-imu_device_t imu_find(const char *dtb_path){
-	int node = fdt_path_offset(_devicetree, dtb_path);
-	if(node < 0) return NULL;
-    return imu_find_by_node(_devicetree, node);
-}
-
+DEFINE_DEVICE_CLASS(imu)

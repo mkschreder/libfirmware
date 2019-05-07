@@ -20,8 +20,11 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define THREAD_SLEEP_MAX_DELAY 0xffffffff
+
+typedef uint32_t timeout_t;
 
 #define typecheck(type,x) \
 (__extension__({  type __dummy; \

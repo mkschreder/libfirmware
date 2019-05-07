@@ -91,7 +91,13 @@ CLASS ## _device_t CLASS ## _find_by_ref(void *fdt, int fdt_node, const char *re
 }
 
 #define DEVICE_NAME(dev) fdt_get_name((dev)->fdt, (dev)->fdt_node, NULL)
-#define DEVICE_REF(name, type, ref) do { self->ref = type ## _find_by_ref(fdt, fdt_node, #ref); if(!self->ref) { printk(PRINT_ERROR name ": %s missing\n", #ref); return -EINVAL; } } while(0)
+#define DEVICE_REF(name, type, ref) do { \
+		self->ref = type ## _find_by_ref(fdt, fdt_node, #ref); \
+		if(!self->ref) { \
+			printk(PRINT_ERROR name ": %s missing\n", #ref);\
+			/*return -EINVAL;*/ \
+		}\
+	} while(0)
 
 int probe_device_drivers(void *fdt);
 int remove_device_drivers(void *fdt);
