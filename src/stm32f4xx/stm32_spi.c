@@ -84,10 +84,11 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 	while (DMA_GetCmdStatus(dma) != ENABLE);
 }
 
-static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, msec_t timeout){
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
 	if(!self->hw) return -1;
 
+	#if 0
 	if(self->hw == SPI1){
 		thread_mutex_lock(&self->lock);
 
@@ -108,6 +109,7 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 		if(self->cs_control) gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
 	} else {
+		#endif
 		// Currently DMA does not seem to work. Need to debug it.
 		//_dma_set_data(DMA1_Stream3, (uint32_t)rx_data, size);
 		//_dma_set_data(DMA1_Stream4, (uint32_t)tx_data, size);
@@ -127,7 +129,7 @@ static int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs
 		}
 		if(self->cs_control) gpio_set(gpio, cs_pin);
 		thread_mutex_unlock(&self->lock);
-	}
+	//}
 
 	return 0;
 }
@@ -166,6 +168,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 	SPI_CalculateCRC(SPIx, DISABLE);
 
 	if(SPIx == SPI1){
+		#if 0
 		DMA_InitTypeDef dma;
 		DMA_StructInit(&dma);
 
@@ -206,8 +209,9 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Rx, ENABLE);
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 
-		_devices[0] = self;
+		#endif
 		printk("spi1: ready\n");
+		_devices[0] = self;
 	} else if(SPIx == SPI2){
 		#if 0
 		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
@@ -253,7 +257,6 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 
 		#endif
-
 		_devices[1] = self;
 
 		printk("spi2: ready\n");
