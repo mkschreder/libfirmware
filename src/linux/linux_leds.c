@@ -8,7 +8,7 @@
 #define MAX_LEDS 8
 struct linux_leds {
     bool leds[MAX_LEDS];
-	const struct led_controller_ops *led_ops;
+	struct leds_device dev;
 };
 
 static void print_leds(struct linux_leds *self){
@@ -21,28 +21,28 @@ static void print_leds(struct linux_leds *self){
     fflush(stdout);
 }
 
-void _linux_leds_on(led_controller_t leds, uint8_t id){
-	struct linux_leds *self = container_of(leds, struct linux_leds, led_ops);
+void _linux_leds_on(leds_device_t leds, uint8_t id){
+	struct linux_leds *self = container_of(leds, struct linux_leds, dev.ops);
 	if(id >= MAX_LEDS) return;
     self->leds[id] = true;
     print_leds(self);
 }
 
-void _linux_leds_off(led_controller_t leds, uint8_t id){
-	struct linux_leds *self = container_of(leds, struct linux_leds, led_ops);
+void _linux_leds_off(leds_device_t leds, uint8_t id){
+	struct linux_leds *self = container_of(leds, struct linux_leds, dev.ops);
 	if(id >= MAX_LEDS) return;
     self->leds[id] = false;
     print_leds(self);
 }
 
-void _linux_leds_toggle(led_controller_t leds, uint8_t id){
-	struct linux_leds *self = container_of(leds, struct linux_leds, led_ops);
+void _linux_leds_toggle(leds_device_t leds, uint8_t id){
+	struct linux_leds *self = container_of(leds, struct linux_leds, dev.ops);
 	if(id >= MAX_LEDS) return;
     self->leds[id] = !self->leds[id];
     print_leds(self);
 }
 
-static const struct led_controller_ops _led_ops = {
+static const struct leds_device_ops _led_ops = {
 	.on = _linux_leds_on,
 	.off = _linux_leds_off,
 	.toggle = _linux_leds_toggle,
@@ -51,9 +51,9 @@ static const struct led_controller_ops _led_ops = {
 static int _linux_leds_probe(void *fdt, int fdt_node){
 	struct linux_leds *self = kzmalloc(sizeof(struct linux_leds));
 
-	self->led_ops = &_led_ops;
+	leds_device_init(&self->dev, fdt, fdt_node, &_led_ops);
+	leds_device_register(&self->dev);
 
-	leds_register(fdt, fdt_node, &self->led_ops);
 	return 0;
 }
 

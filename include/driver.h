@@ -41,6 +41,7 @@ struct CLASS ## _device {\
 void CLASS ## _device_init(struct CLASS ## _device *self,\
 		void *fdt, int fdt_node, const struct CLASS ## _device_ops *ops);\
 int CLASS ## _device_register(struct CLASS ## _device *self);\
+int CLASS ## _device_unregister(struct CLASS ## _device *self);\
 CLASS ## _device_t CLASS ## _find(void *fdt, const char *dtb_path);\
 CLASS ## _device_t CLASS ## _find_by_node(void *fdt, int node);\
 CLASS ## _device_t CLASS ## _find_by_ref(void *fdt, int fdt_node, const char *ref_name);\
@@ -59,6 +60,12 @@ int CLASS ## _device_register(struct CLASS ## _device *self){\
 	BUG_ON(!self);\
 	BUG_ON(!self->ops);\
 	list_add_tail(&self->list, &_ ## CLASS ## _drivers);\
+	return 0;\
+}\
+int CLASS ## _device_unregister(struct CLASS ## _device *self){\
+	BUG_ON(!self);\
+	BUG_ON(!self->ops);\
+	list_del(&self->list);\
 	return 0;\
 }\
 \

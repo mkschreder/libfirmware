@@ -44,7 +44,7 @@ int thread_sem_give(struct semaphore *self){
 	return 0;
 }
 
-int thread_sem_give_from_isr(struct semaphore *self){
+int thread_sem_give_from_isr(struct semaphore *self, int32_t *wake){
 	return thread_sem_give(self);
 }
 

@@ -37,6 +37,38 @@ int thread_join(thread_t handle){
     return 0;
 }
 
+void thread_suspend(){
+
+}
+
+void thread_sched_suspend(){
+
+}
+
+void thread_sched_resume(){
+
+}
+
+void thread_meminfo(){
+
+}
+
+unsigned long thread_get_total_heap(){
+	return 0;
+}
+
+unsigned long thread_get_free_heap(){
+	return 0;
+}
+
+uint32_t thread_ticks_count(){
+	return micros() / 1000;
+}
+
+uint32_t thread_ticks_from_us(usec_t us){
+	return us / 1000;
+}
+
 void thread_enter_critical(void){
 	// TODO: see how we should do this
 }
@@ -51,9 +83,18 @@ void thread_set_tag(thread_t thread, void *tag){
 	// TODO: make this set the tag using pthread func
 }
 
-int thread_sleep_ms(uint32_t ms){
+int thread_sleep_ms(msec_t ms){
 	usleep(ms * 1000);
     return 0;
+}
+
+int thread_sleep_us(usec_t us){
+	usleep(us);
+    return 0;
+}
+
+int thread_sleep_ms_until(msec_t *until, msec_t ms){
+	return thread_sleep_ms(ms);
 }
 
 void *kzmalloc(size_t size){

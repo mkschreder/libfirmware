@@ -69,7 +69,6 @@ static int _can_recv(can_device_t can, struct can_message *msg){
 	}
 	return 0;
 }
-#endif
 
 static int _can_subscribe(can_device_t can, struct can_listener *listener){
 	struct linux_udpcan *self = container_of(can, struct linux_udpcan, dev.ops);
@@ -135,16 +134,12 @@ int linux_udpcan_bind(struct linux_udpcan *self, const char *ip, uint16_t port){
 	}
 
 	self->socket = fd;
-	can_dispatcher_init(&self->dispatcher, _can_recv);
+	can_dispatcher_init(&self->dispatcher, &self->dev.ops, _can_recv);
 
 	printf("bound udp socket!\n");
 end:
 	free(res);
 	return -1;
-}
-
-can_device_t linux_udpcan_get_interface(struct linux_udpcan *self){
-	return &self->can_ops;
 }
 
 static int _linux_udpcan_probe(void *fdt, int fdt_node){
@@ -153,7 +148,8 @@ static int _linux_udpcan_probe(void *fdt, int fdt_node){
 	struct linux_udpcan *self = malloc(sizeof(struct linux_udpcan));
 	linux_udpcan_init(self);
 
-	can_register_device(fdt, fdt_node, &self->dev, &self->can_ops);
+	can_device_init(&self->dev, fdt, fdt_node, &_can_ops);
+	can_device_register(&self->dev);
 
 	return 0;
 }
