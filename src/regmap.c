@@ -232,10 +232,10 @@ static int _regmap_read(regmap_device_t dev, uint32_t id, regmap_value_type_t ge
 	list_for_each_entry(entry, &self->ranges, list){
 		if(id >= entry->start && id <= entry->end){
 			// try all ranges until one read succeeds. This allow overlapping regions
-			int ret = 0;
+			ssize_t ret = 0;
 			if((ret = entry->ops->read(&entry->ops, id, get_as, value, value_size)) >= 0){
 				thread_mutex_unlock(&self->lock);
-				return ret;
+				return (int)ret;
 			}
 		}
 	}
@@ -253,10 +253,10 @@ static int _regmap_write(regmap_device_t dev, uint32_t id, regmap_value_type_t s
 	list_for_each_entry(entry, &self->ranges, list){
 		if(id >= entry->start && id <= entry->end){
 			// try all ranges until one write succeeds. This allow overlapping regions
-			int ret = 0;
+			ssize_t ret = 0;
 			if((ret = entry->ops->write(&entry->ops, id, set_from, value, size)) >= 0){
 				thread_mutex_unlock(&self->lock);
-				return ret;
+				return (int)ret;
 			}
 		}
 	}

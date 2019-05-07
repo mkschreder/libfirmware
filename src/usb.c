@@ -258,7 +258,7 @@ static struct usb_string_descriptor *_alloc_string_desc(const char *str){
     s->bDescriptorType = USB_DESC_TYPE_STR;
     uint8_t *data = (uint8_t*)s + sizeof(struct usb_string_descriptor);
     for(size_t c = 0; c < str_len; c++){
-        data[c * 2] = str[c];
+        data[c * 2] = (uint8_t)str[c];
         data[c * 2 + 1] = 0;
     }
     return s;

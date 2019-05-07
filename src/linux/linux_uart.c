@@ -63,7 +63,7 @@ int _pipe_read(serial_port_t serial, void *frame, size_t max_size, uint32_t tout
 	return -ETIMEDOUT;
 }
 
-static const struct serial_ops _linux_serial = {
+static const struct serial_device_ops _linux_serial = {
 	.write = _pipe_write,
 	.read = _pipe_read
 };
@@ -128,11 +128,13 @@ static int _linux_uart_probe(void *fdt, int fdt_node){
 
 	struct linux_uart *self = kzmalloc(sizeof(struct linux_uart));
 	linux_uart_init_fd(self, fdm);
-	serial_device_init(&self->dev, fdt_node, &_linux_serial);
+
+	serial_device_init(&self->dev, fdt, fdt_node, &_linux_serial);
+	serial_device_register(&self->dev);
 
 	printf("linux_uart: start pseudo terminal at %s\n", (const char*)ptsname(fdm));
 
-	return serial_device_register(&self->dev);
+	return 0;
 }
 
 static int _linux_uart_remove(void *fdt, int fdt_node){

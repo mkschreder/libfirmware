@@ -15,32 +15,33 @@
 #include "driver.h"
 #include "can.h"
 #include "queue.h"
+#include "timestamp.h"
+
+#define LINUX_CAN_TIMEOUT 100
 
 struct linux_udpcan {
 	int socket;
 	struct sockaddr_in addr;
 	struct thread_queue rx_queue, tx_queue;
 	struct can_device dev;
-	const struct can_ops *can_ops;
+	struct can_dispatcher dispatcher;
 };
 
-static int _can_send(can_port_t can, const struct can_message *msg, uint32_t timeout_ms){
+static int _can_send(can_device_t can, const struct can_message *msg, uint32_t timeout_ms){
 	(void)timeout_ms;
-	struct linux_udpcan *self = container_of(can, struct linux_udpcan, can_ops);
+	struct linux_udpcan *self = container_of(can, struct linux_udpcan, dev.ops);
 	// TODO: implement timeout (for the most part these alway succeed anyway)
 	return (int)sendto(self->socket, msg, sizeof(*msg), 0, (struct sockaddr*)&self->addr, sizeof(struct sockaddr));
 }
 
-#if 0
-static int _can_recv(can_port_t can, struct can_message *msg, uint32_t timeout_ms){
-	(void)timeout_ms;
-
-	struct linux_udpcan *self = container_of(can, struct linux_udpcan, can_ops);
+static int _can_recv(can_device_t can, struct can_message *msg){
+	struct linux_udpcan *self = container_of(can, struct linux_udpcan, dev.ops);
 
 	// use OS function for setting the timeout (we could have used poll() too)
 	struct timeval tv;
 	// timeout of 0 should not mean infinite
-	if(timeout_ms == THREAD_QUEUE_MAX_DELAY) timeout_ms = 0;
+	msec_t timeout_ms = LINUX_CAN_TIMEOUT;
+	if(timeout_ms == THREAD_WAIT_FOREVER) timeout_ms = 0;
 	else if(timeout_ms == 0) timeout_ms = 1;
 	unsigned long tus = timeout_ms * 1000;
 	tv.tv_sec = (suseconds_t)(tus / 1000000UL);
@@ -70,19 +71,19 @@ static int _can_recv(can_port_t can, struct can_message *msg, uint32_t timeout_m
 }
 #endif
 
-static int _can_handler(can_port_t can, can_listen_cmd_t cmd, struct can_listener *listener){
-	struct linux_udpcan *self = container_of(can, struct linux_udpcan, can_ops);
-	return can_device_handler(&self->dev, cmd, listener);
+static int _can_subscribe(can_device_t can, struct can_listener *listener){
+	struct linux_udpcan *self = container_of(can, struct linux_udpcan, dev.ops);
+	can_dispatcher_add_listener(&self->dispatcher, listener);
+	return 0;
 }
 
-static const struct can_ops _can_ops = {
+static const struct can_device_ops _can_ops = {
 	.send = _can_send,
-	.handler = _can_handler
+	.subscribe = _can_subscribe
 };
 
 void linux_udpcan_init(struct linux_udpcan *self){
 	memset(self, 0, sizeof(*self));
-	self->can_ops = &_can_ops;
 }
 
 int linux_udpcan_bind(struct linux_udpcan *self, const char *ip, uint16_t port){
@@ -134,6 +135,7 @@ int linux_udpcan_bind(struct linux_udpcan *self, const char *ip, uint16_t port){
 	}
 
 	self->socket = fd;
+	can_dispatcher_init(&self->dispatcher, _can_recv);
 
 	printf("bound udp socket!\n");
 end:
@@ -141,7 +143,7 @@ end:
 	return -1;
 }
 
-can_port_t linux_udpcan_get_interface(struct linux_udpcan *self){
+can_device_t linux_udpcan_get_interface(struct linux_udpcan *self){
 	return &self->can_ops;
 }
 

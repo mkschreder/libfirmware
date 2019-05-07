@@ -44,5 +44,5 @@
 #define COVERAGE_DUMMY() do { uint8_t __attribute__((unused)) uncovered = 0; } while(0)
 
 void __attribute__((weak)) panic(const char *msg);
-
+#define __packed __attribute__((packed))
 //#define __pure __attribute__((pure))
