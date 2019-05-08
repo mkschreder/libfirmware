@@ -74,14 +74,14 @@ int serial_write_string(serial_port_t dev, const char *str, timeout_t to){
 
 int serial_write_u32(serial_port_t dev, uint32_t value, timeout_t to){
 	char buf[12];
-	int len = snprintf(buf, sizeof(buf), "%u", value);
+	int len = snprintf(buf, sizeof(buf), "%u", (unsigned)value);
 	if(len < 0) return -EINVAL;
 	return serial_write(dev, buf, (size_t)len, to);
 }
 
 int serial_write_i32(serial_port_t dev, int32_t value, timeout_t to){
 	char buf[12];
-	int len = snprintf(buf, sizeof(buf), "%d", value);
+	int len = snprintf(buf, sizeof(buf), "%d", (signed)value);
 	if(len < 0) return -EINVAL;
 	return serial_write(dev, buf, (size_t)len, to);
 }

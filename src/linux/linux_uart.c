@@ -18,10 +18,17 @@ struct linux_uart {
 	struct serial_device dev;
 	int fd_read, fd_write;
 	int fd_host_read, fd_host_write;
+	int def_port;
 };
 
 int _pipe_write(serial_port_t serial, const void *_frame, size_t size, uint32_t tout){
 	struct linux_uart *self = container_of(serial, struct linux_uart, dev.ops);
+
+	if(self->def_port){
+		if(write(1, _frame, size) < 0){
+			perror("write");
+		}
+	}
 
     // check for hangup event and do not write to the terminal if the other end has hung up
     struct pollfd pfd = { .fd = self->fd_write, .events = POLLHUP };
@@ -106,7 +113,9 @@ int linux_uart_init(struct linux_uart *self){
 }
 
 static int _linux_uart_probe(void *fdt, int fdt_node){
-	int fdm = posix_openpt(O_RDWR); 
+	int def_port = fdt_get_int_or_default(fdt, (int)fdt_node, "printk_port", 0);
+
+	int fdm = posix_openpt(O_RDWR);
 	if(fdm < 0){
 		perror("linux_uart open");
 		return -1;
@@ -129,8 +138,15 @@ static int _linux_uart_probe(void *fdt, int fdt_node){
 	struct linux_uart *self = kzmalloc(sizeof(struct linux_uart));
 	linux_uart_init_fd(self, fdm);
 
+	self->def_port = def_port;
+
 	serial_device_init(&self->dev, fdt, fdt_node, &_linux_serial);
 	serial_device_register(&self->dev);
+
+    if(def_port) {
+	    printf("linux_uart (%s): using as printk port\n", fdt_get_name(fdt, fdt_node, NULL));
+	    serial_set_printk_port(&self->dev.ops);
+	}
 
 	printf("linux_uart: start pseudo terminal at %s\n", (const char*)ptsname(fdm));
 

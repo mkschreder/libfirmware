@@ -47,5 +47,8 @@ typedef uint32_t timeout_t;
 #define COVERAGE_DUMMY() do { uint8_t __attribute__((unused)) uncovered = 0; } while(0)
 
 void __attribute__((weak)) panic(const char *msg);
+
+#ifndef __packed
 #define __packed __attribute__((packed))
+#endif
 //#define __pure __attribute__((pure))

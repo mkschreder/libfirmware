@@ -75,6 +75,9 @@ void thread_enter_critical(void){
 
 void thread_start_scheduler(void){
 	// TODO: need to join with all threads
+	while(1){
+		thread_sleep_ms(1000);
+	}
 }
 
 void thread_set_tag(thread_t thread, void *tag){
