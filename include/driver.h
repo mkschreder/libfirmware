@@ -1,6 +1,3 @@
-#pragma once
-
-#include "thread.h"
 /*
  * Copyright (C) 2017 Martin K. Schröder <mkschreder.uk@gmail.com>
  *
@@ -18,7 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+#pragma once
 
+#include "thread.h"
 #include <errno.h>
 #include "list.h"
 #include <libfdt/libfdt.h>

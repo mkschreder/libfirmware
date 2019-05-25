@@ -2,32 +2,33 @@ lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = \
 	adc.c\
 	analog.c\
+	avl.c\
 	avl-cmp.c\
-    avl.c\
 	baro.c\
-    can.c\
-    console.c\
+	can.c\
+	console.c\
 	display.c\
-    dx_tracker.c\
-    pointer.c\
-    driver.c\
-    encoder.c\
+	driver.c\
+	dx_tracker.c\
+	encoder.c\
 	events.c\
 	gpio.c\
 	i2c.c\
 	imu.c\
-    leds.c\
-    math.c\
+	leds.c\
+	math.c\
 	memory.c\
-    serial.c\
-    spi.c\
+	pointer.c\
+	regmap.c\
+	serial.c\
+	spi.c\
 	termui.c\
-    timestamp.c\
-    ulink.c\
+	timestamp.c\
+	ulink.c\
 	usb.c\
-    vardir.c\
-	regmap.c
-libfirmware_a_CFLAGS = -I$(top_srcdir)/include -std=gnu99
+	vardir.c
+
+libfirmware_a_CFLAGS = -I$(top_srcdir)/libfdt/include/ -I$(top_srcdir)/include -I$(top_srcdir)/include/libfirmware/ -std=gnu11
 
 if WITH_TARGET_LINUX
 libfirmware_a_SOURCES+=linux/chip.c\

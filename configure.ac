@@ -16,7 +16,7 @@ AC_ARG_WITH([target],
     [AC_HELP_STRING([--with-target],
         [specify which board we are compiling for])],
     [],
-    [AC_MSG_ERROR("\nYou must specify target for libfirmware!\n    Use --with-target=<target> to set target!\n")])
+    [AC_MSG_WARN("You should specify target for libfirmware! Use --with-target=<target> to set target!")])
 
 AM_CONDITIONAL([WITH_TARGET_LINUX], [test x$with_target = xlinux])
 AM_COND_IF([WITH_TARGET_LINUX], (AC_DEFINE([WITH_TARGET_LINUX], [1], [Build for linux system])))
@@ -37,5 +37,7 @@ AM_CONDITIONAL([WITH_TARGET_STM32F10X], [test x$with_target = xstm32f10x])
 AM_COND_IF([WITH_TARGET_STM32F10X], (AC_DEFINE([WITH_TARGET_STM32F10X], [1], [Build for stm32f10x processor])))
 
 AC_CONFIG_FILES([Makefile include/Makefile src/Makefile libfirmware.pc])
+
+AC_CONFIG_SUBDIRS([libfdt])
 
 AC_OUTPUT
