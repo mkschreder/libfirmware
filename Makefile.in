@@ -324,19 +324,13 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = libfdt include src
+SUBDIRS = include src
 AUTOMAKE_OPTIONS = subdir-objects
-AM_CFLAGS = \
-	-I$(srcdir)/libfdt/include\
-	-I$(srcdir)/libfirmware/include/
-
-AM_LDFLAGS = -shared -O3
 all: all-recursive
 
 .SUFFIXES:

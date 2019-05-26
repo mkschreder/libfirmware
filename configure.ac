@@ -38,6 +38,4 @@ AM_COND_IF([WITH_TARGET_STM32F10X], (AC_DEFINE([WITH_TARGET_STM32F10X], [1], [Bu
 
 AC_CONFIG_FILES([Makefile include/Makefile src/Makefile libfirmware.pc])
 
-AC_CONFIG_SUBDIRS([libfdt])
-
 AC_OUTPUT

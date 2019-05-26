@@ -18,6 +18,7 @@ nobase_pkginclude_HEADERS = \
 	canopen.h\
 	chip.h\
 	console.h\
+	device.h\
 	display.h\
 	driver.h\
 	dx_tracker.h\
@@ -35,6 +36,7 @@ nobase_pkginclude_HEADERS = \
 	memory.h\
 	motor.h\
 	mutex.h\
+	pm.h\
 	pointer.h\
 	pwm.h\
 	queue.h\

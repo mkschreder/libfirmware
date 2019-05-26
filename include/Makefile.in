@@ -284,7 +284,6 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -310,6 +309,7 @@ nobase_pkginclude_HEADERS = \
 	canopen.h\
 	chip.h\
 	console.h\
+	device.h\
 	display.h\
 	driver.h\
 	dx_tracker.h\
@@ -327,6 +327,7 @@ nobase_pkginclude_HEADERS = \
 	memory.h\
 	motor.h\
 	mutex.h\
+	pm.h\
 	pointer.h\
 	pwm.h\
 	queue.h\
