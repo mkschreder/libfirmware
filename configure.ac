@@ -4,13 +4,29 @@ AC_CONFIG_AUX_DIR(aux-dist)
 AM_INIT_AUTOMAKE
 
 AC_PROG_MAKE_SET
+AC_PROG_CC
+AC_PROG_CXX
 AC_LANG(C)
 
 AC_CONFIG_MACRO_DIR([m4])
-PKG_PROG_PKG_CONFIG([0.25])
+AC_CONFIG_MACRO_DIR([ultim84])
+
+AX_CHECK_STDC
+AX_SUPERWARN
+
+AC_COMPILE_CHECK(typeof, [int x; typeof(x) y;], [AC_DEFINE([HAVE_TYPEOF], [1])])
+
+AM_CONDITIONAL([XC16_GCC], [test "x$host" = "xxc16"])
+AM_COND_IF([XC16_GCC],
+	[AC_PREFIX_DEFAULT($(dirname $(dirname `which xc16-gcc`)))],
+	[
+		AC_ARG_ENABLE(coverage, Enable coverage reporting, [AX_COVERAGE], [])
+		AC_CONFIG_FILES([tests/Makefile])
+	])
 
 LT_PREREQ([2.2])
 LT_INIT([dlopen shared])
+PKG_PROG_PKG_CONFIG([0.25])
 
 AC_ARG_WITH([target],
     [AC_HELP_STRING([--with-target],
@@ -39,3 +55,5 @@ AM_COND_IF([WITH_TARGET_STM32F10X], (AC_DEFINE([WITH_TARGET_STM32F10X], [1], [Bu
 AC_CONFIG_FILES([Makefile include/Makefile src/Makefile libfirmware.pc])
 
 AC_OUTPUT
+
+AX_PRINT_INFO

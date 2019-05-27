@@ -1,3 +1,5 @@
+DEFS=
+
 lib_LIBRARIES = libfirmware.a
 libfirmware_a_SOURCES = \
 	adc.c\
@@ -28,7 +30,7 @@ libfirmware_a_SOURCES = \
 	usb.c\
 	vardir.c
 
-libfirmware_a_CFLAGS = -I$(top_srcdir)/libfdt/include/ -I$(top_srcdir)/include -I$(top_srcdir)/include/libfirmware/ -std=gnu11
+libfirmware_a_CFLAGS = -I$(top_srcdir)/include
 
 if WITH_TARGET_LINUX
 libfirmware_a_SOURCES+=linux/chip.c\

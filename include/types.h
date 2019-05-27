@@ -61,7 +61,7 @@ typedef uint32_t timeout_t;
 
 #define typecheck(type,x) \
 (__extension__({  type __dummy; \
-    typeof(x) __dummy2; \
+    __typeof__(x) __dummy2; \
     (void)(&__dummy == &__dummy2); \
     1; \
 }))
@@ -71,16 +71,16 @@ typedef uint32_t timeout_t;
                       ((type *) ((char *)(ptr) - offsetof(type, member)))
 #if 0
 #define container_of(ptr, type, member) (__extension__({ \
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);\
+	const __typeof__( ((type *)0)->member ) *__mptr = (ptr);\
 		(type *)( (char *)__mptr - offsetof(type,member) );}))
 #endif
 
 #define call_member(x, n, ...) ((x)->n((x), ##__VA_ARGS__))
 
-#define _STRING(expr) #expr
-#define STRING(expr) _STRING(expr)
+#define _PASTE_STRING(expr) #expr
+#define PASTE_STRING(expr) _PASTE_STRING(expr)
 
-#define BUG_ON(expr) do { if(expr) { panic("BUG_ON " STRING(expr) " in " __FILE__ " line " STRING(__LINE__)); } } while(0)
+#define BUG_ON(expr) do { if(expr) { panic("BUG_ON " PASTE_STRING(expr) " in " __FILE__ " line " PASTE_STRING(__LINE__)); } } while(0)
 #define COVERAGE_DUMMY() do { uint8_t __attribute__((unused)) uncovered = 0; } while(0)
 
 void __attribute__((weak)) panic(const char *msg);

@@ -173,9 +173,12 @@ host_triplet = @host@
 @WITH_TARGET_STM32F40_41XXX_TRUE@am__append_10 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/ultim84/ax_append_flag.m4 \
+	$(top_srcdir)/ultim84/ax_check_compile_flags.m4 \
+	$(top_srcdir)/ultim84/ax_check_stdc.m4 \
+	$(top_srcdir)/ultim84/ax_coverage.m4 \
+	$(top_srcdir)/ultim84/ax_print_info.m4 \
+	$(top_srcdir)/ultim84/ax_superwarn.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -584,10 +587,20 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COVERAGE_CFLAGS = @COVERAGE_CFLAGS@
+COVERAGE_CXXFLAGS = @COVERAGE_CXXFLAGS@
+COVERAGE_LDFLAGS = @COVERAGE_LDFLAGS@
+COVERAGE_LIBS = @COVERAGE_LIBS@
+COVERAGE_OPTFLAGS = @COVERAGE_OPTFLAGS@
+COVERAGE_SUPPORT = @COVERAGE_SUPPORT@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DEFS = @DEFS@
+DEFS = 
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -598,12 +611,17 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GCOV = @GCOV@
+GENHTML = @GENHTML@
+GENHTML_OPTIONS = @GENHTML_OPTIONS@
 GREP = @GREP@
+HAVE_CPPFILT = @HAVE_CPPFILT@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LCOV = @LCOV@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -645,6 +663,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -699,10 +718,9 @@ libfirmware_a_SOURCES = adc.c analog.c avl.c avl-cmp.c baro.c can.c \
 	serial.c spi.c termui.c timestamp.c ulink.c usb.c vardir.c \
 	$(am__append_1) $(am__append_3) $(am__append_5) \
 	$(am__append_7) $(am__append_9)
-libfirmware_a_CFLAGS = -I$(top_srcdir)/libfdt/include/ \
-	-I$(top_srcdir)/include -I$(top_srcdir)/include/libfirmware/ \
-	-std=gnu11 $(am__append_2) $(am__append_4) $(am__append_6) \
-	$(am__append_8) $(am__append_10)
+libfirmware_a_CFLAGS = -I$(top_srcdir)/include $(am__append_2) \
+	$(am__append_4) $(am__append_6) $(am__append_8) \
+	$(am__append_10)
 STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
     stm32f4xx/stdperiph/stm32f4xx_adc.c\
     stm32f4xx/stdperiph/stm32f4xx_can.c\

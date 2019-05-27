@@ -63,14 +63,14 @@
 //#include <cstdint>
 //#include <cmath>
 #define min(x,y) (__extension__({ \
-    typeof(x) _x = (x); \
-    typeof(x) _y = (y); \
+    __typeof__(x) _x = (x); \
+    __typeof__(x) _y = (y); \
     (void) (&_x == &_y);        \
-    (typeof(x))(_x < _y ? _x : _y); }))
+    (__typeof__(x))(_x < _y ? _x : _y); }))
 
 #define max(x,y) ({ \
-    typeof(x) _x = (x); \
-    typeof(y) _y = (y); \
+    __typeof__(x) _x = (x); \
+    __typeof__(y) _y = (y); \
     (void) (&_x == &_y);        \
     _x > _y ? _x : _y; })
 #endif
@@ -102,11 +102,11 @@ static inline int16_t constrain_i16(int16_t x, int16_t a, int16_t b){
 }
 
 static inline uint8_t constrain_u8(uint8_t x, uint8_t a, uint8_t b){
-	return _CONSTRAIN(x, a, b);
+	return (uint8_t)_CONSTRAIN(x, a, b);
 }
 
 static inline int8_t constrain_i8(int8_t x, int8_t a, int8_t b){
-	return _CONSTRAIN(x, a, b);
+	return (int8_t)_CONSTRAIN(x, a, b);
 }
 
 static inline float constrain_float(float x, float a, float b){

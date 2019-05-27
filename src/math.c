@@ -102,7 +102,7 @@ float fastsinf(float x){
 }
 
 float fastcosf(float x){
-	return (_sine_table[(uint16_t)((x * (SINE_TABLE_LENGTH >> 1) / M_PI) + (90 * 512 / 360)) & (SINE_TABLE_LENGTH - 1)] / 127.0f);
+	return (_sine_table[(uint16_t)((x * (SINE_TABLE_LENGTH >> 1) / M_PI) + (90 * SINE_TABLE_LENGTH / 360)) & (SINE_TABLE_LENGTH - 1)] / 127.0f);
 }
 
 void clamp_rad360(float *a){

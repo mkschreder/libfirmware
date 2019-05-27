@@ -121,7 +121,7 @@ static const struct events_device_ops _events_ops = {
 static int _events_probe(void *fdt, int fdt_node){
 	uint8_t prio = (uint8_t)fdt_get_int_or_default(fdt, fdt_node, "priority", 1);
 	uint32_t stack_size = (uint32_t)fdt_get_int_or_default(fdt, fdt_node, "stack_size", 450);
-	uint32_t queue_size = (uint32_t)fdt_get_int_or_default(fdt, fdt_node, "queue_size", 8);
+	size_t queue_size = (size_t)fdt_get_int_or_default(fdt, fdt_node, "queue_size", 8);
 	uint32_t timeout = (uint32_t)fdt_get_int_or_default(fdt, fdt_node, "timeout", 100);
 
 	struct events *self = kzmalloc(sizeof(struct events));
