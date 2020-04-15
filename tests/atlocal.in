@@ -1,0 +1,4 @@
+TESTS=@abs_top_srcdir@/tests
+CXX=@CXX@
+CXXFLAGS="@CXXFLAGS@"
+LIBS="@LIBS@"

@@ -1,0 +1,32 @@
+AT_INIT([libfirmware])
+
+AT_COLOR_TESTS
+
+dnl test failure with message
+dnl $1 -- message to output
+m4_define([FAIL],[AT_CHECK([echo "$1" >> testsuite.log ; exit 99])])
+
+dnl Check if a file exists
+dnl $1 -- file name to test
+m4_define([FILE_EXISTS],[
+ AS_IF([test -f "$1"],[],[FAIL("$1 does not exist")])
+])
+
+dnl Check whether the contents of two files are identical
+dnl $1 -- first file
+dnl $2 -- second file
+m4_define([SAME_FILES],[
+ FILE_EXISTS(["$1"])
+ FILE_EXISTS(["$2"])
+ AT_CHECK([diff "$1" "$2"],[],[],[])
+])
+
+dnl Check that $1 does not have added lines (removing lines is allowed)
+dnl $1 -- first file
+dnl $2 -- second file
+m4_define([DISALLOW_ADD_LINES],[
+ FILE_EXISTS(["$1"])
+ FILE_EXISTS(["$2"])
+ dnl AT_CHECK([diff -u "$1" "$2" | grep -E "^\+\+"],[],[],[])
+ AT_CHECK([$TESTS/only-additions "$1" "$2"],[],[],[])
+])
