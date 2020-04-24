@@ -107,9 +107,25 @@ usec_t micros(void){
     return (usec_t)(((uint64_t)ticks * SysTick->LOAD + cycle_cnt) / usTicks);
 }
 
+void delay_us(uint32_t us) {
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
+	volatile uint32_t cycles = (clocks.SYSCLK_Frequency/1000000L)*us;
+
+	//uint32_t prim = __get_PRIMASK();
+	//__disable_irq();
+
+	volatile uint32_t start = DWT->CYCCNT;
+	do  {
+	} while(DWT->CYCCNT - start < cycles);
+
+	//if(!prim) __enable_irq();
+}
+
 // TODO: fix the 49 days overflow in some smart way that doesn't require locks
 timestamp_t timestamp(void){
-    uint32_t sched_ticks = 0;
+	uint32_t sched_ticks = 0;
 	uint32_t cycle_cnt = 0;
 
 	RCC_ClocksTypeDef clocks;

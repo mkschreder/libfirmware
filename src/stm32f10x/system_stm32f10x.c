@@ -203,6 +203,7 @@ void SetSysClock(bool overclock) {
 	RCC_CFGR_PLLMUL = GPIOC->IDR &GPIO_IDR_IDR15 ? hse_value = 12000000,
 	RCC_CFGR_PLLMULL6 : RCC_CFGR_PLLMULL9;
 #endif
+<<<<<<< HEAD
 	switch(clocksrc) {
 		case SRC_HSE:
 			if(overclock) {
@@ -235,4 +236,39 @@ void SetSysClock(bool overclock) {
 		;
 
 	SystemCoreClockUpdate();
+=======
+    switch (clocksrc) {
+        case SRC_HSE:
+            if (overclock) {
+                if (RCC_CFGR_PLLMUL == RCC_CFGR_PLLMULL6)
+                    RCC_CFGR_PLLMUL = RCC_CFGR_PLLMULL7;
+                else if (RCC_CFGR_PLLMUL == RCC_CFGR_PLLMULL9)
+                    RCC_CFGR_PLLMUL = RCC_CFGR_PLLMULL10;
+            }
+            // overclock=false : PLL configuration: PLLCLK = HSE * 9 = 72 MHz || HSE * 6 = 72 MHz
+            // overclock=true  : PLL configuration: PLLCLK = HSE * 10 = 80 MHz || HSE * 7 = 84 MHz
+            RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLSRC_HSE | RCC_CFGR_PLLMUL);
+            break;
+        case SRC_HSI:
+            // PLL configuration: PLLCLK = HSI / 2 * 16 = 64 MHz
+            RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLSRC_HSI_Div2 | RCC_CFGR_PLLMULL16);
+            break;
+    }
+
+    // Enable PLL
+    RCC->CR |= RCC_CR_PLLON;
+    // Wait till PLL is ready
+    while ((RCC->CR & RCC_CR_PLLRDY) == 0);
+    // Select PLL as system clock source
+    RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+    RCC->CFGR |= (uint32_t)RCC_CFGR_SW_PLL;
+    // Wait till PLL is used as system clock source
+    while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)0x08);
+
+    SystemCoreClockUpdate();
+
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CYCCNT = 0; // reset the counter
+	DWT->CTRL |= 1 ; // enable the counter
+>>>>>>> push latest changes
 }

@@ -53,11 +53,13 @@
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_adc.h>
+#include <stm32f10x_gpio.h>
+#include <stm32f10x_rcc.h>
 #include <string.h>
 
 #include "adc.h"
-#include "thread.h"
 #include "sem.h"
+#include "thread.h"
 
 #if 0
 int _stm32_adc_read(adc_device_t dev, uint32_t *value){
@@ -71,7 +73,7 @@ int _stm32_adc_probe(void *fdt, int fdt_node){
     int len = 0;
 	const fdt32_t *val = (const fdt32_t*)fdt_getprop(fdt, node, "channels", &len);
 	if(len == 0 || !val || (len % 1) != 0) {
-        dbg_printk("adc: nochan!\n");
+		dbg_printk("adc: nochan!\n");
         return -1;
     }
 

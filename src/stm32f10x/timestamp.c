@@ -176,7 +176,34 @@ void time_gettime(struct timeval *ts) {
 	RTC_ITConfig(RTC_IT_SEC, ENABLE);
 }
 
-uint32_t time_get_hse_precision(void) {
+void delay_us(uint32_t us) {
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
+
+	volatile uint32_t cycles = (clocks.SYSCLK_Frequency/1000000L)*us;
+
+	//uint32_t prim = __get_PRIMASK();
+	//__disable_irq();
+
+	volatile uint32_t start = DWT->CYCCNT;
+	do  {
+	} while(DWT->CYCCNT - start < cycles);
+
+	//if(!prim) __enable_irq();
+}
+
+timestamp_t timestamp(void){
+	uint64_t us = micros();
+
+	timestamp_t r = (timestamp_t) {
+		.sec = (sec_t)(us / 1000000),
+		.usec = (usec_t)(us % 1000000)
+	};
+
+	return r;
+}
+
+uint32_t time_get_hse_precision(void){
 	return _rtc_calib;
 }
 
