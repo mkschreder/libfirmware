@@ -60,7 +60,7 @@
 #include "motor.h"
 #include "math.h"
 #include "pwm.h"
-#include "types.h"
+#include "types/types.h"
 
 #define PL_DIR_STOPPED 0
 #define PL_DIR_FORWARD 1

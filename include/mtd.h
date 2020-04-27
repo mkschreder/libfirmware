@@ -1,8 +1,6 @@
 #pragma once
 
 #include "driver.h"
-#include "list.h"
-#include "timestamp.h"
 
 typedef const struct mtd_device_ops **mtd_device_t;
 

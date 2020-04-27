@@ -59,8 +59,8 @@
 #include <libfdt/libfdt.h>
 
 #include "usb.h"
-#include "list.h"
-#include "thread.h"
+#include "types/list.h"
+#include "thread/thread.h"
 #include "driver.h"
 #include "chip.h"
 

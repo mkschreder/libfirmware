@@ -60,12 +60,10 @@
 
 #include <libfdt/libfdt.h>
 
-#include "console.h"
-#include "list.h"
-#include "thread.h"
-#include "mutex.h"
 #include "driver.h"
-#include "errno.h"
+#include "console.h"
+#include "thread/thread.h"
+#include "thread/mutex.h"
 
 DEFINE_DEVICE_CLASS(console)
 

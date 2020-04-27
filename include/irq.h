@@ -52,7 +52,7 @@
 **/
 #pragma once
 
-#include "list.h"
+#include "types/list.h"
 
 typedef enum {
 	IRQ_TRIGGER_RISING = 0,

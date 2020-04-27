@@ -53,7 +53,7 @@
 #pragma once
 
 #include "spinlock.h"
-#include "list.h"
+#include "types/list.h"
 
 struct work {
 	spinlock_t lock;

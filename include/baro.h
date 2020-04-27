@@ -52,8 +52,7 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
+#include "types/list.h"
 
 typedef const struct baro_device_ops ** baro_device_t;
 

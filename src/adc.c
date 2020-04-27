@@ -52,10 +52,8 @@
 **/
 #include <libfdt/libfdt.h>
 
-#include "adc.h"
-#include "list.h"
-#include "thread.h"
 #include "driver.h"
+#include "adc.h"
 
 #include <errno.h>
 

@@ -52,8 +52,6 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
 #include "driver.h"
 
 typedef const struct analog_device_ops ** analog_device_t;

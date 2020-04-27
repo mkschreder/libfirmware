@@ -67,7 +67,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include "timestamp.h"
+#include "types/timestamp.h"
 
 /*-----------------------------------------------------------
  * Application specific definitions.

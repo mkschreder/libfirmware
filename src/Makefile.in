@@ -165,14 +165,41 @@ host_triplet = @host@
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/MemMang/heap_1.c\
 @WITH_TARGET_STM32F10X_TRUE@	freertos/kernel/portable/GCC/ARM_CM3/port.c
 
-@WITH_TARGET_STM32F10X_TRUE@am__append_4 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F10X_TRUE@am__append_4 = -I$(srcdir)/freertos/kernel/include \
+@WITH_TARGET_STM32F10X_TRUE@	-I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ \
+@WITH_TARGET_STM32F10X_TRUE@	-I$(top_srcdir)/include/stm32f10x \
+@WITH_TARGET_STM32F10X_TRUE@	-I$(top_srcdir)/include/CMSIS \
+@WITH_TARGET_STM32F10X_TRUE@	-DSTM32F10X -DUSE_STDPERIPH_DRIVER \
+@WITH_TARGET_STM32F10X_TRUE@	-I$(top_srcdir)/include/libfirmware/stm32f10x \
+@WITH_TARGET_STM32F10X_TRUE@	-I$(top_srcdir)/include/libfirmware/CMSIS
 @WITH_TARGET_STM32F427_TRUE@am__append_5 = $(STM32F4XX_FILES)
-@WITH_TARGET_STM32F427_TRUE@am__append_6 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F427_TRUE@am__append_6 = -I$(srcdir)/freertos/kernel/include \
+@WITH_TARGET_STM32F427_TRUE@	-I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ \
+@WITH_TARGET_STM32F427_TRUE@	-I$(top_srcdir)/include/stm32f4xx \
+@WITH_TARGET_STM32F427_TRUE@	-I$(top_srcdir)/include/CMSIS \
+@WITH_TARGET_STM32F427_TRUE@	-DSTM32F427_437xx \
+@WITH_TARGET_STM32F427_TRUE@	-DUSE_STDPERIPH_DRIVER \
+@WITH_TARGET_STM32F427_TRUE@	-I$(top_srcdir)/include/libfirmware/stm32f4xx \
+@WITH_TARGET_STM32F427_TRUE@	-I$(top_srcdir)/include/libfirmware/CMSIS
 @WITH_TARGET_STM32F429_439XX_TRUE@am__append_7 = $(STM32F4XX_FILES)
-@WITH_TARGET_STM32F429_439XX_TRUE@am__append_8 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
+@WITH_TARGET_STM32F429_439XX_TRUE@am__append_8 = -I$(srcdir)/freertos/kernel/include \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-I$(top_srcdir)/include/stm32f4xx \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-I$(top_srcdir)/include/CMSIS \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-DSTM32F429_439xx \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-DUSE_STDPERIPH_DRIVER \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-I$(top_srcdir)/include/libfirmware/stm32f4xx \
+@WITH_TARGET_STM32F429_439XX_TRUE@	-I$(top_srcdir)/include/libfirmware/CMSIS
 @WITH_TARGET_STM32F40_41XXX_TRUE@am__append_9 = $(STM32F4XX_FILES)
-@WITH_TARGET_STM32F40_41XXX_TRUE@am__append_10 = -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
-subdir = src
+@WITH_TARGET_STM32F40_41XXX_TRUE@am__append_10 = -I$(srcdir)/freertos/kernel/include \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-I$(top_srcdir)/include/stm32f4xx \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-I$(top_srcdir)/include/CMSIS \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-DSTM32F40_41xxx \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-DUSE_STDPERIPH_DRIVER \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-I$(top_srcdir)/include/libfirmware/stm32f4xx \
+@WITH_TARGET_STM32F40_41XXX_TRUE@	-I$(top_srcdir)/include/libfirmware/CMSIS
+subdir = src/libfirmware
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -319,7 +346,15 @@ am__libfirmware_a_SOURCES_DIST = adc.c analog.c avl-cmp.c avl.c baro.c \
 	stm32f4xx/system_stm32f4xx.c stm32f4xx/timestamp.c \
 	stm32f4xx/usb_serial.c stm32f4xx/watchdog.c \
 	freertos/kernel/portable/MemMang/heap_2.c \
-	freertos/kernel/portable/GCC/ARM_CM4F/port.c
+	freertos/kernel/portable/GCC/ARM_CM4F/port.c \
+	stm32f4xx/usb_core/usbd_cdc_core.c \
+	stm32f4xx/usb_core/usbd_core.c stm32f4xx/usb_core/usbd_ioreq.c \
+	stm32f4xx/usb_core/usbd_req.c stm32f4xx/usb_vcp/stm32f4xx_it.c \
+	stm32f4xx/usb_vcp/usb_bsp.c stm32f4xx/usb_vcp/usbd_cdc_vcp.c \
+	stm32f4xx/usb_vcp/usbd_desc.c stm32f4xx/usb_vcp/usbd_usr.c \
+	stm32f4xx/usb_otg/usb_core.c stm32f4xx/usb_otg/usb_dcd.c \
+	stm32f4xx/usb_otg/usb_dcd_int.c stm32f4xx/usb_otg/usb_hcd.c \
+	stm32f4xx/usb_otg/usb_hcd_int.c stm32f4xx/usb_otg/usb_otg.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_TARGET_LINUX_TRUE@am__objects_1 =  \
 @WITH_TARGET_LINUX_TRUE@	linux/libfirmware_a-chip.$(OBJEXT) \
@@ -464,7 +499,22 @@ am__objects_3 = stm32f4xx/stdperiph/libfirmware_a-misc.$(OBJEXT) \
 	freertos/kernel/libfirmware_a-tasks.$(OBJEXT) \
 	freertos/kernel/libfirmware_a-timers.$(OBJEXT) \
 	freertos/kernel/portable/MemMang/libfirmware_a-heap_2.$(OBJEXT) \
-	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT)
+	freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT) \
+	stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.$(OBJEXT) \
+	stm32f4xx/usb_core/libfirmware_a-usbd_core.$(OBJEXT) \
+	stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.$(OBJEXT) \
+	stm32f4xx/usb_core/libfirmware_a-usbd_req.$(OBJEXT) \
+	stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.$(OBJEXT) \
+	stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.$(OBJEXT) \
+	stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.$(OBJEXT) \
+	stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.$(OBJEXT) \
+	stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_core.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_dcd.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_hcd.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.$(OBJEXT) \
+	stm32f4xx/usb_otg/libfirmware_a-usb_otg.$(OBJEXT)
 @WITH_TARGET_STM32F427_TRUE@am__objects_4 = $(am__objects_3)
 @WITH_TARGET_STM32F429_439XX_TRUE@am__objects_5 = $(am__objects_3)
 @WITH_TARGET_STM32F40_41XXX_TRUE@am__objects_6 = $(am__objects_3)
@@ -560,18 +610,16 @@ AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
-AUTOM4TE = @AUTOM4TE@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
+CCAS = @CCAS@
+CCASDEPMODE = @CCASDEPMODE@
+CCASFLAGS = @CCASFLAGS@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
-CXX = @CXX@
-CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
-CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -591,6 +639,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
+LDADD = @LDADD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -616,22 +665,23 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
+ROCKET_TARGET_CMD_FLASH = @ROCKET_TARGET_CMD_FLASH@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WITH_DEVICETREE = @WITH_DEVICETREE@
+WITH_DRIVERS = @WITH_DRIVERS@
+WITH_LIBS = @WITH_LIBS@
+WITH_TARGET = @WITH_TARGET@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
-ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -689,23 +739,7 @@ libfirmware_a_SOURCES = adc.c analog.c avl-cmp.c avl.c baro.c can.c \
 libfirmware_a_CFLAGS = -I$(abs_top_builddir)/include \
 	-I$(top_srcdir)/include -std=gnu99 $(am__append_2) \
 	$(am__append_4) $(am__append_6) $(am__append_8) \
-	$(am__append_10)
-
-#stm32f4xx/usb_core/usbd_cdc_core.c\
-#	stm32f4xx/usb_core/usbd_core.c\
-#	stm32f4xx/usb_core/usbd_ioreq.c\
-#	stm32f4xx/usb_core/usbd_req.c\
-#	stm32f4xx/usb_otg/usb_core.c\
-#	stm32f4xx/usb_otg/usb_dcd.c\
-#	stm32f4xx/usb_otg/usb_dcd_int.c\
-#	stm32f4xx/usb_otg/usb_hcd.c\
-#	stm32f4xx/usb_otg/usb_hcd_int.c\
-#	stm32f4xx/usb_otg/usb_otg.c\
-#	stm32f4xx/usb_vcp/stm32f4xx_it.c\
-#	stm32f4xx/usb_vcp/usb_bsp.c\
-#	stm32f4xx/usb_vcp/usbd_cdc_vcp.c\
-#	stm32f4xx/usb_vcp/usbd_desc.c\
-#	stm32f4xx/usb_vcp/usbd_usr.c
+	$(am__append_10) -I$(top_srcdir)/include/libfirmware
 STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
 	stm32f4xx/stdperiph/stm32f4xx_adc.c\
 	stm32f4xx/stdperiph/stm32f4xx_can.c\
@@ -775,7 +809,22 @@ STM32F4XX_FILES = stm32f4xx/stdperiph/misc.c\
 	freertos/kernel/tasks.c\
 	freertos/kernel/timers.c\
 	freertos/kernel/portable/MemMang/heap_2.c\
-	freertos/kernel/portable/GCC/ARM_CM4F/port.c
+	freertos/kernel/portable/GCC/ARM_CM4F/port.c\
+	stm32f4xx/usb_core/usbd_cdc_core.c\
+	stm32f4xx/usb_core/usbd_core.c\
+	stm32f4xx/usb_core/usbd_ioreq.c\
+	stm32f4xx/usb_core/usbd_req.c\
+	stm32f4xx/usb_vcp/stm32f4xx_it.c\
+	stm32f4xx/usb_vcp/usb_bsp.c\
+	stm32f4xx/usb_vcp/usbd_cdc_vcp.c\
+	stm32f4xx/usb_vcp/usbd_desc.c\
+	stm32f4xx/usb_vcp/usbd_usr.c\
+	stm32f4xx/usb_otg/usb_core.c\
+	stm32f4xx/usb_otg/usb_dcd.c\
+	stm32f4xx/usb_otg/usb_dcd_int.c\
+	stm32f4xx/usb_otg/usb_hcd.c\
+	stm32f4xx/usb_otg/usb_hcd_int.c\
+	stm32f4xx/usb_otg/usb_otg.c
 
 AUTOMAKE_OPTIONS = subdir-objects
 all: all-am
@@ -791,9 +840,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/libfirmware/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu src/Makefile
+	  $(AUTOMAKE) --gnu src/libfirmware/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -1249,6 +1298,69 @@ freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR)/$(am__dirstamp):
 freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.$(OBJEXT):  \
 	freertos/kernel/portable/GCC/ARM_CM4F/$(am__dirstamp) \
 	freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_core/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_core
+	@: > stm32f4xx/usb_core/$(am__dirstamp)
+stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_core/$(DEPDIR)
+	@: > stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.$(OBJEXT):  \
+	stm32f4xx/usb_core/$(am__dirstamp) \
+	stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_core/libfirmware_a-usbd_core.$(OBJEXT):  \
+	stm32f4xx/usb_core/$(am__dirstamp) \
+	stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.$(OBJEXT):  \
+	stm32f4xx/usb_core/$(am__dirstamp) \
+	stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_core/libfirmware_a-usbd_req.$(OBJEXT):  \
+	stm32f4xx/usb_core/$(am__dirstamp) \
+	stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_vcp
+	@: > stm32f4xx/usb_vcp/$(am__dirstamp)
+stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_vcp/$(DEPDIR)
+	@: > stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.$(OBJEXT):  \
+	stm32f4xx/usb_vcp/$(am__dirstamp) \
+	stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.$(OBJEXT):  \
+	stm32f4xx/usb_vcp/$(am__dirstamp) \
+	stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.$(OBJEXT):  \
+	stm32f4xx/usb_vcp/$(am__dirstamp) \
+	stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.$(OBJEXT):  \
+	stm32f4xx/usb_vcp/$(am__dirstamp) \
+	stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.$(OBJEXT):  \
+	stm32f4xx/usb_vcp/$(am__dirstamp) \
+	stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_otg
+	@: > stm32f4xx/usb_otg/$(am__dirstamp)
+stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) stm32f4xx/usb_otg/$(DEPDIR)
+	@: > stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_core.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+stm32f4xx/usb_otg/libfirmware_a-usb_otg.$(OBJEXT):  \
+	stm32f4xx/usb_otg/$(am__dirstamp) \
+	stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
 
 libfirmware.a: $(libfirmware_a_OBJECTS) $(libfirmware_a_DEPENDENCIES) $(EXTRA_libfirmware_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libfirmware.a
@@ -1268,6 +1380,9 @@ mostlyclean-compile:
 	-rm -f stm32f10x/usb-fs-core/*.$(OBJEXT)
 	-rm -f stm32f4xx/*.$(OBJEXT)
 	-rm -f stm32f4xx/stdperiph/*.$(OBJEXT)
+	-rm -f stm32f4xx/usb_core/*.$(OBJEXT)
+	-rm -f stm32f4xx/usb_otg/*.$(OBJEXT)
+	-rm -f stm32f4xx/usb_vcp/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1431,6 +1546,21 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/stdperiph/$(DEPDIR)/libfirmware_a-stm32f4xx_tim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/stdperiph/$(DEPDIR)/libfirmware_a-stm32f4xx_usart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/stdperiph/$(DEPDIR)/libfirmware_a-stm32f4xx_wwdg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -3682,6 +3812,216 @@ freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.obj: freertos/kernel/po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o freertos/kernel/portable/GCC/ARM_CM4F/libfirmware_a-port.obj `if test -f 'freertos/kernel/portable/GCC/ARM_CM4F/port.c'; then $(CYGPATH_W) 'freertos/kernel/portable/GCC/ARM_CM4F/port.c'; else $(CYGPATH_W) '$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/port.c'; fi`
 
+stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.o: stm32f4xx/usb_core/usbd_cdc_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.o -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.o `test -f 'stm32f4xx/usb_core/usbd_cdc_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_cdc_core.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_cdc_core.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.o `test -f 'stm32f4xx/usb_core/usbd_cdc_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_cdc_core.c
+
+stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.obj: stm32f4xx/usb_core/usbd_cdc_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.obj -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.obj `if test -f 'stm32f4xx/usb_core/usbd_cdc_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_cdc_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_cdc_core.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_cdc_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_cdc_core.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_cdc_core.obj `if test -f 'stm32f4xx/usb_core/usbd_cdc_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_cdc_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_cdc_core.c'; fi`
+
+stm32f4xx/usb_core/libfirmware_a-usbd_core.o: stm32f4xx/usb_core/usbd_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_core.o -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_core.o `test -f 'stm32f4xx/usb_core/usbd_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_core.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_core.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_core.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_core.o `test -f 'stm32f4xx/usb_core/usbd_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_core.c
+
+stm32f4xx/usb_core/libfirmware_a-usbd_core.obj: stm32f4xx/usb_core/usbd_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_core.obj -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_core.obj `if test -f 'stm32f4xx/usb_core/usbd_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_core.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_core.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_core.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_core.obj `if test -f 'stm32f4xx/usb_core/usbd_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_core.c'; fi`
+
+stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.o: stm32f4xx/usb_core/usbd_ioreq.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.o -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.o `test -f 'stm32f4xx/usb_core/usbd_ioreq.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_ioreq.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_ioreq.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.o `test -f 'stm32f4xx/usb_core/usbd_ioreq.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_ioreq.c
+
+stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.obj: stm32f4xx/usb_core/usbd_ioreq.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.obj -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.obj `if test -f 'stm32f4xx/usb_core/usbd_ioreq.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_ioreq.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_ioreq.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_ioreq.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_ioreq.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_ioreq.obj `if test -f 'stm32f4xx/usb_core/usbd_ioreq.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_ioreq.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_ioreq.c'; fi`
+
+stm32f4xx/usb_core/libfirmware_a-usbd_req.o: stm32f4xx/usb_core/usbd_req.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_req.o -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_req.o `test -f 'stm32f4xx/usb_core/usbd_req.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_req.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_req.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_req.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_req.o `test -f 'stm32f4xx/usb_core/usbd_req.c' || echo '$(srcdir)/'`stm32f4xx/usb_core/usbd_req.c
+
+stm32f4xx/usb_core/libfirmware_a-usbd_req.obj: stm32f4xx/usb_core/usbd_req.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_core/libfirmware_a-usbd_req.obj -MD -MP -MF stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Tpo -c -o stm32f4xx/usb_core/libfirmware_a-usbd_req.obj `if test -f 'stm32f4xx/usb_core/usbd_req.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_req.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_req.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Tpo stm32f4xx/usb_core/$(DEPDIR)/libfirmware_a-usbd_req.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_core/usbd_req.c' object='stm32f4xx/usb_core/libfirmware_a-usbd_req.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_core/libfirmware_a-usbd_req.obj `if test -f 'stm32f4xx/usb_core/usbd_req.c'; then $(CYGPATH_W) 'stm32f4xx/usb_core/usbd_req.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_core/usbd_req.c'; fi`
+
+stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.o: stm32f4xx/usb_vcp/stm32f4xx_it.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.o -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.o `test -f 'stm32f4xx/usb_vcp/stm32f4xx_it.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/stm32f4xx_it.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/stm32f4xx_it.c' object='stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.o `test -f 'stm32f4xx/usb_vcp/stm32f4xx_it.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/stm32f4xx_it.c
+
+stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.obj: stm32f4xx/usb_vcp/stm32f4xx_it.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.obj -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.obj `if test -f 'stm32f4xx/usb_vcp/stm32f4xx_it.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/stm32f4xx_it.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/stm32f4xx_it.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-stm32f4xx_it.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/stm32f4xx_it.c' object='stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-stm32f4xx_it.obj `if test -f 'stm32f4xx/usb_vcp/stm32f4xx_it.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/stm32f4xx_it.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/stm32f4xx_it.c'; fi`
+
+stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.o: stm32f4xx/usb_vcp/usb_bsp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.o -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.o `test -f 'stm32f4xx/usb_vcp/usb_bsp.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usb_bsp.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usb_bsp.c' object='stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.o `test -f 'stm32f4xx/usb_vcp/usb_bsp.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usb_bsp.c
+
+stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.obj: stm32f4xx/usb_vcp/usb_bsp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.obj -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.obj `if test -f 'stm32f4xx/usb_vcp/usb_bsp.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usb_bsp.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usb_bsp.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usb_bsp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usb_bsp.c' object='stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usb_bsp.obj `if test -f 'stm32f4xx/usb_vcp/usb_bsp.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usb_bsp.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usb_bsp.c'; fi`
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.o: stm32f4xx/usb_vcp/usbd_cdc_vcp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.o -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.o `test -f 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_cdc_vcp.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_cdc_vcp.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.o `test -f 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_cdc_vcp.c
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.obj: stm32f4xx/usb_vcp/usbd_cdc_vcp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.obj -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.obj `if test -f 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_cdc_vcp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_cdc_vcp.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_cdc_vcp.obj `if test -f 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_cdc_vcp.c'; fi`
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.o: stm32f4xx/usb_vcp/usbd_desc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.o -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.o `test -f 'stm32f4xx/usb_vcp/usbd_desc.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_desc.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_desc.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.o `test -f 'stm32f4xx/usb_vcp/usbd_desc.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_desc.c
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.obj: stm32f4xx/usb_vcp/usbd_desc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.obj -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.obj `if test -f 'stm32f4xx/usb_vcp/usbd_desc.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_desc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_desc.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_desc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_desc.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_desc.obj `if test -f 'stm32f4xx/usb_vcp/usbd_desc.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_desc.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_desc.c'; fi`
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.o: stm32f4xx/usb_vcp/usbd_usr.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.o -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.o `test -f 'stm32f4xx/usb_vcp/usbd_usr.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_usr.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_usr.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.o `test -f 'stm32f4xx/usb_vcp/usbd_usr.c' || echo '$(srcdir)/'`stm32f4xx/usb_vcp/usbd_usr.c
+
+stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.obj: stm32f4xx/usb_vcp/usbd_usr.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.obj -MD -MP -MF stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Tpo -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.obj `if test -f 'stm32f4xx/usb_vcp/usbd_usr.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_usr.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_usr.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Tpo stm32f4xx/usb_vcp/$(DEPDIR)/libfirmware_a-usbd_usr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_vcp/usbd_usr.c' object='stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_vcp/libfirmware_a-usbd_usr.obj `if test -f 'stm32f4xx/usb_vcp/usbd_usr.c'; then $(CYGPATH_W) 'stm32f4xx/usb_vcp/usbd_usr.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_vcp/usbd_usr.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_core.o: stm32f4xx/usb_otg/usb_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_core.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_core.o `test -f 'stm32f4xx/usb_otg/usb_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_core.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_core.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_core.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_core.o `test -f 'stm32f4xx/usb_otg/usb_core.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_core.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_core.obj: stm32f4xx/usb_otg/usb_core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_core.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_core.obj `if test -f 'stm32f4xx/usb_otg/usb_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_core.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_core.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_core.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_core.obj `if test -f 'stm32f4xx/usb_otg/usb_core.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_core.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_core.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd.o: stm32f4xx/usb_otg/usb_dcd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_dcd.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd.o `test -f 'stm32f4xx/usb_otg/usb_dcd.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_dcd.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_dcd.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_dcd.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd.o `test -f 'stm32f4xx/usb_otg/usb_dcd.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_dcd.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd.obj: stm32f4xx/usb_otg/usb_dcd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_dcd.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd.obj `if test -f 'stm32f4xx/usb_otg/usb_dcd.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_dcd.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_dcd.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_dcd.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_dcd.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd.obj `if test -f 'stm32f4xx/usb_otg/usb_dcd.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_dcd.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_dcd.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.o: stm32f4xx/usb_otg/usb_dcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.o `test -f 'stm32f4xx/usb_otg/usb_dcd_int.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_dcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_dcd_int.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.o `test -f 'stm32f4xx/usb_otg/usb_dcd_int.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_dcd_int.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.obj: stm32f4xx/usb_otg/usb_dcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.obj `if test -f 'stm32f4xx/usb_otg/usb_dcd_int.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_dcd_int.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_dcd_int.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_dcd_int.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_dcd_int.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_dcd_int.obj `if test -f 'stm32f4xx/usb_otg/usb_dcd_int.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_dcd_int.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_dcd_int.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd.o: stm32f4xx/usb_otg/usb_hcd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_hcd.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd.o `test -f 'stm32f4xx/usb_otg/usb_hcd.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_hcd.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_hcd.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_hcd.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd.o `test -f 'stm32f4xx/usb_otg/usb_hcd.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_hcd.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd.obj: stm32f4xx/usb_otg/usb_hcd.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_hcd.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd.obj `if test -f 'stm32f4xx/usb_otg/usb_hcd.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_hcd.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_hcd.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_hcd.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_hcd.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd.obj `if test -f 'stm32f4xx/usb_otg/usb_hcd.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_hcd.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_hcd.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.o: stm32f4xx/usb_otg/usb_hcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.o `test -f 'stm32f4xx/usb_otg/usb_hcd_int.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_hcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_hcd_int.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.o `test -f 'stm32f4xx/usb_otg/usb_hcd_int.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_hcd_int.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.obj: stm32f4xx/usb_otg/usb_hcd_int.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.obj `if test -f 'stm32f4xx/usb_otg/usb_hcd_int.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_hcd_int.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_hcd_int.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_hcd_int.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_hcd_int.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_hcd_int.obj `if test -f 'stm32f4xx/usb_otg/usb_hcd_int.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_hcd_int.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_hcd_int.c'; fi`
+
+stm32f4xx/usb_otg/libfirmware_a-usb_otg.o: stm32f4xx/usb_otg/usb_otg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_otg.o -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_otg.o `test -f 'stm32f4xx/usb_otg/usb_otg.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_otg.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_otg.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_otg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_otg.o `test -f 'stm32f4xx/usb_otg/usb_otg.c' || echo '$(srcdir)/'`stm32f4xx/usb_otg/usb_otg.c
+
+stm32f4xx/usb_otg/libfirmware_a-usb_otg.obj: stm32f4xx/usb_otg/usb_otg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -MT stm32f4xx/usb_otg/libfirmware_a-usb_otg.obj -MD -MP -MF stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Tpo -c -o stm32f4xx/usb_otg/libfirmware_a-usb_otg.obj `if test -f 'stm32f4xx/usb_otg/usb_otg.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_otg.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_otg.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Tpo stm32f4xx/usb_otg/$(DEPDIR)/libfirmware_a-usb_otg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stm32f4xx/usb_otg/usb_otg.c' object='stm32f4xx/usb_otg/libfirmware_a-usb_otg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfirmware_a_CFLAGS) $(CFLAGS) -c -o stm32f4xx/usb_otg/libfirmware_a-usb_otg.obj `if test -f 'stm32f4xx/usb_otg/usb_otg.c'; then $(CYGPATH_W) 'stm32f4xx/usb_otg/usb_otg.c'; else $(CYGPATH_W) '$(srcdir)/stm32f4xx/usb_otg/usb_otg.c'; fi`
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -3825,6 +4165,12 @@ distclean-generic:
 	-rm -f stm32f4xx/$(am__dirstamp)
 	-rm -f stm32f4xx/stdperiph/$(DEPDIR)/$(am__dirstamp)
 	-rm -f stm32f4xx/stdperiph/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_core/$(DEPDIR)/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_core/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_otg/$(DEPDIR)/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_otg/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_vcp/$(DEPDIR)/$(am__dirstamp)
+	-rm -f stm32f4xx/usb_vcp/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -3835,7 +4181,7 @@ clean-am: clean-generic clean-libLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) freertos/$(DEPDIR) freertos/kernel/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR) freertos/kernel/portable/MemMang/$(DEPDIR) linux/$(DEPDIR) stm32f10x/$(DEPDIR) stm32f10x/stdperiph/$(DEPDIR) stm32f10x/usb-fs-core/$(DEPDIR) stm32f4xx/$(DEPDIR) stm32f4xx/stdperiph/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) freertos/$(DEPDIR) freertos/kernel/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR) freertos/kernel/portable/MemMang/$(DEPDIR) linux/$(DEPDIR) stm32f10x/$(DEPDIR) stm32f10x/stdperiph/$(DEPDIR) stm32f10x/usb-fs-core/$(DEPDIR) stm32f4xx/$(DEPDIR) stm32f4xx/stdperiph/$(DEPDIR) stm32f4xx/usb_core/$(DEPDIR) stm32f4xx/usb_otg/$(DEPDIR) stm32f4xx/usb_vcp/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -3881,7 +4227,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) freertos/$(DEPDIR) freertos/kernel/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR) freertos/kernel/portable/MemMang/$(DEPDIR) linux/$(DEPDIR) stm32f10x/$(DEPDIR) stm32f10x/stdperiph/$(DEPDIR) stm32f10x/usb-fs-core/$(DEPDIR) stm32f4xx/$(DEPDIR) stm32f4xx/stdperiph/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) freertos/$(DEPDIR) freertos/kernel/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM3/$(DEPDIR) freertos/kernel/portable/GCC/ARM_CM4F/$(DEPDIR) freertos/kernel/portable/MemMang/$(DEPDIR) linux/$(DEPDIR) stm32f10x/$(DEPDIR) stm32f10x/stdperiph/$(DEPDIR) stm32f10x/usb-fs-core/$(DEPDIR) stm32f4xx/$(DEPDIR) stm32f4xx/stdperiph/$(DEPDIR) stm32f4xx/usb_core/$(DEPDIR) stm32f4xx/usb_otg/$(DEPDIR) stm32f4xx/usb_vcp/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

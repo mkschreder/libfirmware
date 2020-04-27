@@ -52,8 +52,6 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
 #include "driver.h"
 
 typedef const struct imu_device_ops ** imu_device_t;

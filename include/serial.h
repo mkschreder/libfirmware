@@ -54,7 +54,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "list.h"
 #include "driver.h"
 
 #define serial_port_t serial_device_t

@@ -56,9 +56,9 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "thread.h"
 #include "regmap.h"
 #include "driver.h"
+#include "thread/mutex.h"
 
 #include <libfdt/libfdt.h>
 

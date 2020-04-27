@@ -1,34 +1,22 @@
-/** :ms-top-comment
- *               __        ___          _     _____ ____
- *               \ \      / (_)___  ___| |   | ____|  _ \
- *                \ \ /\ / /| / __|/ _ \ |   |  _| | | | |
- *                 \ V  V / | \__ \  __/ |___| |___| |_| |
- *                  \_/\_/  |_|___/\___|_____|_____|____/
+/*
+ * Copyright (C) 2017 Martin K. Schröder <mkschreder.uk@gmail.com>
  *
- * FILE ............... src/cbuf.c
- * AUTHOR ............. Martin K. Schröder
- * VERSION ............ Not tagged
- * DATE ............... 2019-06-30
- * WEBSITE ............ http://wiseled.com
- * LICENSE ............ WiseLED
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * This file is part of WiseLED Project.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * WiseLED Project can not be copied and/or distributed without the express
- * permission of WiseLED.
- *
- * +----------------------------------------------------------------------+
- * |         Swedish Embedded - We design hardware and program it         |
- * +----------------------------------------------------------------------+
- * |  This file was refactored and improved for WiseLED, on contract, by  |
- * | Swedish Embedded. If you have software that needs to be developed or |
- * |        hardware that needs to be designed, then get in touch!        |
- * |                                                                      |
- * |                       Phone: (+46)733-38-76-94                       |
- * |                   Email: info@swedishembedded.com                    |
- * +----------------------------------------------------------------------+
- **/
-#include "cbuf.h"
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+#include "types/cbuf.h"
 #include <string.h>
 
 void cbuf_init(struct cbuf *self, void *data, size_t item_size, size_t nitems) {

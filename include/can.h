@@ -52,9 +52,7 @@
 **/
 #pragma once
 
-#include "list.h"
-#include "work.h"
-#include "mutex.h"
+#include "thread/mutex.h"
 #include "driver.h"
 
 #include <stdint.h>

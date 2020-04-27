@@ -53,8 +53,6 @@
 #include <libfdt/libfdt.h>
 
 #include "analog.h"
-#include "list.h"
-#include "thread.h"
 #include "driver.h"
 
 #include <errno.h>

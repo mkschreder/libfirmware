@@ -56,10 +56,12 @@
 #include <string.h>
 
 #include "driver.h"
-#include "mutex.h"
-#include "sem.h"
+#include "thread/thread.h"
+#include "thread/mutex.h"
+#include "thread/sem.h"
+#include "types/timestamp.h"
+
 #include "spi.h"
-#include "thread.h"
 #include "time.h"
 
 #include <libfdt/libfdt.h>

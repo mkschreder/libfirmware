@@ -51,7 +51,7 @@
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #include "driver.h"
-#include "thread.h"
+#include "thread/thread.h"
 #include <libfdt/libfdt.h>
 #include <stm32f4xx/stm32f4xx_rcc.h>
 #include "FreeRTOS.h"

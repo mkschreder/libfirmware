@@ -52,8 +52,8 @@
 **/
 #include "events.h"
 #include "driver.h"
-#include "mutex.h"
-#include "queue.h"
+#include "thread/mutex.h"
+#include "thread/queue.h"
 
 DEFINE_DEVICE_CLASS(events)
 

@@ -52,8 +52,7 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
+#include "types/list.h"
 
 typedef const struct display_device_ops ** display_device_t;
 typedef uint32_t color_t;

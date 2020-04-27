@@ -52,15 +52,14 @@
 **/
 #pragma once
 
-// TODO: get rid of direct freertos dependency
 #include "thread.h"
 #include "queue.h"
 
 #pragma once
 
 #include "serial.h"
-#include "list.h"
 #include "driver.h"
+#include "types/list.h"
 
 typedef const struct console_device_ops ** console_device_t;
 

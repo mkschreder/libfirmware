@@ -54,8 +54,6 @@
 
 #include <stdbool.h>
 #include "irq.h"
-#include "timestamp.h"
-#include "list.h"
 #include "driver.h"
 
 typedef const struct events_device_ops ** events_device_t;

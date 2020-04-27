@@ -53,8 +53,6 @@
 #pragma once
 
 #include <sys/types.h>
-#include "list.h"
-#include "mutex.h"
 #include "driver.h"
 
 typedef enum {

@@ -64,15 +64,15 @@
 #include "analog.h"
 #include "driver.h"
 #include "encoder.h"
-#include "queue.h"
-#include "sem.h"
-#include "thread.h"
-#include "work.h"
+
+#include "thread/sem.h"
+#include "thread/thread.h"
+#include "thread/work.h"
+#include "thread/mutex.h"
 
 //#include "timer.h"
 #include "atomic.h"
 #include "events.h"
-#include "mutex.h"
 
 #include <errno.h>
 

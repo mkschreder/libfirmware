@@ -23,6 +23,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx/usb_otg/usb_bsp.h"
 #include "stm32f4xx/usb_vcp/usbd_conf.h"
+#include "thread/thread.h"
 //#include "stm32f4xx_conf.h"
 //#include "../drivers/nvic.h"
 //#include "../drivers/io.h"
@@ -130,7 +131,6 @@ void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
 #endif
 }
 
-#include "thread.h"
 /**
 * @brief  USB_OTG_BSP_uDelay
 *         This function provides delay time in micro sec

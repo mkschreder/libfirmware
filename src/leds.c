@@ -52,9 +52,7 @@
 **/
 #include <libfdt/libfdt.h>
 
-#include "thread.h"
 #include "leds.h"
-#include "list.h"
 #include "driver.h"
 
 #include <errno.h>

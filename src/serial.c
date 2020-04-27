@@ -59,9 +59,9 @@
 #include <libfdt/libfdt.h>
 
 #include "serial.h"
-#include "list.h"
-#include "thread.h"
-#include "mutex.h"
+#include "types/list.h"
+#include "thread/thread.h"
+#include "thread/mutex.h"
 #include "driver.h"
 
 #define PRINTK_WRITE_TIMEOUT 100

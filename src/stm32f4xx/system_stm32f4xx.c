@@ -381,6 +381,9 @@ extern void _init (void);
 
 #include <stdlib.h>
 /* Iterate over all the init routines.  */
+void __libc_init_array (void);
+
+#if 0
 void
 __libc_init_array (void)
 {
@@ -398,7 +401,6 @@ __libc_init_array (void)
 	}
 }
 
-#if 0
 static void _enable_fpu( void ){
     __asm volatile
     (   

@@ -110,24 +110,8 @@ libfirmware_a_SOURCES += \
 	freertos/kernel/portable/MemMang/heap_1.c\
 	freertos/kernel/portable/GCC/ARM_CM3/port.c
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM3/ -I$(top_srcdir)/include/stm32f10x -I$(top_srcdir)/include/CMSIS -DSTM32F10X -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(top_srcdir)/include/libfirmware/stm32f10x -I$(top_srcdir)/include/libfirmware/CMSIS
 endif
-
-
-#stm32f4xx/usb_core/usbd_cdc_core.c\
-	stm32f4xx/usb_core/usbd_core.c\
-	stm32f4xx/usb_core/usbd_ioreq.c\
-	stm32f4xx/usb_core/usbd_req.c\
-	stm32f4xx/usb_otg/usb_core.c\
-	stm32f4xx/usb_otg/usb_dcd.c\
-	stm32f4xx/usb_otg/usb_dcd_int.c\
-	stm32f4xx/usb_otg/usb_hcd.c\
-	stm32f4xx/usb_otg/usb_hcd_int.c\
-	stm32f4xx/usb_otg/usb_otg.c\
-	stm32f4xx/usb_vcp/stm32f4xx_it.c\
-	stm32f4xx/usb_vcp/usb_bsp.c\
-	stm32f4xx/usb_vcp/usbd_cdc_vcp.c\
-	stm32f4xx/usb_vcp/usbd_desc.c\
-	stm32f4xx/usb_vcp/usbd_usr.c
 
 STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
 	stm32f4xx/stdperiph/stm32f4xx_adc.c\
@@ -198,21 +182,41 @@ STM32F4XX_FILES=stm32f4xx/stdperiph/misc.c\
 	freertos/kernel/tasks.c\
 	freertos/kernel/timers.c\
 	freertos/kernel/portable/MemMang/heap_2.c\
-	freertos/kernel/portable/GCC/ARM_CM4F/port.c
+	freertos/kernel/portable/GCC/ARM_CM4F/port.c\
+	stm32f4xx/usb_core/usbd_cdc_core.c\
+	stm32f4xx/usb_core/usbd_core.c\
+	stm32f4xx/usb_core/usbd_ioreq.c\
+	stm32f4xx/usb_core/usbd_req.c\
+	stm32f4xx/usb_vcp/stm32f4xx_it.c\
+	stm32f4xx/usb_vcp/usb_bsp.c\
+	stm32f4xx/usb_vcp/usbd_cdc_vcp.c\
+	stm32f4xx/usb_vcp/usbd_desc.c\
+	stm32f4xx/usb_vcp/usbd_usr.c\
+	stm32f4xx/usb_otg/usb_core.c\
+	stm32f4xx/usb_otg/usb_dcd.c\
+	stm32f4xx/usb_otg/usb_dcd_int.c\
+	stm32f4xx/usb_otg/usb_hcd.c\
+	stm32f4xx/usb_otg/usb_hcd_int.c\
+	stm32f4xx/usb_otg/usb_otg.c
+
 
 if WITH_TARGET_STM32F427
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F427_437xx -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(top_srcdir)/include/libfirmware/stm32f4xx -I$(top_srcdir)/include/libfirmware/CMSIS
 endif
 
 if WITH_TARGET_STM32F429_439XX
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(top_srcdir)/include/libfirmware/stm32f4xx -I$(top_srcdir)/include/libfirmware/CMSIS
 endif
 
 if WITH_TARGET_STM32F40_41XXX
 libfirmware_a_SOURCES += $(STM32F4XX_FILES)
 libfirmware_a_CFLAGS += -I$(srcdir)/freertos/kernel/include -I$(srcdir)/freertos/kernel/portable/GCC/ARM_CM4F/ -I$(top_srcdir)/include/stm32f4xx -I$(top_srcdir)/include/CMSIS -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
+libfirmware_a_CFLAGS += -I$(top_srcdir)/include/libfirmware/stm32f4xx -I$(top_srcdir)/include/libfirmware/CMSIS
 endif
 
+libfirmware_a_CFLAGS+=-I$(top_srcdir)/include/libfirmware
 AUTOMAKE_OPTIONS = subdir-objects

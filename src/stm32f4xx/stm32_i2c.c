@@ -60,13 +60,11 @@
 #include <libfdt/libfdt.h>
 
 #include "driver.h"
-#include "thread.h"
-#include "queue.h"
-#include "sem.h"
-#include "console.h"
-
-#include "mutex.h"
+#include "thread/thread.h"
+#include "thread/mutex.h"
+#include "thread/sem.h"
 #include "atomic.h"
+#include "console.h"
 
 #include <errno.h>
 

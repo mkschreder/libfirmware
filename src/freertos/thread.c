@@ -52,7 +52,7 @@
 **/
 #include "kernel.h"
 
-#include "thread.h"
+#include "thread/thread.h"
 #include "kernel/include/FreeRTOS.h"
 #include "kernel/include/queue.h"
 #include "kernel/include/task.h"

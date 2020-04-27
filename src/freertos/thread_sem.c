@@ -51,7 +51,7 @@
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #include "kernel.h"
-#include "sem.h"
+#include "thread/sem.h"
 
 int thread_sem_init(struct semaphore *self){
 	if((self->sem = xSemaphoreCreateBinary()) == NULL) return -1;

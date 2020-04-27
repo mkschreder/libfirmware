@@ -53,7 +53,6 @@
 **/
 #include <string.h>
 #include "driver.h"
-#include "list.h"
 #include <errno.h>
 #include <libfdt/libfdt.h>
 #include <stm32f4xx_exti.h>

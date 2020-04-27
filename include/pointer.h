@@ -52,8 +52,6 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
 #include "driver.h"
 
 typedef const struct pointer_device_ops ** pointer_device_t;

@@ -53,8 +53,6 @@
 #pragma once
 
 #include "driver.h"
-#include "list.h"
-#include "timestamp.h"
 
 typedef const struct memory_device_ops **memory_device_t;
 

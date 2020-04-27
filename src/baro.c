@@ -53,9 +53,8 @@
 #include <libfdt/libfdt.h>
 
 #include "baro.h"
-#include "list.h"
-#include "thread.h"
 #include "driver.h"
+#include "types/list.h"
 
 #include <errno.h>
 

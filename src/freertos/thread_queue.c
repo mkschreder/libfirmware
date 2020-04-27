@@ -51,7 +51,7 @@
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #include "kernel.h"
-#include "queue.h"
+#include "thread/queue.h"
 
 int thread_queue_init(struct thread_queue *queue, size_t elems, size_t elem_size){
 	queue->handle = xQueueCreate(elems, elem_size);

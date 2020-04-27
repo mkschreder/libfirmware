@@ -55,7 +55,7 @@
 #include <stm32f4xx_tim.h>
 #include <stm32f4xx_rcc.h>
 
-#include "timestamp.h"
+#include "types/timestamp.h"
 
 // current uptime for 1kHz systick timer. will rollover after 49 days. hopefully we won't care.
 // force overflow ~10s after boot

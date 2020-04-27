@@ -53,14 +53,13 @@
 #pragma once
 
 #include "can.h"
-#include "timestamp.h"
-#include "mutex.h"
-#include "sem.h"
-#include "thread.h"
+#include "types/timestamp.h"
 #include "atomic.h"
-#include "work.h"
 #include "vardir.h"
 #include "memory.h"
+
+#include "thread/thread.h"
+#include "thread/sem.h"
 
 enum {
 	CANOPEN_COB_NMT = 0,

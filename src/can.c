@@ -60,8 +60,6 @@
 
 #include "driver.h"
 #include "can.h"
-#include "list.h"
-#include "thread.h"
 
 DEFINE_DEVICE_CLASS(can)
 

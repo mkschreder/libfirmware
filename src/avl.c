@@ -45,7 +45,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "avl.h"
+#include "types/avl.h"
 
 /**
  * internal type save inline function to calculate the maximum of

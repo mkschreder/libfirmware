@@ -103,6 +103,7 @@ static int _init_subnodes(void *fdt, int root) {
 				break;
 			} else if(r == 0) {
 				found_driver = true;
+				printk(PRINT_SYSTEM ">> %s\n", path);
 				if((r = driver->probe(fdt, node)) < 0) {
 					printk(PRINT_ERROR "devicetree: failed to probe %s (error(%d): %s)\n",
 					       path, r, strerror(-r));
@@ -116,8 +117,6 @@ static int _init_subnodes(void *fdt, int root) {
 			       "devicetree: driver for %s was not included in the firmware\n",
 			       path);
 		}
-
-		printk(PRINT_SYSTEM ">> %s\n", path);
 
 		// initialize children recursively
 		_init_subnodes(fdt, node);

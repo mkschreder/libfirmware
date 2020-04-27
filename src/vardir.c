@@ -56,9 +56,8 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "thread.h"
-#include "vardir.h"
 #include "driver.h"
+#include "vardir.h"
 
 #include <libfdt/libfdt.h>
 

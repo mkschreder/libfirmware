@@ -58,15 +58,10 @@
 #include <libfdt/libfdt.h>
 
 #include "driver.h"
-#include "thread.h"
-#include "queue.h"
-#include "sem.h"
-#include "work.h"
-#include "console.h"
 
 #include "adc.h"
-#include "mutex.h"
 #include "atomic.h"
+#include "console.h"
 
 #include <errno.h>
 

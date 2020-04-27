@@ -51,7 +51,7 @@
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #include "kernel.h"
-#include "mutex.h"
+#include "thread/mutex.h"
 #include <string.h>
 #include <errno.h>
 

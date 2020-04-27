@@ -53,8 +53,8 @@
 #pragma once
 
 #include "driver.h"
-#include "queue.h"
-#include "sem.h"
+#include "thread/queue.h"
+#include "thread/sem.h"
 
 /* USB Descriptor Types */
 #define USB_DESC_TYPE_DEVICE 1

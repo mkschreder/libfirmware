@@ -53,8 +53,6 @@
 #include <libfdt/libfdt.h>
 
 #include "spi.h"
-#include "list.h"
-#include "thread.h"
 #include "driver.h"
 
 #include <errno.h>

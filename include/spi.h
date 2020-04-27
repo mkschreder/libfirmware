@@ -52,8 +52,6 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
 #include "gpio.h"
 
 typedef const struct spi_device_ops ** spi_device_t;

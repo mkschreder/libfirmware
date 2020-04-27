@@ -60,15 +60,12 @@
 #include "driver.h"
 #include "math.h"
 
-#include "thread.h"
-#include "queue.h"
-#include "sem.h"
-#include "work.h"
 #include "memory.h"
 #include "can.h"
-#include "mutex.h"
-#include "atomic.h"
+#include "thread/work.h"
+#include "thread/queue.h"
 #include "console.h"
+#include "atomic.h"
 
 #include <errno.h>
 

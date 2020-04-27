@@ -51,11 +51,10 @@
 * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 #pragma once
-
-#include "thread.h"
 #include <errno.h>
-#include "list.h"
 #include <libfdt/libfdt.h>
+#include "thread/thread.h"
+#include "types/list.h"
 
 struct device_driver {
 	const char *name;
