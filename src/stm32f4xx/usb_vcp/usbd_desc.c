@@ -48,8 +48,8 @@
   * @{
   */ 
 
-#define USBD_VID                        0x04e8
-#define USBD_PID                        0x6860
+#define USBD_VID                        0x16c0
+#define USBD_PID                        0x05e1
 
 /** @defgroup USB_String_Descriptors
   * @{

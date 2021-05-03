@@ -1,7 +1,6 @@
 #include "stm32f4xx_it.h"
 #include "stm32f4xx_conf.h"
 
-//#include <usb_core/usb_core.h>
 #include <usb_core/usbd_core.h>
 #include <usb_core/usbd_cdc_core.h>
 

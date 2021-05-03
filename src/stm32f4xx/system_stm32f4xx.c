@@ -357,7 +357,7 @@
   * @{
   */
 
-static void SetSysClock(void);
+////static void SetSysClock(void);
 
 #if defined (DATA_IN_ExtSRAM) || defined (DATA_IN_ExtSDRAM)
 static void SystemInit_ExtMemCtl(void); 
@@ -398,6 +398,7 @@ __libc_init_array (void)
 	}
 }
 
+#if 0
 static void _enable_fpu( void ){
     __asm volatile
     (   
@@ -409,7 +410,7 @@ static void _enable_fpu( void ){
         "   bx r14                      "        
     );
 }     
-
+#endif
 void delay_us(uint32_t us) {
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
@@ -609,6 +610,7 @@ void SystemCoreClockUpdate(void)
   * @param  None
   * @retval None
   */
+#if 0
 static void SetSysClock(void)
 {
 	return;
@@ -742,7 +744,7 @@ static void SetSysClock(void)
     while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);  // Wait till PLL is system clock src
   }
 }
-
+#endif
 /**
   * @brief  Setup the external memory controller. Called in startup_stm32f4xx.s 
   *          before jump to __main

@@ -80,7 +80,7 @@ static void _get_ticks(uint32_t *_ticks, uint32_t *_cycles){
 	register uint32_t cycle_cnt;
     do {
         ticks = _sys_ticks;
-        cycle_cnt = SysTick->VAL;
+        cycle_cnt = SysTick->LOAD - SysTick->VAL;
 
         /*
          * If the SysTick timer expired during the previous instruction, we need to give it a little time for that

@@ -1,4 +1,5 @@
 /** :ms-top-comment
+<<<<<<< HEAD
 * +-------------------------------------------------------------------------------+
 * |                      ____                  _ _     _                          |
 * |                     / ___|_      _____  __| (_)___| |__                       |
@@ -53,15 +54,15 @@
 /**
  * Author: Martin Schröder 2017
  */
-#include <string.h>
 #include <errno.h>
+#include <string.h>
 
-#include "sem.h"
-#include "thread.h"
-#include "time.h"
-#include "spi.h"
 #include "driver.h"
 #include "gpio.h"
+#include "sem.h"
+#include "spi.h"
+#include "thread.h"
+#include "time.h"
 
 #include <libfdt/libfdt.h>
 
@@ -72,11 +73,11 @@
 struct stm32_spi {
 	struct spi_device dev;
 	SPI_TypeDef *hw;
-/*
-	char tx_dma[16];
-	char rx_dma[16];
-	struct semaphore rx_sem;
-*/
+	/*
+	  char tx_dma[16];
+	  char rx_dma[16];
+	  struct semaphore rx_sem;
+	*/
 };
 
 struct stm32_spi *_devices[2];
@@ -140,47 +141,53 @@ static void _dma_set_data(DMA_Stream_TypeDef *dma, uint32_t addr, size_t size){
 
 #define SPI_TRANSFER_TIMEOUT 20000
 
-int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin, const void *tx_data, void *rx_data, size_t size, timestamp_t timeout){
+int _stm32_spi_transfer(spi_device_t dev, gpio_device_t gpio, uint32_t cs_pin,
+                        const void *tx_data, void *rx_data, size_t size,
+                        msec_t timeout) {
 	struct stm32_spi *self = container_of(dev, struct stm32_spi, dev.ops);
-	if(!self->hw) return -1;
+	if(!self->hw)
+		return -1;
 
-    //SPI_Cmd(self->hw, ENABLE);
+	// SPI_Cmd(self->hw, ENABLE);
 
-    //gpio_reset(self->gpio, cs);
+	// gpio_reset(self->gpio, cs);
 	gpio_reset(gpio, cs_pin);
-    for(size_t c = 0; c < size; c++){
-		SPI_I2S_SendData(self->hw, ((const uint8_t*)tx_data)[c]);
-        int tout = SPI_TRANSFER_TIMEOUT;
-        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_TXE) == RESET && --tout) asm volatile ("nop");
-        if(tout == 0) {
-            dbg_printk("spi: etxe\n");
-            goto timedout;
-        }
-        tout = SPI_TRANSFER_TIMEOUT;
-        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_RXNE) == RESET && --tout) asm volatile ("nop");
-        if(tout == 0){
-            dbg_printk("spi: erxne\n");
-            goto timedout;
-        }
+	for(size_t c = 0; c < size; c++) {
+		SPI_I2S_SendData(self->hw, ((const uint8_t *)tx_data)[c]);
+		int tout = SPI_TRANSFER_TIMEOUT;
+		while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_TXE) == RESET && --tout)
+			asm volatile("nop");
+		if(tout == 0) {
+			dbg_printk("spi: etxe\n");
+			goto timedout;
+		}
+		tout = SPI_TRANSFER_TIMEOUT;
+		while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_RXNE) == RESET && --tout)
+			asm volatile("nop");
+		if(tout == 0) {
+			dbg_printk("spi: erxne\n");
+			goto timedout;
+		}
 
-		((uint8_t*)rx_data)[c] = (uint8_t)SPI_I2S_ReceiveData(self->hw);
+		((uint8_t *)rx_data)[c] = (uint8_t)SPI_I2S_ReceiveData(self->hw);
 
-        tout = SPI_TRANSFER_TIMEOUT;
-        while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY) == SET && --tout) asm volatile ("nop");
-        if(tout == 0){
-            dbg_printk("spi: ebsy\n");
-            goto timedout;
-        }
-    }
+		tout = SPI_TRANSFER_TIMEOUT;
+		while(SPI_I2S_GetFlagStatus(self->hw, SPI_I2S_FLAG_BSY) == SET && --tout)
+			asm volatile("nop");
+		if(tout == 0) {
+			dbg_printk("spi: ebsy\n");
+			goto timedout;
+		}
+	}
 	gpio_set(gpio, cs_pin);
-    //gpio_set(self->gpio, cs);
-    //SPI_Cmd(self->hw, DISABLE);
-    return 0;
+	// gpio_set(self->gpio, cs);
+	// SPI_Cmd(self->hw, DISABLE);
+	return 0;
 timedout:
 	gpio_set(gpio, cs_pin);
-    //gpio_set(self->gpio, cs);
-    //SPI_Cmd(self->hw, DISABLE);
-    return -ETIMEDOUT;
+	// gpio_set(self->gpio, cs);
+	// SPI_Cmd(self->hw, DISABLE);
+	return -ETIMEDOUT;
 #if 0
 	if(self->hw == SPI1){
 		_dma_set_data(DMA2_Stream0, (uint32_t)rx_data, size);
@@ -216,51 +223,50 @@ timedout:
 	return 0;
 }
 
-const struct spi_device_ops _ops = {
-	.transfer = _stm32_spi_transfer
-};
+const struct spi_device_ops _ops = {.transfer = _stm32_spi_transfer};
 
-static int _stm32_spi_probe(void *fdt, int fdt_node){
-	SPI_TypeDef *SPIx = (SPI_TypeDef*)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
+static int _stm32_spi_probe(void *fdt, int fdt_node) {
+	SPI_TypeDef *SPIx =
+	    (SPI_TypeDef *)fdt_get_int_or_default(fdt, (int)fdt_node, "reg", 0);
 
 	int idx = 0;
-    if(SPIx == SPI1){
-        RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
-        idx = 0;
-    } else if(SPIx == SPI2){
-        RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-        idx = 1;
-    } else {
-        return -1;
-    }
+	if(SPIx == SPI1) {
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+		idx = 0;
+	} else if(SPIx == SPI2) {
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+		idx = 1;
+	} else {
+		return -1;
+	}
 
 	struct stm32_spi *self = kzmalloc(sizeof(struct stm32_spi));
 	self->hw = SPIx;
-    _devices[idx] = self;
+	_devices[idx] = self;
 
 	SPI_Cmd(SPIx, DISABLE);
 
-    SPI_InitTypeDef spi;
-    SPI_StructInit(&spi);
+	SPI_InitTypeDef spi;
+	SPI_StructInit(&spi);
 
-    spi.SPI_Mode = SPI_Mode_Master;
-    spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-    spi.SPI_DataSize = SPI_DataSize_8b;
-    spi.SPI_CPOL = SPI_CPOL_High;
-    spi.SPI_CPHA = SPI_CPHA_2Edge;
-    spi.SPI_NSS = SPI_NSS_Soft;
-    spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
-    spi.SPI_FirstBit = SPI_FirstBit_MSB;
+	spi.SPI_Mode = SPI_Mode_Master;
+	spi.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	spi.SPI_DataSize = SPI_DataSize_8b;
+	spi.SPI_CPOL = SPI_CPOL_High;
+	spi.SPI_CPHA = SPI_CPHA_2Edge;
+	spi.SPI_NSS = SPI_NSS_Soft;
+	spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+	spi.SPI_FirstBit = SPI_FirstBit_MSB;
 
-    SPI_Init(SPIx, &spi);
-    SPI_CalculateCRC(SPIx, DISABLE);
+	SPI_Init(SPIx, &spi);
+	SPI_CalculateCRC(SPIx, DISABLE);
 
 	SPI_Cmd(SPIx, ENABLE);
 
 	spi_device_init(&self->dev, fdt, fdt_node, &_ops);
 	spi_device_register(&self->dev);
 
-    dbg_printk("spi%d: ok\n", idx + 1);
+	dbg_printk("spi%d: ok\n", idx + 1);
 #if 0
 
 	if(SPIx == SPI1){
@@ -346,7 +352,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_Init(SPIx, &spi);
 		SPI_CalculateCRC(SPIx, DISABLE);
 
-		#if 0
+#if 0
 		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 
 		DMA_InitTypeDef dma;
@@ -389,7 +395,7 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Rx, ENABLE);
 		SPI_I2S_DMACmd(SPIx, SPI_I2S_DMAReq_Tx, ENABLE);
 
-		#endif
+#endif
 
 		self = &_devices[1];
 	} else {
@@ -405,14 +411,14 @@ static int _stm32_spi_probe(void *fdt, int fdt_node){
 	return 0;
 }
 
-static int _stm32_spi_remove(void *fdt, int fdt_node){
+static int _stm32_spi_remove(void *fdt, int fdt_node) {
 	return 0;
 }
 
 DEVICE_DRIVER(stm32_spi, "st,stm32_spi", _stm32_spi_probe, _stm32_spi_remove)
 #if 0
-#include <string.h>
 #include <errno.h>
+#include <string.h>
 
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"

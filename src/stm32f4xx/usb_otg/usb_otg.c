@@ -107,15 +107,15 @@ uint32_t STM32_USBO_OTG_ISR_Handler(USB_OTG_CORE_HANDLE *pdev)
   }
   if (gintsts.b.otgintr)
   {
-    retval |= 1;//USB_OTG_HandleOTG_ISR(pdev);
+    retval |= USB_OTG_HandleOTG_ISR(pdev);
   }
   if (gintsts.b.conidstschng)
   {
-    retval |= 2;//USB_OTG_HandleConnectorIDStatusChange_ISR(pdev);
+    retval |= USB_OTG_HandleConnectorIDStatusChange_ISR(pdev);
   }
   if (gintsts.b.sessreqintr)
   {
-    retval |= 3;//USB_OTG_HandleSessionRequest_ISR(pdev);
+    retval |= USB_OTG_HandleSessionRequest_ISR(pdev);
   }
   return retval;
 }

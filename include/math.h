@@ -84,7 +84,7 @@
 
 /* use several alternatives to make full use of the -Wconversion warning */
 
-#define _CONSTRAIN(x, a, b) (((x) <= (a))?(a):(((x) > (b))?(b):(x)))
+#define _CONSTRAIN(x, a, b) (((x) < (a))?(a):(((x) > (b))?(b):(x)))
 static inline uint32_t constrain_u32(uint32_t x, uint32_t a, uint32_t b){
 	return _CONSTRAIN(x, a, b);
 }

@@ -106,20 +106,30 @@ int _pipe_read(serial_port_t serial, void *frame, size_t max_size, uint32_t tout
 	suseconds_t tv_sec = (suseconds_t)(tout_ms / 1000);
 	suseconds_t tv_usec = (suseconds_t)((tout_ms % 1000) * 1000);
 
-    struct timeval tv;
-    fd_set fds;
-    tv.tv_sec = tv_sec;
-    tv.tv_usec = tv_usec;
+	while(1){
+	struct timeval tv;
+		fd_set fds;
+		tv.tv_sec = tv_sec;
+		tv.tv_usec = tv_usec;
 
-    FD_ZERO(&fds);
-    FD_SET(self->fd_read, &fds);
+		FD_ZERO(&fds);
+		FD_SET(self->fd_read, &fds);
 
-    select(self->fd_read+1, &fds, NULL, NULL, &tv);
+		if(tout_ms == THREAD_SLEEP_MAX_DELAY){
+			select(self->fd_read+1, &fds, NULL, NULL, NULL);
+		} else {
+			select(self->fd_read+1, &fds, NULL, NULL, &tv);
+		}
 
-    if(FD_ISSET(self->fd_read, &fds)){
-		return (int)read(self->fd_read, frame, max_size);
+		if(FD_ISSET(self->fd_read, &fds)){
+			int r = (int)read(self->fd_read, frame, max_size);
+			if(r > 0) {
+				return r;
+			}
+		}
 	}
-	return -ETIMEDOUT;
+
+	return 0;
 }
 
 static const struct serial_device_ops _linux_serial = {

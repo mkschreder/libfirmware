@@ -52,15 +52,15 @@
 **/
 #pragma once
 
-#include "timestamp.h"
-#include "list.h"
 #include "driver.h"
+#include "list.h"
+#include "timestamp.h"
 
-typedef const struct memory_device_ops ** memory_device_t;
+typedef const struct memory_device_ops **memory_device_t;
 
 struct memory_device_ops {
-    int (*write)(memory_device_t dev, size_t offset, const void *data, size_t len);
-    int (*read)(memory_device_t dev, size_t offset, void *data, size_t len);
+	int (*write)(memory_device_t dev, size_t offset, const void *data, size_t len);
+	int (*read)(memory_device_t dev, size_t offset, void *data, size_t len);
 };
 
 #define memory_read(dev, off, dat, len) (*(dev))->read(dev, off, dat, len)

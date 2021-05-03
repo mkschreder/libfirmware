@@ -145,20 +145,19 @@ void vApplicationTickHook(void) {
 }
 
 // Return system uptime in microseconds (rollover in 70minutes)
-timestamp_t micros(void) {
-	register uint32_t ms, cycle_cnt;
-	do {
-		ms = _ms;
-		cycle_cnt = SysTick->VAL;
+usec_t micros(void){
+    register uint32_t ms, cycle_cnt;
+    do {
+        ms = _ms;
+        cycle_cnt = SysTick->VAL;
 
-		/*
-		 * If the SysTick timer expired during the previous instruction, we need to
-		 * give it a little time for that interrupt to be delivered before we can
-		 * recheck _ms:
-		 */
-		asm volatile("\tnop\n");
-	} while(ms != _ms);
-	usec_t usec = (ms * 1000) + (usTicks * 1000 - cycle_cnt) / usTicks;
+        /*
+         * If the SysTick timer expired during the previous instruction, we need to give it a little time for that
+         * interrupt to be delivered before we can recheck _ms:
+         */
+        asm volatile("\tnop\n");
+    } while (ms != _ms);
+    usec_t usec = (ms * 1000) + (usTicks * 1000 - cycle_cnt) / usTicks;
 	return usec;
 }
 
